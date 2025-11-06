@@ -77,7 +77,7 @@
   - Implementar vinculación de votos con candidatos específicos
   - _Requerimientos: 16.8, 16.11_
 
-- [ ]* 2.7 Escribir pruebas para gestión de candidatos
+- [ ] 2.7 Escribir pruebas para gestión de candidatos
   - Probar creación de partidos, coaliciones y candidatos
   - Verificar carga masiva desde CSV con validación de datos
   - Probar asociaciones entre candidatos y organizaciones políticas
@@ -143,7 +143,7 @@
   - Desarrollar mapeo de campos dinámicos para reconocimiento automático
   - _Requerimientos: 10.5, 2.3, 2.4_
 
-- [ ]* 3.5 Escribir pruebas para plantillas de formularios
+- [ ] 3.5 Escribir pruebas para plantillas de formularios
   - Probar generación de formularios dinámicos para cada tipo
   - Verificar configuraciones de OCR específicas
   - Probar validaciones particulares de cada tipo de elección
