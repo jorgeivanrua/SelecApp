@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Mesa - Sistema Electoral ERP{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    {{ 'Editar Mesa' if mesa else 'Nueva Mesa' }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('electoral.save_mesa', mesa_id=mesa.id if mesa else 'new') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="numero" class="form-label">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    Número de Mesa *
+                                </label>
+                                <input type="text" class="form-control" id="numero" name="numero" 
+                                       value="{{ mesa.numero if mesa else '' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="puesto_votacion" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    Puesto de Votación *
+                                </label>
+                                <input type="text" class="form-control" id="puesto_votacion" name="puesto_votacion" 
+                                       value="{{ mesa.puesto_votacion if mesa else '' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="municipio" class="form-label">
+                                    <i class="fas fa-city me-1"></i>
+                                    Municipio *
+                                </label>
+                                <select class="form-select" id="municipio" name="municipio" required>
+                                    <option value="">Seleccionar municipio...</option>
+                                    {% for municipio in municipios %}
+                                    <option value="{{ municipio.codigo }}" 
+                                            {{ 'selected' if mesa and mesa.municipio == municipio.codigo else '' }}>
+                                        {{ municipio.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="zona" class="form-label">
+                                    <i class="fas fa-map me-1"></i>
+                                    Zona
+                                </label>
+                                <select class="form-select" id="zona" name="zona">
+                                    <option value="">Seleccionar zona...</option>
+                                    <option value="urbana" {{ 'selected' if mesa and mesa.zona == 'urbana' else '' }}>Urbana</option>
+                                    <option value="rural" {{ 'selected' if mesa and mesa.zona == 'rural' else '' }}>Rural</option>
+                                    <option value="periferica" {{ 'selected' if mesa and mesa.zona == 'periferica' else '' }}>Periférica</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="votantes_habilitados" class="form-label">
+                                    <i class="fas fa-users me-1"></i>
+                                    Votantes Habilitados *
+                                </label>
+                                <input type="number" class="form-control" id="votantes_habilitados" name="votantes_habilitados" 
+                                       value="{{ mesa.votantes_habilitados if mesa else '' }}" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="jurado_principal" class="form-label">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    Jurado Principal
+                                </label>
+                                <select class="form-select" id="jurado_principal" name="jurado_principal">
+                                    <option value="">Seleccionar jurado...</option>
+                                    {% for jurado in jurados %}
+                                    <option value="{{ jurado.id }}" 
+                                            {{ 'selected' if mesa and mesa.jurado_principal_id == jurado.id else '' }}>
+                                        {{ jurado.nombre_completo }} - {{ jurado.cedula }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="jurado_suplente" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Jurado Suplente
+                                </label>
+                                <select class="form-select" id="jurado_suplente" name="jurado_suplente">
+                                    <option value="">Seleccionar suplente...</option>
+                                    {% for jurado in jurados %}
+                                    <option value="{{ jurado.id }}" 
+                                            {{ 'selected' if mesa and mesa.jurado_suplente_id == jurado.id else '' }}>
+                                        {{ jurado.nombre_completo }} - {{ jurado.cedula }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            Dirección
+                        </label>
+                        <textarea class="form-control" id="direccion" name="direccion" rows="2" 
+                                  placeholder="Dirección completa del puesto de votación">{{ mesa.direccion if mesa else '' }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="estado" class="form-label">
+                                    <i class="fas fa-toggle-on me-1"></i>
+                                    Estado
+                                </label>
+                                <select class="form-select" id="estado" name="estado">
+                                    <option value="inactiva" {{ 'selected' if mesa and mesa.estado == 'inactiva' else '' }}>Inactiva</option>
+                                    <option value="configurada" {{ 'selected' if mesa and mesa.estado == 'configurada' else '' }}>Configurada</option>
+                                    <option value="activa" {{ 'selected' if mesa and mesa.estado == 'activa' else '' }}>Activa</option>
+                                    <option value="cerrada" {{ 'selected' if mesa and mesa.estado == 'cerrada' else '' }}>Cerrada</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="proceso_electoral" class="form-label">
+                                    <i class="fas fa-vote-yea me-1"></i>
+                                    Proceso Electoral *
+                                </label>
+                                <select class="form-select" id="proceso_electoral" name="proceso_electoral" required>
+                                    <option value="">Seleccionar proceso...</option>
+                                    {% for proceso in procesos_electorales %}
+                                    <option value="{{ proceso.id }}" 
+                                            {{ 'selected' if mesa and mesa.proceso_electoral_id == proceso.id else '' }}>
+                                        {{ proceso.nombre }} - {{ proceso.fecha_inicio.strftime('%Y') }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">
+                            <i class="fas fa-sticky-note me-1"></i>
+                            Observaciones
+                        </label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="3" 
+                                  placeholder="Observaciones adicionales sobre la mesa">{{ mesa.observaciones if mesa else '' }}</textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('electoral.mesas') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Volver
+                        </a>
+                        <div>
+                            {% if mesa %}
+                            <button type="button" class="btn btn-danger me-2" onclick="confirmDelete()">
+                                <i class="fas fa-trash me-2"></i>
+                                Eliminar
+                            </button>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {{ 'Actualizar' if mesa else 'Crear' }} Mesa
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if mesa %}
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar la Mesa {{ mesa.numero }}?</p>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('electoral.delete_mesa', mesa_id=mesa.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function confirmDelete() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+// Validación del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const numero = document.getElementById('numero').value;
+        const puestoVotacion = document.getElementById('puesto_votacion').value;
+        const municipio = document.getElementById('municipio').value;
+        const votantesHabilitados = document.getElementById('votantes_habilitados').value;
+        const procesoElectoral = document.getElementById('proceso_electoral').value;
+        
+        if (!numero || !puestoVotacion || !municipio || !votantesHabilitados || !procesoElectoral) {
+            e.preventDefault();
+            alert('Por favor complete todos los campos requeridos (*)');
+            return false;
+        }
+        
+        if (parseInt(votantesHabilitados) < 1) {
+            e.preventDefault();
+            alert('El número de votantes habilitados debe ser mayor a 0');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

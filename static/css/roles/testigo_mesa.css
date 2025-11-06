@@ -1,0 +1,273 @@
+/* Estilos específicos para Testigo de Mesa */
+
+.role-testigo-mesa {
+    --primary-color: #6f42c1;
+    --secondary-color: #e83e8c;
+    --accent-color: #fd7e14;
+    --text-color: #495057;
+}
+
+/* Navbar personalizada */
+.role-testigo-mesa .navbar {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    box-shadow: 0 2px 10px rgba(111, 66, 193, 0.3);
+}
+
+.role-testigo-mesa .navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+/* Banner de bienvenida */
+.welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-left: 5px solid #fff;
+    box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+}
+
+/* Cards personalizadas */
+.role-testigo-mesa .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.role-testigo-mesa .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.role-testigo-mesa .card-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 12px 12px 0 0 !important;
+    border: none;
+    font-weight: 600;
+}
+
+/* Métricas específicas */
+.role-testigo-mesa .card.bg-primary {
+    background: linear-gradient(135deg, var(--primary-color), #5a32a3) !important;
+}
+
+.role-testigo-mesa .card.bg-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+}
+
+.role-testigo-mesa .card.bg-warning {
+    background: linear-gradient(135deg, var(--accent-color), #e8590c) !important;
+}
+
+.role-testigo-mesa .card.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #138496) !important;
+}
+
+/* Botones específicos */
+.role-testigo-mesa .btn-lg {
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.role-testigo-mesa .btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.role-testigo-mesa .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), #5a32a3);
+}
+
+.role-testigo-mesa .btn-warning {
+    background: linear-gradient(135deg, var(--accent-color), #e8590c);
+    color: white;
+}
+
+/* Área de observaciones */
+.observations-area {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.observations-area h6 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* Lista de verificación */
+.checklist-item {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.checklist-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 10px rgba(111, 66, 193, 0.1);
+}
+
+.checklist-item.completed {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border-color: #28a745;
+}
+
+.checklist-item.pending {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-color: var(--accent-color);
+}
+
+/* Formulario de observaciones */
+.role-testigo-mesa .form-control,
+.role-testigo-mesa .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.role-testigo-mesa .form-control:focus,
+.role-testigo-mesa .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+/* Badges específicos */
+.role-testigo-mesa .badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+    border-radius: 20px;
+}
+
+.role-testigo-mesa .badge.bg-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+}
+
+.role-testigo-mesa .badge.bg-warning {
+    background: linear-gradient(135deg, var(--accent-color), #e8590c) !important;
+    color: white;
+}
+
+.role-testigo-mesa .badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+}
+
+/* Timeline de eventos */
+.event-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.event-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+}
+
+.event-item {
+    position: relative;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.event-marker {
+    position: absolute;
+    left: -22px;
+    top: 15px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer personalizado */
+.role-testigo-mesa footer {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-top: 3px solid var(--primary-color);
+}
+
+/* Animaciones */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.role-testigo-mesa .card {
+    animation: bounceIn 0.6s ease-out;
+}
+
+.role-testigo-mesa .checklist-item {
+    animation: slideInLeft 0.6s ease-out;
+}
+
+.role-testigo-mesa .checklist-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.role-testigo-mesa .checklist-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .role-testigo-mesa .welcome-banner h2 {
+        font-size: 1.5rem;
+    }
+    
+    .role-testigo-mesa .btn-lg {
+        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .event-timeline {
+        padding-left: 20px;
+    }
+    
+    .event-marker {
+        left: -17px;
+        width: 10px;
+        height: 10px;
+    }
+}

@@ -1,0 +1,516 @@
+<!-- Formulario específico para registro de candidatos -->
+<form id="candidateForm" class="candidate-form" data-role-form="candidate">
+    <div class="form-header">
+        <h4><i class="fas fa-user-tie me-2"></i>Registro de Candidato</h4>
+        <p class="text-muted">Complete la información del candidato electoral</p>
+    </div>
+
+    <!-- Información Personal -->
+    <div class="form-section">
+        <div class="section-title">
+            <i class="fas fa-user"></i>Información Personal
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <label class="form-label required">Nombre Completo</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="nombre_completo" 
+                       name="nombre_completo" 
+                       required 
+                       data-validate="required"
+                       placeholder="Nombres y apellidos completos">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label required">Cédula</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="cedula" 
+                       name="cedula" 
+                       required 
+                       data-validate="cedula"
+                       placeholder="Número de cédula">
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" 
+                       class="form-control" 
+                       id="telefono" 
+                       name="telefono" 
+                       data-validate="phone"
+                       placeholder="Número de contacto">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" 
+                       class="form-control" 
+                       id="email" 
+                       name="email" 
+                       data-validate="email"
+                       placeholder="Correo electrónico">
+            </div>
+        </div>
+    </div>
+
+    <!-- Información Electoral -->
+    <div class="form-section">
+        <div class="section-title">
+            <i class="fas fa-vote-yea"></i>Información Electoral
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label required">Cargo Aspirado</label>
+                <select class="form-select" 
+                        id="cargo_aspirado" 
+                        name="cargo_aspirado" 
+                        required 
+                        data-validate="required">
+                    <option value="">Seleccione un cargo</option>
+                    <option value="presidente">Presidente</option>
+                    <option value="vicepresidente">Vicepresidente</option>
+                    <option value="senador">Senador</option>
+                    <option value="representante_camara">Representante a la Cámara</option>
+                    <option value="gobernador">Gobernador</option>
+                    <option value="diputado_asamblea">Diputado Asamblea</option>
+                    <option value="alcalde">Alcalde</option>
+                    <option value="concejal">Concejal</option>
+                    <option value="edil">Edil</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label required">Tipo de Elección</label>
+                <select class="form-select" 
+                        id="election_type_id" 
+                        name="election_type_id" 
+                        required 
+                        data-validate="required">
+                    <option value="">Seleccione tipo de elección</option>
+                    {% for tipo in election_types %}
+                    <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <label class="form-label required">Número de Tarjetón</label>
+                <input type="number" 
+                       class="form-control" 
+                       id="numero_tarjeton" 
+                       name="numero_tarjeton" 
+                       required 
+                       data-validate="number"
+                       min="1"
+                       placeholder="Número en el tarjetón">
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Circunscripción</label>
+                <select class="form-select" id="circunscripcion" name="circunscripcion">
+                    <option value="">Seleccione circunscripción</option>
+                    <option value="nacional">Nacional</option>
+                    <option value="departamental">Departamental</option>
+                    <option value="municipal">Municipal</option>
+                    <option value="distrital">Distrital</option>
+                    <option value="especial">Especial</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Afiliación Política -->
+    <div class="form-section">
+        <div class="section-title">
+            <i class="fas fa-flag"></i>Afiliación Política
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-check-group">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="radio" 
+                               name="tipo_afiliacion" 
+                               id="afiliacion_partido" 
+                               value="partido">
+                        <label class="form-check-label" for="afiliacion_partido">
+                            Partido Político
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="radio" 
+                               name="tipo_afiliacion" 
+                               id="afiliacion_coalicion" 
+                               value="coalicion">
+                        <label class="form-check-label" for="afiliacion_coalicion">
+                            Coalición
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="radio" 
+                               name="tipo_afiliacion" 
+                               id="afiliacion_independiente" 
+                               value="independiente">
+                        <label class="form-check-label" for="afiliacion_independiente">
+                            Independiente
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3" id="partido_select_container" style="display: none;">
+            <div class="col-md-12">
+                <label class="form-label">Partido Político</label>
+                <select class="form-select" id="party_id" name="party_id">
+                    <option value="">Seleccione un partido</option>
+                    {% for partido in political_parties %}
+                    <option value="{{ partido.id }}" data-color="{{ partido.color_representativo }}">
+                        {{ partido.siglas }} - {{ partido.nombre_oficial }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3" id="coalicion_select_container" style="display: none;">
+            <div class="col-md-12">
+                <label class="form-label">Coalición</label>
+                <select class="form-select" id="coalition_id" name="coalition_id">
+                    <option value="">Seleccione una coalición</option>
+                    {% for coalicion in coalitions %}
+                    <option value="{{ coalicion.id }}">
+                        {{ coalicion.nombre_coalicion }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información Adicional -->
+    <div class="form-section">
+        <div class="section-title">
+            <i class="fas fa-info-circle"></i>Información Adicional
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <label class="form-label">Biografía</label>
+                <textarea class="form-control" 
+                          id="biografia" 
+                          name="biografia" 
+                          rows="4"
+                          placeholder="Breve biografía del candidato, experiencia profesional y política..."></textarea>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <label class="form-label">Propuestas</label>
+                <textarea class="form-control" 
+                          id="propuestas" 
+                          name="propuestas" 
+                          rows="4"
+                          placeholder="Principales propuestas y plan de gobierno..."></textarea>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label class="form-label">Experiencia</label>
+                <textarea class="form-control" 
+                          id="experiencia" 
+                          name="experiencia" 
+                          rows="3"
+                          placeholder="Experiencia relevante..."></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">URL de Foto</label>
+                <input type="url" 
+                       class="form-control" 
+                       id="foto_url" 
+                       name="foto_url" 
+                       placeholder="https://ejemplo.com/foto.jpg">
+                <small class="form-text text-muted">URL de la foto oficial del candidato</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado -->
+    <div class="form-section">
+        <div class="section-title">
+            <i class="fas fa-toggle-on"></i>Estado
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           id="activo" 
+                           name="activo" 
+                           checked>
+                    <label class="form-check-label" for="activo">
+                        Candidato Activo
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           id="habilitado_oficialmente" 
+                           name="habilitado_oficialmente" 
+                           checked>
+                    <label class="form-check-label" for="habilitado_oficialmente">
+                        Habilitado Oficialmente
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+            <i class="fas fa-undo me-2"></i>Limpiar
+        </button>
+        <button type="button" class="btn btn-outline-primary" onclick="previewCandidate()">
+            <i class="fas fa-eye me-2"></i>Vista Previa
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Guardar Candidato
+        </button>
+    </div>
+</form>
+
+<script>
+// JavaScript específico para el formulario de candidatos
+document.addEventListener('DOMContentLoaded', function() {
+    setupCandidateForm();
+});
+
+function setupCandidateForm() {
+    // Manejar cambio de tipo de afiliación
+    document.querySelectorAll('input[name="tipo_afiliacion"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            toggleAfiliacionSelects(this.value);
+        });
+    });
+    
+    // Validación en tiempo real
+    document.getElementById('candidateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (validateCandidateForm()) {
+            submitCandidateForm();
+        }
+    });
+    
+    // Auto-completar basado en cédula
+    document.getElementById('cedula').addEventListener('blur', function() {
+        if (this.value) {
+            checkExistingCandidate(this.value);
+        }
+    });
+}
+
+function toggleAfiliacionSelects(tipo) {
+    const partidoContainer = document.getElementById('partido_select_container');
+    const coalicionContainer = document.getElementById('coalicion_select_container');
+    
+    // Ocultar todos
+    partidoContainer.style.display = 'none';
+    coalicionContainer.style.display = 'none';
+    
+    // Limpiar valores
+    document.getElementById('party_id').value = '';
+    document.getElementById('coalition_id').value = '';
+    
+    // Mostrar el correspondiente
+    if (tipo === 'partido') {
+        partidoContainer.style.display = 'block';
+    } else if (tipo === 'coalicion') {
+        coalicionContainer.style.display = 'block';
+    }
+}
+
+function validateCandidateForm() {
+    let isValid = true;
+    const requiredFields = ['nombre_completo', 'cedula', 'cargo_aspirado', 'election_type_id', 'numero_tarjeton'];
+    
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (!validateField(field)) {
+            isValid = false;
+        }
+    });
+    
+    // Validar afiliación política
+    const tipoAfiliacion = document.querySelector('input[name="tipo_afiliacion"]:checked');
+    if (!tipoAfiliacion) {
+        showNotification('Debe seleccionar un tipo de afiliación política', 'warning');
+        isValid = false;
+    } else if (tipoAfiliacion.value === 'partido' && !document.getElementById('party_id').value) {
+        showNotification('Debe seleccionar un partido político', 'warning');
+        isValid = false;
+    } else if (tipoAfiliacion.value === 'coalicion' && !document.getElementById('coalition_id').value) {
+        showNotification('Debe seleccionar una coalición', 'warning');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function checkExistingCandidate(cedula) {
+    fetch(`/api/candidates/check-cedula/${cedula}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                showNotification('Ya existe un candidato con esta cédula', 'warning');
+                document.getElementById('cedula').classList.add('is-invalid');
+            }
+        });
+}
+
+function submitCandidateForm() {
+    const formData = new FormData(document.getElementById('candidateForm'));
+    const data = Object.fromEntries(formData.entries());
+    
+    // Agregar campos especiales
+    data.es_independiente = document.querySelector('input[name="tipo_afiliacion"]:checked').value === 'independiente';
+    
+    fetch('/api/candidates/candidates', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Candidato registrado exitosamente', 'success');
+            resetForm();
+        } else {
+            showNotification('Error registrando candidato: ' + data.error, 'danger');
+        }
+    });
+}
+
+function resetForm() {
+    document.getElementById('candidateForm').reset();
+    document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+        el.classList.remove('is-valid', 'is-invalid');
+    });
+    toggleAfiliacionSelects('');
+}
+
+function previewCandidate() {
+    const formData = new FormData(document.getElementById('candidateForm'));
+    const data = Object.fromEntries(formData.entries());
+    
+    // Crear modal de vista previa
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vista Previa del Candidato</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="candidate-preview">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                ${data.foto_url ? `<img src="${data.foto_url}" class="img-fluid rounded" alt="Foto">` : '<div class="placeholder-photo"><i class="fas fa-user fa-4x"></i></div>'}
+                            </div>
+                            <div class="col-md-9">
+                                <h4>${data.nombre_completo}</h4>
+                                <p><strong>Cargo:</strong> ${data.cargo_aspirado.replace('_', ' ')}</p>
+                                <p><strong>Cédula:</strong> ${data.cedula}</p>
+                                <p><strong>Tarjetón:</strong> #${data.numero_tarjeton}</p>
+                                ${data.biografia ? `<p><strong>Biografía:</strong> ${data.biografia}</p>` : ''}
+                                ${data.propuestas ? `<p><strong>Propuestas:</strong> ${data.propuestas}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    new bootstrap.Modal(modal).show();
+    
+    // Remover modal al cerrar
+    modal.addEventListener('hidden.bs.modal', function() {
+        modal.remove();
+    });
+}
+</script>
+
+<style>
+.candidate-form .form-section {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.candidate-form .section-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.candidate-form .section-title i {
+    margin-right: 0.5rem;
+}
+
+.candidate-form .form-check-group {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.candidate-form .form-actions {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.candidate-form .form-actions .btn {
+    margin: 0 0.5rem;
+    min-width: 150px;
+}
+
+.candidate-form .required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.placeholder-photo {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.candidate-preview img {
+    max-height: 200px;
+    object-fit: cover;
+}
+</style>

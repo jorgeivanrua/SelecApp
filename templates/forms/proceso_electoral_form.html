@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Proceso Electoral - Sistema Electoral ERP{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">{{ 'Editar' if proceso else 'Nuevo' }} Proceso Electoral</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-vote-yea me-2"></i>
+                    {{ 'Editar Proceso Electoral' if proceso else 'Nuevo Proceso Electoral' }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('electoral.save_proceso', proceso_id=proceso.id if proceso else 'new') }}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>
+                                    Nombre del Proceso Electoral *
+                                </label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       value="{{ proceso.nombre if proceso else '' }}" 
+                                       placeholder="Ej: Elecciones Municipales 2024" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">
+                                    <i class="fas fa-list me-1"></i>
+                                    Tipo de Proceso *
+                                </label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    <option value="">Seleccionar tipo...</option>
+                                    <option value="presidencial" {{ 'selected' if proceso and proceso.tipo == 'presidencial' else '' }}>Presidencial</option>
+                                    <option value="congreso" {{ 'selected' if proceso and proceso.tipo == 'congreso' else '' }}>Congreso</option>
+                                    <option value="departamental" {{ 'selected' if proceso and proceso.tipo == 'departamental' else '' }}>Departamental</option>
+                                    <option value="municipal" {{ 'selected' if proceso and proceso.tipo == 'municipal' else '' }}>Municipal</option>
+                                    <option value="consulta" {{ 'selected' if proceso and proceso.tipo == 'consulta' else '' }}>Consulta Popular</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fecha_inicio" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Fecha de Inicio *
+                                </label>
+                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                       value="{{ proceso.fecha_inicio.strftime('%Y-%m-%d') if proceso and proceso.fecha_inicio else '' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fecha_fin" class="form-label">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    Fecha de Finalización *
+                                </label>
+                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                       value="{{ proceso.fecha_fin.strftime('%Y-%m-%d') if proceso and proceso.fecha_fin else '' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="estado" class="form-label">
+                                    <i class="fas fa-toggle-on me-1"></i>
+                                    Estado
+                                </label>
+                                <select class="form-select" id="estado" name="estado">
+                                    <option value="planificacion" {{ 'selected' if proceso and proceso.estado == 'planificacion' else '' }}>Planificación</option>
+                                    <option value="configuracion" {{ 'selected' if proceso and proceso.estado == 'configuracion' else '' }}>Configuración</option>
+                                    <option value="activo" {{ 'selected' if proceso and proceso.estado == 'activo' else '' }}>Activo</option>
+                                    <option value="finalizado" {{ 'selected' if proceso and proceso.estado == 'finalizado' else '' }}>Finalizado</option>
+                                    <option value="suspendido" {{ 'selected' if proceso and proceso.estado == 'suspendido' else '' }}>Suspendido</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="ambito" class="form-label">
+                                    <i class="fas fa-map me-1"></i>
+                                    Ámbito Geográfico
+                                </label>
+                                <select class="form-select" id="ambito" name="ambito">
+                                    <option value="nacional" {{ 'selected' if proceso and proceso.ambito == 'nacional' else '' }}>Nacional</option>
+                                    <option value="departamental" {{ 'selected' if proceso and proceso.ambito == 'departamental' else '' }}>Departamental</option>
+                                    <option value="municipal" {{ 'selected' if proceso and proceso.ambito == 'municipal' else '' }}>Municipal</option>
+                                    <option value="local" {{ 'selected' if proceso and proceso.ambito == 'local' else '' }}>Local</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="total_mesas" class="form-label">
+                                    <i class="fas fa-table me-1"></i>
+                                    Total de Mesas
+                                </label>
+                                <input type="number" class="form-control" id="total_mesas" name="total_mesas" 
+                                       value="{{ proceso.total_mesas if proceso else '' }}" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>
+                            Descripción
+                        </label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" 
+                                  placeholder="Descripción detallada del proceso electoral">{{ proceso.descripcion if proceso else '' }}</textarea>
+                    </div>
+                    
+                    <!-- Sección de Cargos -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-briefcase me-2"></i>
+                                Cargos a Elegir
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="cargos-container">
+                                <div class="cargo-item mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" name="cargo_nombre[]" 
+                                                   placeholder="Nombre del cargo (ej: Alcalde)">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" class="form-control" name="cargo_vacantes[]" 
+                                                   placeholder="Vacantes" min="1">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-danger" onclick="removeCargo(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success btn-sm" onclick="addCargo()">
+                                <i class="fas fa-plus me-2"></i>Agregar Cargo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Configuración de Votación -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>
+                                Configuración de Votación
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="voto_blanco" name="voto_blanco" 
+                                               {{ 'checked' if proceso and proceso.voto_blanco else '' }}>
+                                        <label class="form-check-label" for="voto_blanco">
+                                            Permitir voto en blanco
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="voto_preferente" name="voto_preferente" 
+                                               {{ 'checked' if proceso and proceso.voto_preferente else '' }}>
+                                        <label class="form-check-label" for="voto_preferente">
+                                            Voto preferente
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="segunda_vuelta" name="segunda_vuelta" 
+                                               {{ 'checked' if proceso and proceso.segunda_vuelta else '' }}>
+                                        <label class="form-check-label" for="segunda_vuelta">
+                                            Segunda vuelta
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Volver
+                        </a>
+                        <div>
+                            {% if proceso %}
+                            <button type="button" class="btn btn-danger me-2" onclick="confirmDelete()">
+                                <i class="fas fa-trash me-2"></i>
+                                Eliminar
+                            </button>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {{ 'Actualizar' if proceso else 'Crear' }} Proceso
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function addCargo() {
+    const container = document.getElementById('cargos-container');
+    const cargoItem = document.createElement('div');
+    cargoItem.className = 'cargo-item mb-3';
+    cargoItem.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="cargo_nombre[]" 
+                       placeholder="Nombre del cargo">
+            </div>
+            <div class="col-md-3">
+                <input type="number" class="form-control" name="cargo_vacantes[]" 
+                       placeholder="Vacantes" min="1">
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-danger" onclick="removeCargo(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    container.appendChild(cargoItem);
+}
+
+function removeCargo(button) {
+    const cargoItem = button.closest('.cargo-item');
+    cargoItem.remove();
+}
+
+function confirmDelete() {
+    if (confirm('¿Está seguro de que desea eliminar este proceso electoral?')) {
+        // Implementar eliminación
+        alert('Funcionalidad de eliminación no implementada');
+    }
+}
+
+// Validación del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const nombre = document.getElementById('nombre').value;
+        const tipo = document.getElementById('tipo').value;
+        const fechaInicio = document.getElementById('fecha_inicio').value;
+        const fechaFin = document.getElementById('fecha_fin').value;
+        
+        if (!nombre || !tipo || !fechaInicio || !fechaFin) {
+            e.preventDefault();
+            alert('Por favor complete todos los campos requeridos (*)');
+            return false;
+        }
+        
+        if (new Date(fechaInicio) >= new Date(fechaFin)) {
+            e.preventDefault();
+            alert('La fecha de inicio debe ser anterior a la fecha de finalización');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

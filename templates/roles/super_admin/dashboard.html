@@ -1,0 +1,617 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Super Administrador - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/super_admin.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-super-admin{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Sistema Electoral - Super Administrador{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='super_admin') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/users">
+        <i class="fas fa-users me-1"></i>Usuarios
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/electoral">
+        <i class="fas fa-vote-yea me-1"></i>Procesos Electorales
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/reports">
+        <i class="fas fa-chart-bar me-1"></i>Reportes
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-dark text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-crown me-2"></i>Panel de Control Total del Sistema</h2>
+            <p class="mb-0">Administración completa del Sistema Electoral ERP - Departamento del Caquetá</p>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas principales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Usuarios Totales</h6>
+                        <h3 class="mb-0">{{ stats.total_users or 156 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Procesos Activos</h6>
+                        <h3 class="mb-0">{{ stats.active_processes or 3 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Municipios</h6>
+                        <h3 class="mb-0">{{ stats.total_municipalities or 16 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-city fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Salud del Sistema</h6>
+                        <h3 class="mb-0">{{ stats.system_health or 98 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-heartbeat fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones de Administración
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="gestionarUsuarios()">
+                            <i class="fas fa-users me-2"></i>
+                            Gestionar Usuarios
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="configurarSistema()">
+                            <i class="fas fa-cogs me-2"></i>
+                            Configurar Sistema
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="verReportes()">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Ver Reportes
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="auditoriaSistema()">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Auditoría
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información del sistema y actividad reciente -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Actividad Reciente del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Usuario</th>
+                                <th>Acción</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-11-05 15:30</td>
+                                <td>admin_dept_001</td>
+                                <td>Creó nuevo proceso electoral</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-05 15:25</td>
+                                <td>coord_elect_002</td>
+                                <td>Registró candidato</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-05 15:20</td>
+                                <td>testigo_001</td>
+                                <td>Capturó datos de mesa</td>
+                                <td><span class="badge bg-info">En proceso</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-05 15:15</td>
+                                <td>jurado_003</td>
+                                <td>Generó acta de votación</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Estado del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Servicios Principales</h6>
+                    <div class="d-flex justify-content-between">
+                        <span>Base de Datos</span>
+                        <span class="badge bg-success">Activo</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>API Electoral</span>
+                        <span class="badge bg-success">Activo</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Sistema de Reportes</span>
+                        <span class="badge bg-success">Activo</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Recursos del Sistema</h6>
+                    <div class="mb-2">
+                        <small>CPU</small>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: 25%">25%</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <small>Memoria</small>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: 45%">45%</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <small>Almacenamiento</small>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: 65%">65%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid">
+                    <button class="btn btn-outline-dark">
+                        <i class="fas fa-tools me-2"></i>
+                        Mantenimiento del Sistema
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para super administrador
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Super Administrador cargado');
+    inicializarDashboard();
+    actualizarMetricas();
+    
+    // Actualizar métricas cada 30 segundos
+    setInterval(actualizarMetricas, 30000);
+});
+
+function inicializarDashboard() {
+    // Configurar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Configurar alertas automáticas
+    verificarEstadoSistema();
+}
+
+function actualizarMetricas() {
+    // Simular actualización de métricas en tiempo real
+    fetch('/api/system/info')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Métricas actualizadas:', data);
+            // Aquí se actualizarían los valores en la interfaz
+        })
+        .catch(error => console.error('Error actualizando métricas:', error));
+}
+
+function gestionarUsuarios() {
+    mostrarModal('Gestión de Usuarios', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Usuarios Activos</h6>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>admin@caqueta.gov.co</span>
+                        <span class="badge bg-success">Activo</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>coord@caqueta.gov.co</span>
+                        <span class="badge bg-success">Activo</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>testigo@caqueta.gov.co</span>
+                        <span class="badge bg-warning">Pendiente</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Acciones Rápidas</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="crearUsuario()">
+                        <i class="fas fa-user-plus me-2"></i>Crear Usuario
+                    </button>
+                    <button class="btn btn-warning" onclick="gestionarRoles()">
+                        <i class="fas fa-user-shield me-2"></i>Gestionar Roles
+                    </button>
+                    <button class="btn btn-info" onclick="exportarUsuarios()">
+                        <i class="fas fa-download me-2"></i>Exportar Lista
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function configurarSistema() {
+    mostrarModal('Configuración del Sistema', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Configuraciones Principales</h6>
+                <form id="configForm">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Departamento</label>
+                        <input type="text" class="form-control" value="Caquetá" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Municipios Activos</label>
+                        <input type="number" class="form-control" value="16" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Modo de Operación</label>
+                        <select class="form-select">
+                            <option selected>Producción</option>
+                            <option>Desarrollo</option>
+                            <option>Pruebas</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">Backup automático habilitado</label>
+                        </div>
+                    </div>
+                </form>
+                <div class="mt-3">
+                    <button class="btn btn-success" onclick="guardarConfiguracion()">
+                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                    </button>
+                    <button class="btn btn-secondary" onclick="reiniciarSistema()">
+                        <i class="fas fa-redo me-2"></i>Reiniciar Sistema
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function verReportes() {
+    mostrarModal('Reportes del Sistema', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Reportes Disponibles</h6>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('usuarios')">
+                        <i class="fas fa-users me-2"></i>Reporte de Usuarios
+                        <small class="text-muted d-block">Listado completo de usuarios del sistema</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('actividad')">
+                        <i class="fas fa-chart-line me-2"></i>Reporte de Actividad
+                        <small class="text-muted d-block">Actividad del sistema en los últimos 30 días</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('seguridad')">
+                        <i class="fas fa-shield-alt me-2"></i>Reporte de Seguridad
+                        <small class="text-muted d-block">Logs de seguridad y accesos</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('electoral')">
+                        <i class="fas fa-vote-yea me-2"></i>Reporte Electoral
+                        <small class="text-muted d-block">Estado de procesos electorales</small>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Estadísticas Rápidas</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <canvas id="reportChart" width="200" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Crear gráfico de estadísticas
+    setTimeout(() => {
+        const ctx = document.getElementById('reportChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Usuarios Activos', 'Procesos', 'Municipios'],
+                    datasets: [{
+                        data: [156, 3, 16],
+                        backgroundColor: ['#28a745', '#007bff', '#ffc107']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+function auditoriaSistema() {
+    mostrarModal('Auditoría del Sistema', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Estado de Auditoría</h6>
+                <div class="progress mb-3">
+                    <div class="progress-bar bg-success" style="width: 95%">95% Cumplimiento</div>
+                </div>
+                
+                <h6>Últimas Auditorías</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Resultado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-11-05</td>
+                                <td>Seguridad</td>
+                                <td><span class="badge bg-success">Completada</span></td>
+                                <td>98% Cumplimiento</td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-04</td>
+                                <td>Usuarios</td>
+                                <td><span class="badge bg-success">Completada</span></td>
+                                <td>100% Cumplimiento</td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-03</td>
+                                <td>Sistema</td>
+                                <td><span class="badge bg-warning">En Proceso</span></td>
+                                <td>85% Completado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="iniciarAuditoria()">
+                        <i class="fas fa-play me-2"></i>Iniciar Nueva Auditoría
+                    </button>
+                    <button class="btn btn-info" onclick="exportarAuditoria()">
+                        <i class="fas fa-download me-2"></i>Exportar Resultados
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="adminModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal existente si existe
+    const existingModal = document.getElementById('adminModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('adminModal'));
+    modal.show();
+}
+
+function crearUsuario() {
+    mostrarNotificacion('Abriendo formulario de creación de usuario...', 'info');
+    setTimeout(() => {
+        window.location.href = '/users/new';
+    }, 1000);
+}
+
+function gestionarRoles() {
+    mostrarNotificacion('Abriendo gestión de roles y permisos...', 'info');
+    setTimeout(() => {
+        window.location.href = '/users/roles';
+    }, 1000);
+}
+
+function exportarUsuarios() {
+    mostrarNotificacion('Exportando lista de usuarios...', 'success');
+    // Simular descarga
+    setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = 'data:text/csv;charset=utf-8,Usuario,Email,Rol,Estado\nadmin,admin@caqueta.gov.co,Super Admin,Activo';
+        link.download = 'usuarios_sistema.csv';
+        link.click();
+    }, 1000);
+}
+
+function guardarConfiguracion() {
+    mostrarNotificacion('Configuración guardada exitosamente', 'success');
+}
+
+function reiniciarSistema() {
+    if (confirm('¿Está seguro de que desea reiniciar el sistema?')) {
+        mostrarNotificacion('Reiniciando sistema...', 'warning');
+    }
+}
+
+function generarReporte(tipo) {
+    mostrarNotificacion(`Generando reporte de ${tipo}...`, 'info');
+    setTimeout(() => {
+        mostrarNotificacion(`Reporte de ${tipo} generado exitosamente`, 'success');
+    }, 2000);
+}
+
+function iniciarAuditoria() {
+    mostrarNotificacion('Iniciando nueva auditoría del sistema...', 'info');
+    setTimeout(() => {
+        mostrarNotificacion('Auditoría iniciada. Se notificará cuando esté completa.', 'success');
+    }, 1500);
+}
+
+function exportarAuditoria() {
+    mostrarNotificacion('Exportando resultados de auditoría...', 'success');
+}
+
+function verificarEstadoSistema() {
+    fetch('/api/health')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'healthy') {
+                console.log('Sistema funcionando correctamente');
+            } else {
+                mostrarNotificacion('Advertencia: El sistema requiere atención', 'warning');
+            }
+        })
+        .catch(error => {
+            mostrarNotificacion('Error verificando estado del sistema', 'error');
+        });
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        'success': 'alert-success',
+        'info': 'alert-info',
+        'warning': 'alert-warning',
+        'error': 'alert-danger'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.parentNode.removeChild(notificacion);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

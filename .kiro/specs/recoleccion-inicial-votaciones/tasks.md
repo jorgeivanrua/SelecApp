@@ -111,7 +111,7 @@
   - Crear GET /api/electoral-process/{id}/form-structure para obtener estructura específica
   - _Requerimientos: 10.1, 10.3, 10.6, 11.2_
 
-- [ ]* 2.4 Escribir pruebas para gestión de tipos de elecciones
+- [ ] 2.4 Escribir pruebas para gestión de tipos de elecciones
   - Probar creación de tipos de elecciones con plantillas personalizadas
   - Verificar generación dinámica de formularios
   - Probar configuración de procesos electorales
@@ -184,7 +184,7 @@
   - Establecer relaciones entre anomalías y formularios E-14
   - _Requerimientos: 11.1, 11.2, 11.3, 11.7, 2.6, 2.7_
 
-- [ ]* 4.5 Escribir pruebas unitarias para modelos extendidos
+- [ ] 4.5 Escribir pruebas unitarias para modelos extendidos
   - Crear tests para MesaElectoral con estados de recolección
   - Probar FormE14Extended con campos de trazabilidad, tipos de elección y anomalías
   - Verificar modelos de validación, auditoría y anomalías
@@ -209,7 +209,7 @@
   - Desarrollar detección de inconsistencias en datos geográficos
   - _Requerimientos: 1.4, 6.1, 6.2_
 
-- [ ]* 5.4 Escribir pruebas para configuración inicial
+- [ ] 5.4 Escribir pruebas para configuración inicial
   - Probar carga de datos DIVIPOLA con archivo de prueba
   - Verificar validaciones de integridad geográfica
   - Probar generación de reporte de configuración
@@ -249,7 +249,7 @@
   - Validar que el tipo de formulario coincida con el proceso electoral
   - _Requerimientos: 2.5, 2.6, 6.1, 6.2, 10.6_
 
-- [ ]* 6.5 Escribir pruebas para captura E-14 con OCR
+- [ ] 6.5 Escribir pruebas para captura E-14 con OCR
   - Probar procesamiento OCR con imágenes de formularios de prueba
   - Verificar comparación entre datos OCR y manuales
   - Probar validaciones matemáticas y detección de duplicados
@@ -290,7 +290,7 @@
   - Mostrar nivel de confianza del OCR y discrepancias detectadas
   - _Requerimientos: 7.1, 2.5, 2.8, 9.2_
 
-- [ ]* 7.5 Escribir pruebas end-to-end para interfaz de captura con cámara
+- [ ] 7.5 Escribir pruebas end-to-end para interfaz de captura con cámara
   - Probar flujo completo desde captura de imagen hasta envío
   - Verificar funcionamiento de cámara en dispositivos móviles
   - Probar validaciones client-side y comparación OCR vs manual
@@ -328,7 +328,7 @@
   - Implementar sistema de comentarios y seguimiento de acciones
   - _Requerimientos: 11.2, 11.3, 11.5, 11.6_
 
-- [ ]* 8.5 Escribir pruebas para gestión de anomalías
+- [ ] 8.5 Escribir pruebas para gestión de anomalías
   - Probar creación y clasificación automática de reportes de anomalías
   - Verificar validación y seguimiento por coordinadores
   - Probar generación de estadísticas y consolidaciones
@@ -355,7 +355,7 @@
   - Desarrollar detección de patrones sospechosos de votación
   - _Requerimientos: 6.4, 6.5_
 
-- [ ]* 9.4 Escribir pruebas para validación y supervisión
+- [ ] 9.4 Escribir pruebas para validación y supervisión
   - Probar validaciones cruzadas y detección de anomalías
   - Verificar flujo de aprobación/rechazo por coordinadores
   - Probar generación de reportes de calidad
@@ -390,7 +390,7 @@
   - Crear sistema de descarga individual de informes PDF por puesto
   - _Requerimientos: 3.6, 3.7, 3.8_
 
-- [ ]* 10.5 Escribir pruebas para interfaz de supervisión e informes PDF
+- [ ] 10.5 Escribir pruebas para interfaz de supervisión e informes PDF
   - Probar dashboard de coordinador con datos de prueba
   - Verificar flujo de aprobación/rechazo desde interfaz
   - Probar reportes de calidad y alertas visuales
@@ -439,7 +439,7 @@
   - Implementar sistema de descarga de informes PDF individuales y consolidado general
   - _Requerimientos: 4.10, 4.11, 4.12_
 
-- [ ]* 11.6 Escribir pruebas para consolidación, verificación E-24 e informes PDF
+- [ ] 11.6 Escribir pruebas para consolidación, verificación E-24 e informes PDF
   - Probar generación automática de E-24 desde múltiples E-14
   - Verificar procesamiento OCR de E-24 oficial y comparación
   - Probar detección de discrepancias y generación de reclamaciones
@@ -476,7 +476,7 @@
   - Desarrollar gráficos estadísticos integrados (participación, anomalías, etc.)
   - _Requerimientos: 3.6, 3.7, 4.10, 4.11_
 
-- [ ]* 12.5 Escribir pruebas para servicio de informes PDF
+- [ ] 12.5 Escribir pruebas para servicio de informes PDF
   - Probar generación de PDFs por puesto con datos completos
   - Verificar generación de PDFs municipales con consolidación
   - Probar descarga y almacenamiento de archivos PDF
@@ -504,7 +504,7 @@
   - Desarrollar escalamiento automático de problemas críticos
   - _Requerimientos: 5.4, 8.3_
 
-- [ ]* 13.4 Escribir pruebas para sistema de auditoría
+- [ ] 13.4 Escribir pruebas para sistema de auditoría
   - Probar logging automático de acciones y generación de reportes
   - Verificar detección de patrones anómalos y alertas
   - Probar exportación de logs y trazabilidad completa
@@ -534,7 +534,7 @@
   - Desarrollar alertas de disponibilidad del sistema
   - _Requerimientos: 8.3, 13.2_
 
-- [ ]* 14.4 Escribir pruebas para reportes y monitoreo
+- [ ] 14.4 Escribir pruebas para reportes y monitoreo
   - Probar dashboards con datos de prueba masivos
   - Verificar cálculo de métricas y KPIs en tiempo real
   - Probar sistema de alertas automáticas
@@ -673,7 +673,7 @@
   - Incluir todas las APIs de gestión de testigos desarrolladas en 15.4
   - _Requerimientos: 12.1, 12.2, 12.4, 12.11, 12.12_
 
-- [ ]* 15.13 Escribir pruebas completas para panel de administración con gestión de testigos
+- [ ] 15.13 Escribir pruebas completas para panel de administración con gestión de testigos
   - Probar configuración de jornadas con múltiples elecciones
   - Verificar carga de plantillas E-14 y actualización DIVIPOLA
   - Probar carga masiva de testigos desde CSV
@@ -750,7 +750,7 @@
   - Crear POST /api/ui/preferences para guardar preferencias de usuario
   - _Requerimientos: 15.1, 15.7, 15.9_
 
-- [ ]* 16.8 Escribir pruebas para interfaces diferenciadas
+- [ ] 16.8 Escribir pruebas para interfaces diferenciadas
   - Probar detección automática de rol y dispositivo
   - Verificar generación correcta de interfaces por rol
   - Probar adaptación responsiva en diferentes dispositivos
@@ -806,7 +806,7 @@
   - Implementar algoritmos de cálculo de intensidad basados en progreso de recolección
   - _Requerimientos: 13.9, 13.10, 13.12_
 
-- [ ]* 16.6 Escribir pruebas para sistema de mapas y mapa de calor
+- [ ] 16.6 Escribir pruebas para sistema de mapas y mapa de calor
   - Probar inicialización de mapas con datos DIVIPOLA
   - Verificar geolocalización y cálculo de rutas
   - Probar actualización de marcadores en tiempo real
@@ -834,7 +834,7 @@
   - Desarrollar funciones de reinicio y recuperación de procesos
   - _Requerimientos: 14.5, 5.4_
 
-- [ ]* 17.4 Escribir pruebas de recuperación y rendimiento
+- [ ] 17.4 Escribir pruebas de recuperación y rendimiento
   - Probar recuperación automática de sesiones interrumpidas
   - Verificar rendimiento con simulación de carga masiva
   - Probar herramientas de administración y diagnóstico
@@ -875,7 +875,7 @@
   - Crear herramientas de análisis histórico y tendencias
   - _Requerimientos: 16.18_
 
-- [ ]* 18.5 Escribir pruebas para dashboards y reportes
+- [ ] 18.5 Escribir pruebas para dashboards y reportes
   - Probar generación de gráficos con datos de prueba
   - Verificar cálculos de métricas y KPIs de candidatos
   - Probar exportación en múltiples formatos
@@ -935,7 +935,7 @@
   - Crear sistema de confirmación de disponibilidad para testigos
   - _Requerimientos: 14.3, 14.5, 14.6_
 
-- [ ]* 19.8 Escribir pruebas para sistema de alertas
+- [ ] 19.8 Escribir pruebas para sistema de alertas
   - Probar detección automática de mesas huérfanas
   - Verificar generación y envío de notificaciones múltiples
   - Probar cálculo de cobertura en tiempo real
@@ -973,7 +973,7 @@
   - Documentar sistema de alertas para testigos faltantes y procedimientos de cobertura
   - _Requerimientos: 5.5, 15.5, 11.8, 12.10, 13.1, 14.8_
 
-- [ ]* 20.4 Escribir pruebas de recuperación y rendimiento
+- [ ] 20.4 Escribir pruebas de recuperación y rendimiento
   - Probar recuperación automática de sesiones interrumpidas
   - Verificar rendimiento con simulación de carga masiva
   - Probar herramientas de administración y diagnóstico
@@ -1014,7 +1014,7 @@
   - Incluir documentación de dashboards y reportes de candidatos
   - _Requerimientos: 5.5, 15.5, 11.8, 12.10, 13.1, 14.8, 16.1, 16.18_
 
-- [ ]* 21.4 Escribir pruebas de integración completas
+- [ ] 21.4 Escribir pruebas de integración completas
   - Probar flujo completo desde configuración hasta consolidación
   - Verificar integración con sistema electoral principal
   - Probar proceso completo con datos reales de DIVIPOLA

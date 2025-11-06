@@ -1,0 +1,755 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Jurado de Votación - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/jurado_votacion.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-jurado-votacion{% endblock %}
+{% block navbar_class %}navbar-dark bg-danger{% endblock %}
+{% block brand_text %}Sistema Electoral - Jurado de Votación{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='jurado_votacion') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/voting/register">
+        <i class="fas fa-vote-yea me-1"></i>Registro Votos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/voting/results">
+        <i class="fas fa-chart-pie me-1"></i>Resultados
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/voting/certificate">
+        <i class="fas fa-file-pdf me-1"></i>Acta
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-danger text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-gavel me-2"></i>Panel de Jurado de Votación</h2>
+            <p class="mb-0">Gestión oficial de mesa electoral - Mesa asignada: <strong>{{ stats.assigned_table or '001-A' }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Estado de la mesa -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Estado Actual de la Mesa
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.assigned_table or '001-A' }}</h3>
+                                <p class="mb-0">Mesa Asignada</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.registered_votes or 234 }}</h3>
+                                <p class="mb-0">Votos Registrados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.eligible_voters or 350 }}</h3>
+                                <p class="mb-0">Votantes Habilitados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.participation or 67 }}%</h3>
+                                <p class="mb-0">Participación</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Funciones principales del jurado -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>
+                    Funciones del Jurado
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-danger btn-lg w-100 mb-2" onclick="registrarVotos()">
+                            <i class="fas fa-vote-yea me-2"></i>
+                            Registrar Votos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-danger btn-lg w-100 mb-2" onclick="gestionarMesa()">
+                            <i class="fas fa-table me-2"></i>
+                            Gestionar Mesa
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-danger btn-lg w-100 mb-2" onclick="generarActa()">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            Generar Acta
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-danger btn-lg w-100 mb-2" onclick="reportarIncidenciaJurado()">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Reportar Incidencia
+                        </button>
+                    </div>
+                </div>
+                <!-- Segunda fila de funciones -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-danger btn-lg w-100 mb-2" onclick="verificarVotantes()">
+                            <i class="fas fa-users me-2"></i>
+                            Verificar Votantes
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-danger btn-lg w-100 mb-2" onclick="contarVotos()">
+                            <i class="fas fa-calculator me-2"></i>
+                            Contar Votos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-danger btn-lg w-100 mb-2" onclick="cerrarMesa()">
+                            <i class="fas fa-lock me-2"></i>
+                            Cerrar Mesa
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-danger btn-lg w-100 mb-2" onclick="consultarNormativa()">
+                            <i class="fas fa-book me-2"></i>
+                            Consultar Normativa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Proceso de votación -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Cronología del Proceso Electoral
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker bg-success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>08:00 - Apertura de Mesa</h6>
+                            <p>Mesa abierta oficialmente. Jurados presentes y acreditados.</p>
+                            <small class="text-success">Completado</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker bg-success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>08:15 - Verificación de Materiales</h6>
+                            <p>Urnas selladas, tarjetones verificados, actas preparadas.</p>
+                            <small class="text-success">Completado</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item active">
+                        <div class="timeline-marker bg-primary">
+                            <i class="fas fa-vote-yea"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>08:30 - 16:00 - Proceso de Votación</h6>
+                            <p>Votación en curso. {{ stats.registered_votes or 234 }} votos registrados hasta el momento.</p>
+                            <small class="text-primary">En proceso</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item pending">
+                        <div class="timeline-marker bg-secondary">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>16:00 - Cierre de Mesa</h6>
+                            <p>Cierre oficial de la votación y sellado de urnas.</p>
+                            <small class="text-secondary">Pendiente</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item pending">
+                        <div class="timeline-marker bg-secondary">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>16:15 - Conteo de Votos</h6>
+                            <p>Conteo oficial de votos en presencia de testigos.</p>
+                            <small class="text-secondary">Pendiente</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item pending">
+                        <div class="timeline-marker bg-secondary">
+                            <i class="fas fa-file-signature"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>17:00 - Firma de Actas</h6>
+                            <p>Elaboración y firma de actas por todos los jurados.</p>
+                            <small class="text-secondary">Pendiente</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Equipo de Mesa
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-user-tie me-2"></i>Presidente de Mesa</h6>
+                    <p class="mb-1">Carlos Mendoza</p>
+                    <small class="text-success">Presente</small>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-user me-2"></i>Vicepresidente</h6>
+                    <p class="mb-1">Ana Patricia Ruiz</p>
+                    <small class="text-success">Presente</small>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-pen me-2"></i>Secretario</h6>
+                    <p class="mb-1">Miguel Torres</p>
+                    <small class="text-success">Presente</small>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-eye me-2"></i>Testigos</h6>
+                    <p class="mb-1">• Testigo Partido A: Presente</p>
+                    <p class="mb-1">• Testigo Partido B: Presente</p>
+                    <p class="mb-1">• Testigo Partido C: Presente</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Incidencias
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Sin incidencias:</strong> El proceso se desarrolla con normalidad
+                </div>
+                
+                <button class="btn btn-warning btn-sm w-100" onclick="reportarIncidencia()">
+                    <i class="fas fa-plus me-2"></i>Reportar Nueva Incidencia
+                </button>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-danger btn-sm" onclick="generarReporte()">
+                        <i class="fas fa-file-alt me-2"></i>Generar Reporte
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="consultarNormativa()">
+                        <i class="fas fa-book me-2"></i>Consultar Normativa
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="contactarSupervisor()">
+                        <i class="fas fa-phone me-2"></i>Contactar Supervisor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para jurado de votación
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Jurado de Votación cargado');
+    actualizarHora();
+    inicializarJurado();
+    setInterval(actualizarHora, 60000); // Actualizar cada minuto
+});
+
+function inicializarJurado() {
+    // Configurar funciones del jurado
+    console.log('Funciones del jurado inicializadas');
+}
+
+function actualizarHora() {
+    const ahora = new Date();
+    const horaActual = ahora.toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
+    
+    // Actualizar estado según la hora
+    if (ahora.getHours() >= 16) {
+        // Después de las 4 PM, activar cierre
+        const activeItem = document.querySelector('.timeline-item.active');
+        if (activeItem) {
+            activeItem.classList.remove('active');
+            activeItem.classList.add('completed');
+        }
+    }
+}
+
+function registrarVotos() {
+    mostrarModalJurado('Registro de Votos', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Registro de Votación - Mesa {{ stats.assigned_table or "001-A" }}</h6>
+                <form id="registroVotosForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Cédula del Votante</label>
+                                <input type="text" class="form-control" id="cedulaVotante" placeholder="Ej: 12345678">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre del Votante</label>
+                                <input type="text" class="form-control" id="nombreVotante" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Hora de Votación</label>
+                                <input type="time" class="form-control" id="horaVotacion">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Estado del Votante</label>
+                                <select class="form-select" id="estadoVotante">
+                                    <option value="habilitado">Habilitado</option>
+                                    <option value="observado">Con Observaciones</option>
+                                    <option value="impedido">Impedido</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Observaciones</label>
+                                <textarea class="form-control" id="observacionesVoto" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-check me-2"></i>Registrar Voto
+                    </button>
+                </form>
+                <hr>
+                <h6>Últimos Votos Registrados</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Cédula</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ultimosVotos">
+                            <tr>
+                                <td>15:45</td>
+                                <td>12345678</td>
+                                <td>Juan Pérez</td>
+                                <td><span class="badge bg-success">Registrado</span></td>
+                            </tr>
+                            <tr>
+                                <td>15:42</td>
+                                <td>23456789</td>
+                                <td>María García</td>
+                                <td><span class="badge bg-success">Registrado</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Estadísticas de Votación</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p><strong>Votos Registrados:</strong> {{ stats.registered_votes or 234 }}</p>
+                        <p><strong>Votantes Habilitados:</strong> {{ stats.eligible_voters or 350 }}</p>
+                        <p><strong>Participación:</strong> {{ stats.participation or 67 }}%</p>
+                        <p><strong>Votos por Hora:</strong> 28</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-info btn-sm w-100" onclick="verificarCedula()">
+                        <i class="fas fa-search me-2"></i>Verificar Cédula
+                    </button>
+                    <button class="btn btn-warning btn-sm w-100 mt-2" onclick="consultarCenso()">
+                        <i class="fas fa-list me-2"></i>Consultar Censo
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function gestionarMesa() {
+    mostrarModalJurado('Gestión de Mesa Electoral', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Estado Actual de la Mesa {{ stats.assigned_table or "001-A" }}</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-success">Abierta</h5>
+                                <p class="card-text">Estado de la Mesa</p>
+                                <button class="btn btn-sm btn-warning" onclick="cambiarEstadoMesa()">Cambiar Estado</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-info">3/3</h5>
+                                <p class="card-text">Jurados Presentes</p>
+                                <button class="btn btn-sm btn-info" onclick="gestionarJurados()">Gestionar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-primary">{{ stats.registered_votes or 234 }}</h5>
+                                <p class="card-text">Votos Emitidos</p>
+                                <button class="btn btn-sm btn-primary" onclick="actualizarConteo()">Actualizar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-warning">0</h5>
+                                <p class="card-text">Incidencias</p>
+                                <button class="btn btn-sm btn-warning" onclick="verIncidencias()">Ver</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h6>Acciones de Mesa</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" onclick="abrirMesa()">
+                                    <i class="fas fa-unlock me-2"></i>Abrir Mesa
+                                </button>
+                                <button class="btn btn-warning" onclick="suspenderVotacion()">
+                                    <i class="fas fa-pause me-2"></i>Suspender Votación
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-info" onclick="verificarMateriales()">
+                                    <i class="fas fa-check-square me-2"></i>Verificar Materiales
+                                </button>
+                                <button class="btn btn-secondary" onclick="sellarUrnas()">
+                                    <i class="fas fa-lock me-2"></i>Sellar Urnas
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-danger" onclick="cerrarMesaDefinitivo()">
+                                    <i class="fas fa-stop me-2"></i>Cerrar Mesa
+                                </button>
+                                <button class="btn btn-dark" onclick="emergenciaMesa()">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Emergencia
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function generarActa() {
+    mostrarModalJurado('Generación de Acta Electoral', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Información del Acta</h6>
+                <form id="actaElectoralForm">
+                    <div class="mb-3">
+                        <label class="form-label">Mesa Electoral</label>
+                        <input type="text" class="form-control" value="{{ stats.assigned_table or '001-A' }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Elección</label>
+                        <input type="date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hora de Cierre</label>
+                        <input type="time" class="form-control" value="16:00">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Total Votos Válidos</label>
+                        <input type="number" class="form-control" id="votosValidos" value="{{ stats.registered_votes or 234 }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Votos en Blanco</label>
+                        <input type="number" class="form-control" id="votosBlanco" value="8">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Votos Nulos</label>
+                        <input type="number" class="form-control" id="votosNulos" value="12">
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h6>Firmas de Jurados</h6>
+                <div class="mb-3">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" checked> Presidente de Mesa
+                    </label>
+                    <p class="small text-muted">Carlos Mendoza - Firma Digital</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" checked> Vicepresidente
+                    </label>
+                    <p class="small text-muted">Ana Patricia Ruiz - Firma Digital</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" checked> Secretario
+                    </label>
+                    <p class="small text-muted">Miguel Torres - Firma Digital</p>
+                </div>
+                <div class="mt-4">
+                    <h6>Observaciones del Acta</h6>
+                    <textarea class="form-control" rows="4" placeholder="Observaciones adicionales..."></textarea>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-danger" onclick="generarActaPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Generar Acta PDF
+                    </button>
+                    <button class="btn btn-success" onclick="firmarActa()">
+                        <i class="fas fa-signature me-2"></i>Firmar Acta
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function reportarIncidenciaJurado() {
+    mostrarModalJurado('Reporte de Incidencia', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Formulario de Incidencia</h6>
+                <form id="incidenciaJuradoForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Incidencia</label>
+                                <select class="form-select" id="tipoIncidencia">
+                                    <option value="tecnica">Técnica</option>
+                                    <option value="procedimiento">Procedimiento</option>
+                                    <option value="seguridad">Seguridad</option>
+                                    <option value="material">Material Electoral</option>
+                                    <option value="votante">Problema con Votante</option>
+                                    <option value="otra">Otra</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Severidad</label>
+                                <select class="form-select" id="severidadIncidencia">
+                                    <option value="baja">Baja</option>
+                                    <option value="media">Media</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="critica">Crítica</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción Detallada</label>
+                        <textarea class="form-control" id="descripcionIncidencia" rows="4" placeholder="Describa la incidencia con el mayor detalle posible..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Hora de Ocurrencia</label>
+                                <input type="time" class="form-control" id="horaIncidencia">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Testigos</label>
+                                <input type="text" class="form-control" id="testigosIncidencia" placeholder="Nombres de testigos">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="requiereAtencion">
+                            <label class="form-check-label">Requiere atención inmediata</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Reportar Incidencia
+                    </button>
+                </form>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModalJurado(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="juradoModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('juradoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('juradoModal'));
+    modal.show();
+}
+
+function mostrarNotificacionJurado(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Implementar funciones específicas
+function verificarVotantes() { mostrarNotificacionJurado('Abriendo verificación de votantes...', 'info'); }
+function contarVotos() { mostrarNotificacionJurado('Iniciando conteo de votos...', 'info'); }
+function cerrarMesa() { mostrarNotificacionJurado('Iniciando proceso de cierre de mesa...', 'warning'); }
+function consultarNormativa() { window.open('/normativa', '_blank'); }
+function verificarCedula() { mostrarNotificacionJurado('Verificando cédula en el sistema...', 'info'); }
+function consultarCenso() { mostrarNotificacionJurado('Consultando censo electoral...', 'info'); }
+function cambiarEstadoMesa() { mostrarNotificacionJurado('Cambiando estado de la mesa...', 'warning'); }
+function gestionarJurados() { mostrarNotificacionJurado('Gestionando jurados de mesa...', 'info'); }
+function actualizarConteo() { mostrarNotificacionJurado('Actualizando conteo de votos...', 'info'); }
+function verIncidencias() { mostrarNotificacionJurado('Mostrando incidencias reportadas...', 'info'); }
+function abrirMesa() { mostrarNotificacionJurado('Abriendo mesa electoral...', 'success'); }
+function suspenderVotacion() { mostrarNotificacionJurado('Suspendiendo votación temporalmente...', 'warning'); }
+function verificarMateriales() { mostrarNotificacionJurado('Verificando materiales electorales...', 'info'); }
+function sellarUrnas() { mostrarNotificacionJurado('Sellando urnas electorales...', 'info'); }
+function cerrarMesaDefinitivo() { mostrarNotificacionJurado('Cerrando mesa definitivamente...', 'error'); }
+function emergenciaMesa() { mostrarNotificacionJurado('Activando protocolo de emergencia...', 'error'); }
+function generarActaPDF() { mostrarNotificacionJurado('Generando acta electoral en PDF...', 'info'); }
+function firmarActa() { mostrarNotificacionJurado('Firmando acta electoral digitalmente...', 'success'); }
+
+function generarReporte() {
+    mostrarNotificacionJurado('Generando reporte de mesa...', 'info');
+}
+
+function contactarSupervisor() {
+    mostrarNotificacionJurado('Contactando supervisor electoral...', 'info');
+}
+</script>
+{% endblock %}

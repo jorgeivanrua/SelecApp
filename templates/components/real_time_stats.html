@@ -1,0 +1,336 @@
+<!-- Estadísticas en Tiempo Real -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-chart-line me-2"></i>
+            Estadísticas en Tiempo Real
+            <span class="badge bg-success ms-2" id="status-indicator">En Vivo</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        <!-- Métricas principales -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card bg-primary text-white">
+                    <div class="stat-icon">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-votes">1,247</h3>
+                        <p>Votos Registrados</p>
+                        <small class="stat-change">
+                            <i class="fas fa-arrow-up"></i> +23 en la última hora
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-success text-white">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="participation-rate">68.5%</h3>
+                        <p>Participación</p>
+                        <small class="stat-change">
+                            <i class="fas fa-arrow-up"></i> +2.1% desde las 12:00
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-info text-white">
+                    <div class="stat-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="active-tables">42/45</h3>
+                        <p>Mesas Activas</p>
+                        <small class="stat-change">
+                            <i class="fas fa-check"></i> 93% operativas
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card bg-warning text-dark">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="incidents">2</h3>
+                        <p>Incidencias</p>
+                        <small class="stat-change">
+                            <i class="fas fa-minus"></i> -1 desde las 14:00
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gráfico de participación por hora -->
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Participación por Hora</h6>
+                <canvas id="participationChart" height="100"></canvas>
+            </div>
+            <div class="col-md-4">
+                <h6>Estado de Mesas</h6>
+                <canvas id="tablesChart" height="100"></canvas>
+            </div>
+        </div>
+        
+        <!-- Últimas actualizaciones -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h6>Últimas Actualizaciones</h6>
+                <div class="timeline" id="updates-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <small class="text-muted">15:23</small>
+                            <p class="mb-0">Mesa 045-A reporta 89% de participación</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <small class="text-muted">15:18</small>
+                            <p class="mb-0">Nuevo candidato registrado en Florencia</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <small class="text-muted">15:12</small>
+                            <p class="mb-0">Incidencia menor resuelta en Mesa 023-B</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-right: 15px;
+    opacity: 0.8;
+}
+
+.stat-content h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-content p {
+    margin: 5px 0;
+    opacity: 0.9;
+}
+
+.stat-change {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
+}
+
+#status-indicator {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar gráfico de participación
+    const participationCtx = document.getElementById('participationChart').getContext('2d');
+    const participationChart = new Chart(participationCtx, {
+        type: 'line',
+        data: {
+            labels: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+            datasets: [{
+                label: 'Participación (%)',
+                data: [5, 12, 25, 38, 52, 61, 66, 68.5],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Configurar gráfico de estado de mesas
+    const tablesCtx = document.getElementById('tablesChart').getContext('2d');
+    const tablesChart = new Chart(tablesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Activas', 'Inactivas', 'Mantenimiento'],
+            datasets: [{
+                data: [42, 2, 1],
+                backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        fontSize: 12
+                    }
+                }
+            }
+        }
+    });
+    
+    // Simular actualizaciones en tiempo real
+    function updateStats() {
+        // Actualizar votos (simulado)
+        const currentVotes = parseInt(document.getElementById('total-votes').textContent.replace(',', ''));
+        const newVotes = currentVotes + Math.floor(Math.random() * 5);
+        document.getElementById('total-votes').textContent = newVotes.toLocaleString();
+        
+        // Actualizar participación
+        const currentParticipation = parseFloat(document.getElementById('participation-rate').textContent);
+        const newParticipation = Math.min(100, currentParticipation + (Math.random() * 0.2));
+        document.getElementById('participation-rate').textContent = newParticipation.toFixed(1) + '%';
+        
+        // Actualizar gráficos
+        const now = new Date();
+        const timeLabel = now.getHours().toString().padStart(2, '0') + ':' + 
+                         now.getMinutes().toString().padStart(2, '0');
+        
+        if (participationChart.data.labels.length > 8) {
+            participationChart.data.labels.shift();
+            participationChart.data.datasets[0].data.shift();
+        }
+        
+        participationChart.data.labels.push(timeLabel);
+        participationChart.data.datasets[0].data.push(newParticipation);
+        participationChart.update('none');
+    }
+    
+    // Actualizar cada 30 segundos (en producción sería cada pocos minutos)
+    setInterval(updateStats, 30000);
+    
+    // Agregar nueva actualización al timeline
+    function addTimelineUpdate(message, type = 'info') {
+        const timeline = document.getElementById('updates-timeline');
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                       now.getMinutes().toString().padStart(2, '0');
+        
+        const colorClass = {
+            'success': 'bg-success',
+            'info': 'bg-info',
+            'warning': 'bg-warning',
+            'danger': 'bg-danger'
+        }[type] || 'bg-info';
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'timeline-item';
+        newItem.innerHTML = `
+            <div class="timeline-marker ${colorClass}"></div>
+            <div class="timeline-content">
+                <small class="text-muted">${timeStr}</small>
+                <p class="mb-0">${message}</p>
+            </div>
+        `;
+        
+        timeline.insertBefore(newItem, timeline.firstChild);
+        
+        // Mantener solo las últimas 5 actualizaciones
+        while (timeline.children.length > 5) {
+            timeline.removeChild(timeline.lastChild);
+        }
+    }
+    
+    // Simular actualizaciones del timeline
+    const sampleUpdates = [
+        { message: "Mesa 067-C alcanza 95% de participación", type: "success" },
+        { message: "Nuevo reporte de auditoría generado", type: "info" },
+        { message: "Mantenimiento programado en Mesa 012-A", type: "warning" },
+        { message: "Candidato adicional registrado en San Vicente", type: "info" }
+    ];
+    
+    setInterval(() => {
+        const randomUpdate = sampleUpdates[Math.floor(Math.random() * sampleUpdates.length)];
+        addTimelineUpdate(randomUpdate.message, randomUpdate.type);
+    }, 45000);
+});
+</script>
+</parameter>
+</invoke>

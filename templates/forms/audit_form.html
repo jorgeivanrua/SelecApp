@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Formulario de Auditoría - Sistema Electoral ERP{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Nueva Auditoría Electoral
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="auditForm" method="POST" action="/api/audit/create">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="audit_type" class="form-label">Tipo de Auditoría</label>
+                                <select class="form-select" id="audit_type" name="audit_type" required>
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="proceso_electoral">Proceso Electoral</option>
+                                    <option value="registro_candidatos">Registro de Candidatos</option>
+                                    <option value="configuracion_mesas">Configuración de Mesas</option>
+                                    <option value="sistema_votacion">Sistema de Votación</option>
+                                    <option value="conteo_votos">Conteo de Votos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">Prioridad</label>
+                                <select class="form-select" id="priority" name="priority" required>
+                                    <option value="">Seleccionar prioridad</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="media">Media</option>
+                                    <option value="baja">Baja</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="municipality" class="form-label">Municipio</label>
+                                <select class="form-select" id="municipality" name="municipality" required>
+                                    <option value="">Seleccionar municipio</option>
+                                    <option value="florencia">Florencia</option>
+                                    <option value="san_vicente">San Vicente del Caguán</option>
+                                    <option value="puerto_rico">Puerto Rico</option>
+                                    <option value="el_paujil">El Paujil</option>
+                                    <option value="la_montanita">La Montañita</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="scheduled_date" class="form-label">Fecha Programada</label>
+                                <input type="date" class="form-control" id="scheduled_date" name="scheduled_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descripción de la Auditoría</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" 
+                                  placeholder="Describe el alcance y objetivos de la auditoría..." required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="criteria" class="form-label">Criterios de Evaluación</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="transparency" name="criteria[]" value="transparency">
+                            <label class="form-check-label" for="transparency">
+                                Transparencia del Proceso
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="security" name="criteria[]" value="security">
+                            <label class="form-check-label" for="security">
+                                Seguridad del Sistema
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="compliance" name="criteria[]" value="compliance">
+                            <label class="form-check-label" for="compliance">
+                                Cumplimiento Normativo
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="integrity" name="criteria[]" value="integrity">
+                            <label class="form-check-label" for="integrity">
+                                Integridad de Datos
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="auditor_assigned" class="form-label">Auditor Asignado</label>
+                                <select class="form-select" id="auditor_assigned" name="auditor_assigned">
+                                    <option value="">Auto-asignar</option>
+                                    <option value="auditor1">Carlos Mendoza</option>
+                                    <option value="auditor2">Ana Patricia Ruiz</option>
+                                    <option value="auditor3">Miguel Ángel Torres</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="estimated_duration" class="form-label">Duración Estimada (días)</label>
+                                <input type="number" class="form-control" id="estimated_duration" 
+                                       name="estimated_duration" min="1" max="30" value="3">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">
+                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-dark">
+                            <i class="fas fa-save me-2"></i>Crear Auditoría
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('auditForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validar que al menos un criterio esté seleccionado
+    const criteria = document.querySelectorAll('input[name="criteria[]"]:checked');
+    if (criteria.length === 0) {
+        alert('Debe seleccionar al menos un criterio de evaluación');
+        return;
+    }
+    
+    // Simular envío del formulario
+    alert('Auditoría creada exitosamente');
+    window.location.href = '/dashboard/auditor_electoral';
+});
+
+// Establecer fecha mínima como hoy
+document.getElementById('scheduled_date').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
+</parameter>
+</invoke>

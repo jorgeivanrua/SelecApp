@@ -1,0 +1,650 @@
+/* Estilos específicos para Testigo Electoral */
+
+.role-testigo-electoral {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+/* Colores específicos del rol */
+:root {
+    --testigo-primary: #2563eb;
+    --testigo-secondary: #64748b;
+    --testigo-success: #059669;
+    --testigo-warning: #d97706;
+    --testigo-danger: #dc2626;
+    --testigo-info: #0891b2;
+}
+
+/* Header específico */
+.role-testigo-electoral .navbar {
+    background: linear-gradient(135deg, var(--testigo-primary), #1e40af) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Cards específicas */
+.role-testigo-electoral .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.role-testigo-electoral .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Estadísticas */
+.role-testigo-electoral .stats-card {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border-left: 4px solid var(--testigo-primary);
+}
+
+.role-testigo-electoral .stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--testigo-primary);
+}
+
+.role-testigo-electoral .stats-label {
+    color: var(--testigo-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+}
+
+/* Botones específicos */
+.role-testigo-electoral .btn-primary {
+    background: linear-gradient(135deg, var(--testigo-primary), #1d4ed8);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.role-testigo-electoral .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.role-testigo-electoral .btn-success {
+    background: linear-gradient(135deg, var(--testigo-success), #047857);
+    border: none;
+}
+
+.role-testigo-electoral .btn-warning {
+    background: linear-gradient(135deg, var(--testigo-warning), #b45309);
+    border: none;
+    color: white;
+}
+
+.role-testigo-electoral .btn-danger {
+    background: linear-gradient(135deg, var(--testigo-danger), #b91c1c);
+    border: none;
+}
+
+/* Acciones rápidas */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.quick-action-card:hover {
+    border-color: var(--testigo-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+}
+
+.quick-action-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--testigo-primary), #3b82f6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.quick-action-title {
+    font-weight: 600;
+    color: var(--testigo-primary);
+    margin-bottom: 0.5rem;
+}
+
+.quick-action-description {
+    color: var(--testigo-secondary);
+    font-size: 0.875rem;
+}
+
+/* Observaciones */
+.observacion-card {
+    border-left: 4px solid var(--testigo-info);
+    background: linear-gradient(135deg, #ffffff, #f0f9ff);
+}
+
+.observacion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.observacion-tipo {
+    background: var(--testigo-info);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.observacion-fecha {
+    color: var(--testigo-secondary);
+    font-size: 0.875rem;
+}
+
+.observacion-descripcion {
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* Incidencias */
+.incidencia-card {
+    border-left: 4px solid var(--testigo-warning);
+    background: linear-gradient(135deg, #ffffff, #fffbeb);
+}
+
+.incidencia-severidad {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.incidencia-severidad.baja {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.incidencia-severidad.media {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.incidencia-severidad.alta {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.incidencia-severidad.critica {
+    background: #fecaca;
+    color: #7f1d1d;
+}
+
+/* Formularios */
+.role-testigo-electoral .form-control {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.role-testigo-electoral .form-control:focus {
+    border-color: var(--testigo-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.role-testigo-electoral .form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+/* Alertas específicas */
+.role-testigo-electoral .alert {
+    border: none;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.role-testigo-electoral .alert-success {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+}
+
+.role-testigo-electoral .alert-warning {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+}
+
+.role-testigo-electoral .alert-danger {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+}
+
+.role-testigo-electoral .alert-info {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+}
+
+/* Tablas */
+.role-testigo-electoral .table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.role-testigo-electoral .table thead th {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border: none;
+    font-weight: 600;
+    color: var(--testigo-primary);
+    padding: 1rem;
+}
+
+.role-testigo-electoral .table tbody td {
+    padding: 1rem;
+    border-color: #f1f5f9;
+}
+
+.role-testigo-electoral .table tbody tr:hover {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+/* Badges */
+.role-testigo-electoral .badge {
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+.role-testigo-electoral .badge-primary {
+    background: var(--testigo-primary);
+}
+
+.role-testigo-electoral .badge-success {
+    background: var(--testigo-success);
+}
+
+.role-testigo-electoral .badge-warning {
+    background: var(--testigo-warning);
+}
+
+.role-testigo-electoral .badge-danger {
+    background: var(--testigo-danger);
+}
+
+/* Navegación específica */
+.role-testigo-electoral .nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin: 0 0.25rem;
+}
+
+.role-testigo-electoral .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.role-testigo-electoral .nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+/* Responsive Mobile-First */
+@media (max-width: 768px) {
+    .quick-actions {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .role-testigo-electoral .stats-number {
+        font-size: 1.75rem;
+    }
+    
+    .quick-action-card {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-action-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .quick-action-title {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .quick-action-description {
+        font-size: 0.8rem;
+    }
+    
+    /* Cámara móvil */
+    .camera-container {
+        height: 250px;
+        margin-bottom: 1rem;
+    }
+    
+    .camera-preview {
+        height: 250px;
+    }
+    
+    .camera-controls {
+        bottom: 10px;
+        gap: 10px;
+    }
+    
+    .capture-btn {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .capture-btn i {
+        font-size: 1.5rem;
+    }
+    
+    /* Formularios móviles */
+    .role-testigo-electoral .form-control {
+        padding: 0.875rem;
+        font-size: 16px; /* Evita zoom en iOS */
+    }
+    
+    .role-testigo-electoral .btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Cards móviles */
+    .role-testigo-electoral .card {
+        margin-bottom: 1rem;
+        border-radius: 8px;
+    }
+    
+    .role-testigo-electoral .card-body {
+        padding: 1rem;
+    }
+    
+    /* Navegación móvil */
+    .role-testigo-electoral .navbar-nav {
+        text-align: center;
+    }
+    
+    .role-testigo-electoral .nav-link {
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0;
+    }
+    
+    /* Tablas móviles */
+    .role-testigo-electoral .table-responsive {
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .role-testigo-electoral .table {
+        font-size: 0.875rem;
+    }
+    
+    .role-testigo-electoral .table th,
+    .role-testigo-electoral .table td {
+        padding: 0.5rem;
+    }
+    
+    /* Alertas móviles */
+    .notification-alert {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+        width: auto;
+        min-width: auto;
+        font-size: 0.875rem;
+    }
+    
+    /* Pasos móviles */
+    .step-indicator {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .step {
+        margin: 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+    }
+    
+    /* Upload zone móvil */
+    .upload-zone {
+        padding: 2rem 1rem;
+    }
+    
+    .upload-zone i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .upload-zone h5 {
+        font-size: 1rem;
+    }
+    
+    .upload-zone p {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small devices */
+    .role-testigo-electoral .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .role-testigo-electoral .card-header {
+        padding: 0.75rem;
+    }
+    
+    .role-testigo-electoral .card-body {
+        padding: 0.75rem;
+    }
+    
+    .quick-action-card {
+        padding: 0.75rem;
+    }
+    
+    .camera-container {
+        height: 200px;
+    }
+    
+    .camera-preview {
+        height: 200px;
+    }
+    
+    .capture-btn {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .capture-btn i {
+        font-size: 1.25rem;
+    }
+    
+    .step {
+        flex-direction: column;
+        text-align: center;
+        margin: 0.25rem;
+    }
+    
+    .step-number {
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+    }
+    
+    .role-testigo-electoral .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Mejoras de rendimiento móvil */
+@media (max-width: 768px) {
+    /* Reducir animaciones en móvil para mejor rendimiento */
+    .role-testigo-electoral .card {
+        animation: none;
+    }
+    
+    .role-testigo-electoral .card:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .role-testigo-electoral .btn:hover {
+        transform: none;
+    }
+    
+    .quick-action-card:hover {
+        transform: none;
+        border-color: var(--testigo-primary);
+    }
+    
+    /* Optimizar transiciones */
+    * {
+        transition-duration: 0.2s;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Dispositivos táctiles */
+    .role-testigo-electoral .btn {
+        min-height: 44px; /* Tamaño mínimo recomendado para touch */
+    }
+    
+    .role-testigo-electoral .form-control {
+        min-height: 44px;
+    }
+    
+    .role-testigo-electoral .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .quick-action-card {
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    /* Eliminar hover effects en dispositivos táctiles */
+    .role-testigo-electoral .card:hover,
+    .role-testigo-electoral .btn:hover,
+    .quick-action-card:hover {
+        transform: none;
+        box-shadow: inherit;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.role-testigo-electoral .card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.role-testigo-electoral .card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.role-testigo-electoral .card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.role-testigo-electoral .card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+/* Estados de carga específicos */
+.role-testigo-electoral .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+.role-testigo-electoral .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid var(--testigo-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notificaciones flotantes */
+.notification-alert {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

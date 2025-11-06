@@ -1,0 +1,576 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Coordinador de Puesto - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/coordinador_puesto.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-coordinador-puesto{% endblock %}
+{% block navbar_class %}navbar-dark bg-success{% endblock %}
+{% block brand_text %}Sistema Electoral - Coordinador de Puesto{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='coordinador_puesto') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/puesto/mesas">
+        <i class="fas fa-table me-1"></i>Mesas
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/puesto/personal">
+        <i class="fas fa-users me-1"></i>Personal
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/puesto/logistica">
+        <i class="fas fa-boxes me-1"></i>Logística
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-success text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-map-marker-alt me-2"></i>Coordinación de Puesto Electoral</h2>
+            <p class="mb-0">Gestión integral del puesto - <strong>{{ stats.puesto_name or 'Escuela Central' }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas del puesto -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Mesas del Puesto</h6>
+                        <h3 class="mb-0">{{ stats.total_mesas or 8 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-table fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Personal Asignado</h6>
+                        <h3 class="mb-0">{{ stats.personal or 24 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Votantes Esperados</h6>
+                        <h3 class="mb-0">{{ stats.votantes or 2800 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Estado General</h6>
+                        <h3 class="mb-0">{{ stats.estado or 'OK' }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Herramientas de coordinación -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas de Coordinación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="gestionarMesas()">
+                            <i class="fas fa-table me-2"></i>
+                            Gestionar Mesas
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary btn-lg w-100 mb-2" onclick="coordinarPersonal()">
+                            <i class="fas fa-users me-2"></i>
+                            Coordinar Personal
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info btn-lg w-100 mb-2" onclick="gestionarLogistica()">
+                            <i class="fas fa-boxes me-2"></i>
+                            Gestionar Logística
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="monitorearPuesto()">
+                            <i class="fas fa-eye me-2"></i>
+                            Monitorear Puesto
+                        </button>
+                    </div>
+                </div>
+                <!-- Segunda fila -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success btn-lg w-100 mb-2" onclick="verificarMateriales()">
+                            <i class="fas fa-check-square me-2"></i>
+                            Verificar Materiales
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-lg w-100 mb-2" onclick="comunicarCentral()">
+                            <i class="fas fa-phone me-2"></i>
+                            Comunicar Central
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-info btn-lg w-100 mb-2" onclick="generarReporte()">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Generar Reporte
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-warning btn-lg w-100 mb-2" onclick="reportarIncidencia()">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Reportar Incidencia
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estado de mesas y personal -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Estado de Mesas del Puesto
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mesa</th>
+                                <th>Jurados</th>
+                                <th>Testigos</th>
+                                <th>Votantes</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>001-A</strong></td>
+                                <td>3/3</td>
+                                <td>2/3</td>
+                                <td>350</td>
+                                <td><span class="badge bg-success">Operativa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verMesa('001-A')">Ver</button>
+                                    <button class="btn btn-sm btn-success" onclick="gestionarMesa('001-A')">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>002-A</strong></td>
+                                <td>3/3</td>
+                                <td>3/3</td>
+                                <td>425</td>
+                                <td><span class="badge bg-success">Operativa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verMesa('002-A')">Ver</button>
+                                    <button class="btn btn-sm btn-success" onclick="gestionarMesa('002-A')">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>003-B</strong></td>
+                                <td>2/3</td>
+                                <td>1/3</td>
+                                <td>380</td>
+                                <td><span class="badge bg-warning">Incompleta</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="completarMesa('003-B')">Completar</button>
+                                    <button class="btn btn-sm btn-danger" onclick="resolverProblema('003-B')">Resolver</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>
+                    Checklist del Puesto
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Materiales verificados</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label">Personal completo</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Mesas configuradas</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Comunicaciones activas</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">Seguridad confirmada</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas del Puesto
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="puestoChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para coordinador de puesto
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Coordinador de Puesto cargado');
+    inicializarGrafico();
+    actualizarEstado();
+    
+    // Actualizar cada 2 minutos
+    setInterval(actualizarEstado, 120000);
+});
+
+function inicializarGrafico() {
+    const ctx = document.getElementById('puestoChart').getContext('2d');
+    window.puestoChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Mesas', 'Jurados', 'Testigos', 'Materiales'],
+            datasets: [{
+                label: 'Estado',
+                data: [8, 24, 18, 95],
+                backgroundColor: ['#28a745', '#007bff', '#17a2b8', '#ffc107']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function gestionarMesas() {
+    mostrarModalPuesto('Gestión de Mesas del Puesto', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Mesas del Puesto</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Mesa</th>
+                                <th>Ubicación</th>
+                                <th>Jurados</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>001-A</td>
+                                <td>Aula 101</td>
+                                <td>3/3</td>
+                                <td><span class="badge bg-success">Lista</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="configurarMesa('001-A')">Configurar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>002-A</td>
+                                <td>Aula 102</td>
+                                <td>3/3</td>
+                                <td><span class="badge bg-success">Lista</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="configurarMesa('002-A')">Configurar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>003-B</td>
+                                <td>Aula 201</td>
+                                <td>2/3</td>
+                                <td><span class="badge bg-warning">Incompleta</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="completarMesa('003-B')">Completar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Acciones Rápidas</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="verificarTodasMesas()">
+                        <i class="fas fa-check-double me-2"></i>Verificar Todas
+                    </button>
+                    <button class="btn btn-info" onclick="redistribuirPersonal()">
+                        <i class="fas fa-users me-2"></i>Redistribuir Personal
+                    </button>
+                    <button class="btn btn-warning" onclick="reportarProblemas()">
+                        <i class="fas fa-exclamation me-2"></i>Reportar Problemas
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function coordinarPersonal() {
+    mostrarModalPuesto('Coordinación de Personal', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Personal Asignado</h6>
+                <div class="mb-3">
+                    <strong>Jurados:</strong> 24 asignados
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 100%">100%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Testigos:</strong> 18 de 24
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: 75%">75%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Personal de Apoyo:</strong> 6 asignados
+                    <div class="progress">
+                        <div class="progress-bar bg-info" style="width: 100%">100%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Gestión de Personal</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="asignarPersonal()">
+                        <i class="fas fa-user-plus me-2"></i>Asignar Personal
+                    </button>
+                    <button class="btn btn-info" onclick="verificarAsistencia()">
+                        <i class="fas fa-check me-2"></i>Verificar Asistencia
+                    </button>
+                    <button class="btn btn-warning" onclick="reasignarPersonal()">
+                        <i class="fas fa-exchange-alt me-2"></i>Reasignar
+                    </button>
+                    <button class="btn btn-success" onclick="contactarPersonal()">
+                        <i class="fas fa-phone me-2"></i>Contactar Personal
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function gestionarLogistica() {
+    mostrarModalPuesto('Gestión Logística', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Inventario de Materiales</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Requerido</th>
+                                <th>Disponible</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Urnas</td>
+                                <td>8</td>
+                                <td>8</td>
+                                <td><span class="badge bg-success">OK</span></td>
+                            </tr>
+                            <tr>
+                                <td>Tarjetones</td>
+                                <td>3000</td>
+                                <td>3000</td>
+                                <td><span class="badge bg-success">OK</span></td>
+                            </tr>
+                            <tr>
+                                <td>Actas</td>
+                                <td>24</td>
+                                <td>20</td>
+                                <td><span class="badge bg-warning">Faltante</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Acciones Logísticas</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="solicitarMateriales()">
+                        <i class="fas fa-plus me-2"></i>Solicitar Materiales
+                    </button>
+                    <button class="btn btn-info" onclick="verificarInventario()">
+                        <i class="fas fa-clipboard-check me-2"></i>Verificar Inventario
+                    </button>
+                    <button class="btn btn-warning" onclick="reportarFaltantes()">
+                        <i class="fas fa-exclamation me-2"></i>Reportar Faltantes
+                    </button>
+                    <button class="btn btn-success" onclick="confirmarRecepcion()">
+                        <i class="fas fa-check me-2"></i>Confirmar Recepción
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModalPuesto(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="puestoModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('puestoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('puestoModal'));
+    modal.show();
+}
+
+function actualizarEstado() {
+    console.log('Actualizando estado del puesto...');
+}
+
+function mostrarNotificacionPuesto(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Implementar funciones específicas
+function monitorearPuesto() { mostrarNotificacionPuesto('Activando monitoreo del puesto...', 'info'); }
+function verificarMateriales() { mostrarNotificacionPuesto('Verificando materiales electorales...', 'info'); }
+function comunicarCentral() { mostrarNotificacionPuesto('Comunicando con central electoral...', 'info'); }
+function generarReporte() { mostrarNotificacionPuesto('Generando reporte del puesto...', 'info'); }
+function reportarIncidencia() { mostrarNotificacionPuesto('Reportando incidencia...', 'warning'); }
+function verMesa(mesa) { mostrarNotificacionPuesto(`Mostrando detalles de mesa ${mesa}...`, 'info'); }
+function gestionarMesa(mesa) { mostrarNotificacionPuesto(`Gestionando mesa ${mesa}...`, 'info'); }
+function completarMesa(mesa) { mostrarNotificacionPuesto(`Completando configuración de mesa ${mesa}...`, 'warning'); }
+function resolverProblema(mesa) { mostrarNotificacionPuesto(`Resolviendo problema en mesa ${mesa}...`, 'error'); }
+function configurarMesa(mesa) { mostrarNotificacionPuesto(`Configurando mesa ${mesa}...`, 'info'); }
+function verificarTodasMesas() { mostrarNotificacionPuesto('Verificando todas las mesas...', 'info'); }
+function redistribuirPersonal() { mostrarNotificacionPuesto('Redistribuyendo personal...', 'info'); }
+function reportarProblemas() { mostrarNotificacionPuesto('Reportando problemas detectados...', 'warning'); }
+function asignarPersonal() { mostrarNotificacionPuesto('Asignando personal adicional...', 'info'); }
+function verificarAsistencia() { mostrarNotificacionPuesto('Verificando asistencia del personal...', 'info'); }
+function reasignarPersonal() { mostrarNotificacionPuesto('Reasignando personal...', 'info'); }
+function contactarPersonal() { mostrarNotificacionPuesto('Contactando personal del puesto...', 'info'); }
+function solicitarMateriales() { mostrarNotificacionPuesto('Solicitando materiales faltantes...', 'info'); }
+function verificarInventario() { mostrarNotificacionPuesto('Verificando inventario completo...', 'info'); }
+function reportarFaltantes() { mostrarNotificacionPuesto('Reportando materiales faltantes...', 'warning'); }
+function confirmarRecepcion() { mostrarNotificacionPuesto('Confirmando recepción de materiales...', 'success'); }
+</script>
+{% endblock %}

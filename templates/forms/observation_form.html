@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Formulario de Observación Internacional - Sistema Electoral ERP{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-globe me-2"></i>
+                    Nueva Observación Internacional
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="observationForm" method="POST" action="/api/observation/create">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="observation_type" class="form-label">Tipo de Observación</label>
+                                <select class="form-select" id="observation_type" name="observation_type" required>
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="pre_electoral">Pre-Electoral</option>
+                                    <option value="jornada_electoral">Jornada Electoral</option>
+                                    <option value="post_electoral">Post-Electoral</option>
+                                    <option value="continua">Observación Continua</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="organization" class="form-label">Organización</label>
+                                <select class="form-select" id="organization" name="organization" required>
+                                    <option value="">Seleccionar organización</option>
+                                    <option value="oea">OEA - Organización de Estados Americanos</option>
+                                    <option value="idea">IDEA Internacional</option>
+                                    <option value="transparency">Transparencia Internacional</option>
+                                    <option value="carter_center">Centro Carter</option>
+                                    <option value="eu">Unión Europea</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Ubicación</label>
+                                <select class="form-select" id="location" name="location" required>
+                                    <option value="">Seleccionar ubicación</option>
+                                    <option value="florencia">Florencia</option>
+                                    <option value="san_vicente">San Vicente del Caguán</option>
+                                    <option value="puerto_rico">Puerto Rico</option>
+                                    <option value="departamental">Nivel Departamental</option>
+                                    <option value="nacional">Nivel Nacional</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="observation_date" class="form-label">Fecha de Observación</label>
+                                <input type="date" class="form-control" id="observation_date" name="observation_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="standards_evaluated" class="form-label">Estándares Internacionales Evaluados</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="transparency_std" name="standards[]" value="transparency">
+                                    <label class="form-check-label" for="transparency_std">
+                                        Transparencia Electoral
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="universal_access" name="standards[]" value="universal_access">
+                                    <label class="form-check-label" for="universal_access">
+                                        Acceso Universal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="vote_security" name="standards[]" value="vote_security">
+                                    <label class="form-check-label" for="vote_security">
+                                        Seguridad del Voto
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="dispute_resolution" name="standards[]" value="dispute_resolution">
+                                    <label class="form-check-label" for="dispute_resolution">
+                                        Resolución de Disputas
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="media_freedom" name="standards[]" value="media_freedom">
+                                    <label class="form-check-label" for="media_freedom">
+                                        Libertad de Medios
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="electoral_justice" name="standards[]" value="electoral_justice">
+                                    <label class="form-check-label" for="electoral_justice">
+                                        Justicia Electoral
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observations" class="form-label">Observaciones Detalladas</label>
+                        <textarea class="form-control" id="observations" name="observations" rows="5" 
+                                  placeholder="Describe las observaciones realizadas, hallazgos y recomendaciones..." required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="compliance_level" class="form-label">Nivel de Cumplimiento General</label>
+                                <select class="form-select" id="compliance_level" name="compliance_level" required>
+                                    <option value="">Seleccionar nivel</option>
+                                    <option value="excelente">Excelente (90-100%)</option>
+                                    <option value="bueno">Bueno (75-89%)</option>
+                                    <option value="satisfactorio">Satisfactorio (60-74%)</option>
+                                    <option value="deficiente">Deficiente (< 60%)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="priority_level" class="form-label">Nivel de Prioridad</label>
+                                <select class="form-select" id="priority_level" name="priority_level" required>
+                                    <option value="">Seleccionar prioridad</option>
+                                    <option value="critica">Crítica</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="media">Media</option>
+                                    <option value="baja">Baja</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="recommendations" class="form-label">Recomendaciones</label>
+                        <textarea class="form-control" id="recommendations" name="recommendations" rows="4" 
+                                  placeholder="Recomendaciones específicas para mejorar el cumplimiento de estándares internacionales..."></textarea>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="send_to_organization" name="send_to_organization">
+                        <label class="form-check-label" for="send_to_organization">
+                            Enviar automáticamente a la organización internacional
+                        </label>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">
+                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Observación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('observationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validar que al menos un estándar esté seleccionado
+    const standards = document.querySelectorAll('input[name="standards[]"]:checked');
+    if (standards.length === 0) {
+        alert('Debe seleccionar al menos un estándar internacional para evaluar');
+        return;
+    }
+    
+    // Simular envío del formulario
+    alert('Observación internacional registrada exitosamente');
+    window.location.href = '/dashboard/observador_internacional';
+});
+
+// Establecer fecha máxima como hoy
+document.getElementById('observation_date').max = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
+</parameter>
+</invoke>

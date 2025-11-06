@@ -15,7 +15,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import (
     Base, Location, MesaElectoral, LocationType, User, ElectionType, 
-    ElectoralJourney, ElectoralProcess, MesaElectoralProcess
+    ElectoralJourney, ElectoralProcess, MesaElectoralProcess,
+    PoliticalParty, Coalition, CoalitionParty, Candidate, CandidateResults,
+    PartyResults, CoalitionResults, CargoElectoral, TipoCircunscripcion, EstadoCandidato
 )
 from datetime import datetime, timedelta
 
@@ -422,6 +424,21 @@ class InitializationService:
                 result['users_created'] = users_result['created']
                 result['errors'].extend(users_result['errors'])
                 
+                # Cargar partidos políticos de ejemplo
+                parties_result = self._load_sample_parties(db)
+                result['parties_created'] = parties_result['created']
+                result['errors'].extend(parties_result['errors'])
+                
+                # Cargar coaliciones de ejemplo
+                coalitions_result = self._load_sample_coalitions(db)
+                result['coalitions_created'] = coalitions_result['created']
+                result['errors'].extend(coalitions_result['errors'])
+                
+                # Cargar candidatos de ejemplo
+                candidates_result = self._load_sample_candidates(db)
+                result['candidates_created'] = candidates_result['created']
+                result['errors'].extend(candidates_result['errors'])
+                
                 db.commit()
                 result['success'] = True
                 
@@ -430,6 +447,9 @@ class InitializationService:
                 logger.info(f"Jornadas: {result['journeys_created']}")
                 logger.info(f"Procesos: {result['processes_created']}")
                 logger.info(f"Usuarios: {result['users_created']}")
+                logger.info(f"Partidos políticos: {result['parties_created']}")
+                logger.info(f"Coaliciones: {result['coalitions_created']}")
+                logger.info(f"Candidatos: {result['candidates_created']}")
                 
         except Exception as e:
             logger.error(f"Error cargando datos de ejemplo: {e}")
@@ -1156,6 +1176,319 @@ class InitializationService:
         """Genera un hash de contraseña ficticio para usuarios de ejemplo"""
         return f"hash_{''.join(random.choices(string.ascii_letters + string.digits, k=16))}"
 
+    def _load_sample_parties(self, db) -> Dict[str, any]:
+        """Carga partidos políticos de ejemplo"""
+        result = {'created': 0, 'errors': []}
+        
+        parties_data = [
+            {
+                'nombre_oficial': 'Partido Liberal Colombiano',
+                'siglas': 'PLC',
+                'color_representativo': '#FF0000',
+                'descripcion': 'Partido político tradicional de Colombia',
+                'ideologia': 'Liberal',
+                'fundacion_year': 1848
+            },
+            {
+                'nombre_oficial': 'Partido Conservador Colombiano',
+                'siglas': 'PCC',
+                'color_representativo': '#0000FF',
+                'descripcion': 'Partido político tradicional conservador',
+                'ideologia': 'Conservador',
+                'fundacion_year': 1849
+            },
+            {
+                'nombre_oficial': 'Centro Democrático',
+                'siglas': 'CD',
+                'color_representativo': '#FF8C00',
+                'descripcion': 'Partido político de centro derecha',
+                'ideologia': 'Centro derecha',
+                'fundacion_year': 2013
+            },
+            {
+                'nombre_oficial': 'Pacto Histórico',
+                'siglas': 'PH',
+                'color_representativo': '#800080',
+                'descripcion': 'Coalición política de izquierda',
+                'ideologia': 'Izquierda',
+                'fundacion_year': 2021
+            },
+            {
+                'nombre_oficial': 'Cambio Radical',
+                'siglas': 'CR',
+                'color_representativo': '#FFA500',
+                'descripcion': 'Partido político de centro',
+                'ideologia': 'Centro',
+                'fundacion_year': 1998
+            },
+            {
+                'nombre_oficial': 'Alianza Verde',
+                'siglas': 'AV',
+                'color_representativo': '#00FF00',
+                'descripcion': 'Partido político ambientalista',
+                'ideologia': 'Verde',
+                'fundacion_year': 2009
+            },
+            {
+                'nombre_oficial': 'Polo Democrático Alternativo',
+                'siglas': 'PDA',
+                'color_representativo': '#FFFF00',
+                'descripcion': 'Partido político de izquierda democrática',
+                'ideologia': 'Izquierda',
+                'fundacion_year': 2005
+            },
+            {
+                'nombre_oficial': 'Partido de la U',
+                'siglas': 'PU',
+                'color_representativo': '#4169E1',
+                'descripcion': 'Partido Social de Unidad Nacional',
+                'ideologia': 'Centro',
+                'fundacion_year': 2005
+            }
+        ]
+        
+        try:
+            for party_data in parties_data:
+                # Verificar si ya existe
+                existing = db.query(PoliticalParty).filter(
+                    PoliticalParty.siglas == party_data['siglas']
+                ).first()
+                
+                if existing:
+                    continue
+                
+                party = PoliticalParty(
+                    nombre_oficial=party_data['nombre_oficial'],
+                    siglas=party_data['siglas'],
+                    color_representativo=party_data['color_representativo'],
+                    descripcion=party_data['descripcion'],
+                    ideologia=party_data['ideologia'],
+                    fundacion_year=party_data['fundacion_year'],
+                    activo=True,
+                    reconocido_oficialmente=True
+                )
+                
+                db.add(party)
+                result['created'] += 1
+                logger.info(f"Partido creado: {party_data['nombre_oficial']} ({party_data['siglas']})")
+                
+        except Exception as e:
+            error_msg = f"Error creando partidos políticos: {e}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+        
+        db.flush()
+        return result
+
+    def _load_sample_coalitions(self, db) -> Dict[str, any]:
+        """Carga coaliciones de ejemplo"""
+        result = {'created': 0, 'errors': []}
+        
+        coalitions_data = [
+            {
+                'nombre_coalicion': 'Coalición Centro Esperanza',
+                'descripcion': 'Coalición de partidos de centro para las elecciones',
+                'partidos': ['CR', 'AV']  # Siglas de los partidos
+            },
+            {
+                'nombre_coalicion': 'Equipo por Colombia',
+                'descripcion': 'Coalición de partidos tradicionales',
+                'partidos': ['PCC', 'CD']
+            }
+        ]
+        
+        try:
+            for coalition_data in coalitions_data:
+                # Verificar si ya existe
+                existing = db.query(Coalition).filter(
+                    Coalition.nombre_coalicion == coalition_data['nombre_coalicion']
+                ).first()
+                
+                if existing:
+                    continue
+                
+                coalition = Coalition(
+                    nombre_coalicion=coalition_data['nombre_coalicion'],
+                    descripcion=coalition_data['descripcion'],
+                    fecha_formacion=datetime.utcnow(),
+                    activo=True
+                )
+                
+                db.add(coalition)
+                db.flush()  # Para obtener el ID
+                
+                # Agregar partidos a la coalición
+                for sigla in coalition_data['partidos']:
+                    party = db.query(PoliticalParty).filter(
+                        PoliticalParty.siglas == sigla
+                    ).first()
+                    
+                    if party:
+                        coalition_party = CoalitionParty(
+                            coalition_id=coalition.id,
+                            party_id=party.id,
+                            fecha_adhesion=datetime.utcnow(),
+                            es_partido_principal=(sigla == coalition_data['partidos'][0])
+                        )
+                        db.add(coalition_party)
+                
+                result['created'] += 1
+                logger.info(f"Coalición creada: {coalition_data['nombre_coalicion']}")
+                
+        except Exception as e:
+            error_msg = f"Error creando coaliciones: {e}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+        
+        db.flush()
+        return result
+
+    def _load_sample_candidates(self, db) -> Dict[str, any]:
+        """Carga candidatos de ejemplo"""
+        result = {'created': 0, 'errors': []}
+        
+        # Obtener tipos de elección y partidos
+        concejos_juventudes = db.query(ElectionType).filter(
+            ElectionType.codigo == 'concejos_juventudes'
+        ).first()
+        
+        senado = db.query(ElectionType).filter(
+            ElectionType.codigo == 'senado'
+        ).first()
+        
+        parties = db.query(PoliticalParty).all()
+        coalitions = db.query(Coalition).all()
+        
+        if not concejos_juventudes or not parties:
+            result['errors'].append("No se encontraron tipos de elección o partidos para crear candidatos")
+            return result
+        
+        # Candidatos para Concejos de Juventudes
+        concejos_candidates = [
+            {
+                'nombre_completo': 'Ana María Rodríguez García',
+                'numero_tarjeton': 1,
+                'cargo_aspirado': 'Consejero de Juventud',
+                'circunscripcion': 'Caquetá',
+                'party_sigla': 'PLC'
+            },
+            {
+                'nombre_completo': 'Carlos Eduardo Martínez López',
+                'numero_tarjeton': 2,
+                'cargo_aspirado': 'Consejero de Juventud',
+                'circunscripcion': 'Caquetá',
+                'party_sigla': 'PCC'
+            },
+            {
+                'nombre_completo': 'Diana Patricia Gómez Ruiz',
+                'numero_tarjeton': 3,
+                'cargo_aspirado': 'Consejero de Juventud',
+                'circunscripcion': 'Caquetá',
+                'party_sigla': 'CD'
+            },
+            {
+                'nombre_completo': 'Javier Alejandro Torres Mendoza',
+                'numero_tarjeton': 4,
+                'cargo_aspirado': 'Consejero de Juventud',
+                'circunscripcion': 'Caquetá',
+                'party_sigla': 'AV'
+            },
+            {
+                'nombre_completo': 'María Fernanda Castro Jiménez',
+                'numero_tarjeton': 5,
+                'cargo_aspirado': 'Consejero de Juventud',
+                'circunscripcion': 'Caquetá',
+                'party_sigla': 'CR'
+            },
+            {
+                'nombre_completo': 'Luis Fernando Vargas Peña',
+                'numero_tarjeton': 6,
+                'cargo_aspirado': 'Consejero de Juventud',
+                'circunscripcion': 'Caquetá',
+                'es_independiente': True
+            }
+        ]
+        
+        # Candidatos para Senado (si existe)
+        senado_candidates = []
+        if senado:
+            senado_candidates = [
+                {
+                    'nombre_completo': 'Roberto Carlos Hernández Silva',
+                    'numero_tarjeton': 101,
+                    'cargo_aspirado': 'Senador',
+                    'circunscripcion': 'Nacional',
+                    'party_sigla': 'PLC'
+                },
+                {
+                    'nombre_completo': 'Gloria Elena Ramírez Vega',
+                    'numero_tarjeton': 102,
+                    'cargo_aspirado': 'Senador',
+                    'circunscripcion': 'Nacional',
+                    'party_sigla': 'PCC'
+                },
+                {
+                    'nombre_completo': 'Miguel Ángel Sánchez Ortiz',
+                    'numero_tarjeton': 103,
+                    'cargo_aspirado': 'Senador',
+                    'circunscripcion': 'Nacional',
+                    'coalition_name': 'Coalición Centro Esperanza'
+                }
+            ]
+        
+        all_candidates = concejos_candidates + senado_candidates
+        
+        try:
+            for candidate_data in all_candidates:
+                # Verificar si ya existe
+                existing = db.query(Candidate).filter(
+                    Candidate.cedula == self._generate_cedula()
+                ).first()
+                
+                # Buscar partido o coalición
+                party = None
+                coalition = None
+                
+                if candidate_data.get('party_sigla'):
+                    party = db.query(PoliticalParty).filter(
+                        PoliticalParty.siglas == candidate_data['party_sigla']
+                    ).first()
+                elif candidate_data.get('coalition_name'):
+                    coalition = db.query(Coalition).filter(
+                        Coalition.nombre_coalicion == candidate_data['coalition_name']
+                    ).first()
+                
+                # Determinar tipo de elección
+                election_type = concejos_juventudes
+                if candidate_data['cargo_aspirado'] == 'Senador' and senado:
+                    election_type = senado
+                
+                candidate = Candidate(
+                    nombre_completo=candidate_data['nombre_completo'],
+                    cedula=self._generate_cedula(),
+                    numero_tarjeton=candidate_data['numero_tarjeton'],
+                    cargo_aspirado=candidate_data['cargo_aspirado'],
+                    election_type_id=election_type.id,
+                    circunscripcion=candidate_data['circunscripcion'],
+                    party_id=party.id if party else None,
+                    coalition_id=coalition.id if coalition else None,
+                    es_independiente=candidate_data.get('es_independiente', False),
+                    activo=True,
+                    habilitado_oficialmente=True
+                )
+                
+                db.add(candidate)
+                result['created'] += 1
+                logger.info(f"Candidato creado: {candidate_data['nombre_completo']} - {candidate_data['cargo_aspirado']}")
+                
+        except Exception as e:
+            error_msg = f"Error creando candidatos: {e}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+        
+        db.flush()
+        return result
+
     def generate_initialization_report(self) -> Dict[str, any]:
         """
         Genera reporte de configuración inicial
@@ -1189,6 +1522,11 @@ class InitializationService:
                 stats['electoral_journeys'] = db.query(ElectoralJourney).count()
                 stats['electoral_processes'] = db.query(ElectoralProcess).count()
                 stats['users'] = db.query(User).count()
+                
+                # Estadísticas de candidatos y partidos
+                stats['political_parties'] = db.query(PoliticalParty).count()
+                stats['coalitions'] = db.query(Coalition).count()
+                stats['candidates'] = db.query(Candidate).count()
                 
                 # Estadísticas por municipio
                 municipios = db.query(Location).filter(Location.tipo == LocationType.MUNICIPIO).all()
@@ -1279,6 +1617,9 @@ def main():
         print(f"  - Jornadas electorales creadas: {sample_result['journeys_created']}")
         print(f"  - Procesos electorales creados: {sample_result['processes_created']}")
         print(f"  - Usuarios creados: {sample_result['users_created']}")
+        print(f"  - Partidos políticos creados: {sample_result.get('parties_created', 0)}")
+        print(f"  - Coaliciones creadas: {sample_result.get('coalitions_created', 0)}")
+        print(f"  - Candidatos creados: {sample_result.get('candidates_created', 0)}")
         
         if sample_result['errors']:
             print(f"  - Errores: {len(sample_result['errors'])}")
@@ -1331,6 +1672,9 @@ def main():
         print(f"  - Jornadas electorales: {summary['electoral_journeys']}")
         print(f"  - Procesos electorales: {summary['electoral_processes']}")
         print(f"  - Usuarios del sistema: {summary['users']}")
+        print(f"  - Partidos políticos: {summary.get('political_parties', 0)}")
+        print(f"  - Coaliciones: {summary.get('coalitions', 0)}")
+        print(f"  - Candidatos: {summary.get('candidates', 0)}")
         
         if 'processes_by_status' in summary:
             print(f"\nPROCESOS POR ESTADO:")
@@ -1362,6 +1706,8 @@ def main():
     print("- Jornadas electorales de ejemplo")
     print("- Procesos electorales activos")
     print("- Usuarios del sistema")
+    print("- Partidos políticos y coaliciones")
+    print("- Candidatos de ejemplo por tipo de elección")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+{% block title %}Captura de Resultados E14 - Testigo Electoral{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/testigo_electoral.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-testigo-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-primary{% endblock %}
+{% block brand_text %}Sistema Electoral - Captura E14{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='testigo_electoral') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/testigo/resultados">
+        <i class="fas fa-file-alt me-1"></i>Resultados E14
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/observacion">
+        <i class="fas fa-eye me-1"></i>Observación
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/incidencias">
+        <i class="fas fa-exclamation-triangle me-1"></i>Incidencias
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-primary text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-file-alt me-2"></i>Captura de Resultados E14</h2>
+            <p class="mb-0">Registro oficial de resultados electorales - Mesa: <strong>001-A</strong> - Puesto: <strong>Escuela Central</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Información de ubicación del testigo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Información de Ubicación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <strong>Departamento:</strong><br>
+                        <span class="text-primary">Caquetá</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Municipio:</strong><br>
+                        <span class="text-primary">Florencia</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Zona:</strong><br>
+                        <span class="text-primary">Centro</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Puesto de Votación:</strong><br>
+                        <span class="text-primary">Escuela Central</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Mesa:</strong><br>
+                        <span class="text-primary">001-A</span>
+                    </div>
+                    <div class="col-md-1">
+                        <strong>Partido:</strong><br>
+                        <span class="text-success">Democrático</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Captura de foto del E14 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-camera me-2"></i>
+                    Captura de Formulario E14
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Instrucciones:</strong> Tome una foto clara del formulario E14 oficial. Asegúrese de que todos los números sean legibles.
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Foto del Formulario E14 *</label>
+                    <input type="file" class="form-control" id="foto_e14" accept="image/*" capture="camera" required>
+                    <small class="form-text text-muted">La cámara se abrirá automáticamente en dispositivos móviles</small>
+                </div>
+                
+                <div id="preview_container" class="mb-3" style="display: none;">
+                    <label class="form-label">Vista previa:</label>
+                    <img id="preview_image" class="img-fluid rounded border" style="max-height: 300px;">
+                </div>
+                
+                <div class="d-grid">
+                    <button class="btn btn-warning btn-lg" onclick="capturarE14()">
+                        <i class="fas fa-camera me-2"></i>
+                        Capturar E14
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-keyboard me-2"></i>
+                    Transcripción de Resultados
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="resultadosForm">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Importante:</strong> Transcriba exactamente los números que aparecen en el E14.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Candidato 1 - Juan Pérez</label>
+                        <input type="number" class="form-control form-control-lg" id="candidato_1" name="candidato_1" min="0" placeholder="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Candidato 2 - María González</label>
+                        <input type="number" class="form-control form-control-lg" id="candidato_2" name="candidato_2" min="0" placeholder="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Candidato 3 - Carlos Rodríguez</label>
+                        <input type="number" class="form-control form-control-lg" id="candidato_3" name="candidato_3" min="0" placeholder="0">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Votos en Blanco</label>
+                                <input type="number" class="form-control" id="votos_blanco" name="votos_blanco" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Votos Nulos</label>
+                                <input type="number" class="form-control" id="votos_nulos" name="votos_nulos" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Total Votos</label>
+                                <input type="number" class="form-control bg-light" id="total_votos" name="total_votos" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales sobre el proceso de conteo..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmar_transcripcion" required>
+                            <label class="form-check-label" for="confirmar_transcripcion">
+                                <strong>Confirmo que he transcrito fielmente los resultados del formulario E14</strong>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-save me-2"></i>
+                            Guardar Resultados E14
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial de capturas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Historial de Capturas E14
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Mesa</th>
+                                <th>Total Votos</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historial_capturas">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    <i class="fas fa-inbox me-2"></i>
+                                    No hay capturas registradas
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de resultados E14 cargada');
+    
+    // Configurar preview de imagen
+    const fotoInput = document.getElementById('foto_e14');
+    const previewContainer = document.getElementById('preview_container');
+    const previewImage = document.getElementById('preview_image');
+    
+    fotoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Calcular total automáticamente
+    const inputs = ['candidato_1', 'candidato_2', 'candidato_3', 'votos_blanco', 'votos_nulos'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', calcularTotal);
+    });
+    
+    // Configurar formulario
+    document.getElementById('resultadosForm').addEventListener('submit', handleResultadosSubmit);
+    
+    // Cargar historial
+    cargarHistorialCapturas();
+});
+
+function calcularTotal() {
+    const candidato1 = parseInt(document.getElementById('candidato_1').value) || 0;
+    const candidato2 = parseInt(document.getElementById('candidato_2').value) || 0;
+    const candidato3 = parseInt(document.getElementById('candidato_3').value) || 0;
+    const votosBlanco = parseInt(document.getElementById('votos_blanco').value) || 0;
+    const votosNulos = parseInt(document.getElementById('votos_nulos').value) || 0;
+    
+    const total = candidato1 + candidato2 + candidato3 + votosBlanco + votosNulos;
+    document.getElementById('total_votos').value = total;
+}
+
+function capturarE14() {
+    const fotoInput = document.getElementById('foto_e14');
+    
+    if (fotoInput.files.length === 0) {
+        // Si no hay archivo, abrir selector de cámara
+        fotoInput.click();
+    } else {
+        // Si ya hay archivo, procesar
+        mostrarNotificacion('Foto del E14 capturada correctamente. Proceda con la transcripción.', 'success');
+    }
+}
+
+function handleResultadosSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Validar que se haya capturado la foto
+    const fotoInput = document.getElementById('foto_e14');
+    if (fotoInput.files.length === 0) {
+        mostrarNotificacion('Debe capturar la foto del formulario E14 antes de guardar los resultados.', 'error');
+        return;
+    }
+    
+    // Validar que el total sea mayor a 0
+    const total = parseInt(document.getElementById('total_votos').value) || 0;
+    if (total === 0) {
+        mostrarNotificacion('Debe ingresar al menos un voto para guardar los resultados.', 'error');
+        return;
+    }
+    
+    // Mostrar indicador de carga
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+    submitBtn.disabled = true;
+    
+    // Preparar datos
+    const resultadosData = {
+        mesa_id: 1, // Mesa 001-A
+        testigo_id: getCurrentUserId(),
+        candidato_1: parseInt(formData.get('candidato_1')) || 0,
+        candidato_2: parseInt(formData.get('candidato_2')) || 0,
+        candidato_3: parseInt(formData.get('candidato_3')) || 0,
+        votos_blanco: parseInt(formData.get('votos_blanco')) || 0,
+        votos_nulos: parseInt(formData.get('votos_nulos')) || 0,
+        total_votos: total,
+        observaciones: formData.get('observaciones'),
+        foto_e14: fotoInput.files[0].name // En implementación real, se subiría el archivo
+    };
+    
+    // Simular guardado (en implementación real, se enviaría a API)
+    setTimeout(() => {
+        mostrarNotificacion('Resultados E14 guardados exitosamente. Los datos han sido transmitidos al sistema central.', 'success');
+        
+        // Agregar al historial
+        agregarAlHistorial(resultadosData);
+        
+        // Limpiar formulario
+        form.reset();
+        document.getElementById('preview_container').style.display = 'none';
+        document.getElementById('total_votos').value = '';
+        
+        // Restaurar botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+    }, 2000);
+}
+
+function cargarHistorialCapturas() {
+    // En implementación real, esto cargaría desde la API
+    const historial = JSON.parse(localStorage.getItem('historial_e14') || '[]');
+    
+    const tbody = document.getElementById('historial_capturas');
+    if (historial.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    <i class="fas fa-inbox me-2"></i>
+                    No hay capturas registradas
+                </td>
+            </tr>
+        `;
+    } else {
+        tbody.innerHTML = historial.map(item => `
+            <tr>
+                <td>${new Date(item.fecha).toLocaleString()}</td>
+                <td>Mesa ${item.mesa}</td>
+                <td>${item.total_votos}</td>
+                <td><span class="badge bg-success">Transmitido</span></td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="verDetalles('${item.id}')">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+}
+
+function agregarAlHistorial(datos) {
+    const historial = JSON.parse(localStorage.getItem('historial_e14') || '[]');
+    
+    const nuevoItem = {
+        id: Date.now().toString(),
+        fecha: new Date().toISOString(),
+        mesa: '001-A',
+        total_votos: datos.total_votos,
+        datos: datos
+    };
+    
+    historial.unshift(nuevoItem);
+    localStorage.setItem('historial_e14', JSON.stringify(historial));
+    
+    cargarHistorialCapturas();
+}
+
+function verDetalles(id) {
+    const historial = JSON.parse(localStorage.getItem('historial_e14') || '[]');
+    const item = historial.find(h => h.id === id);
+    
+    if (item) {
+        const datos = item.datos;
+        mostrarNotificacion(`
+            Detalles E14 - Mesa ${item.mesa}:
+            Candidato 1: ${datos.candidato_1} votos
+            Candidato 2: ${datos.candidato_2} votos  
+            Candidato 3: ${datos.candidato_3} votos
+            Blancos: ${datos.votos_blanco} | Nulos: ${datos.votos_nulos}
+            Total: ${datos.total_votos} votos
+        `, 'info');
+    }
+}
+
+function getCurrentUserId() {
+    return 5; // Laura González - Testigo Electoral
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px; max-width: 500px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 8000);
+}
+</script>
+{% endblock %}

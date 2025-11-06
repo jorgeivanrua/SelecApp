@@ -1,0 +1,792 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Administrador Municipal - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/admin_municipal.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-admin-municipal{% endblock %}
+{% block navbar_class %}navbar-dark bg-warning{% endblock %}
+{% block brand_text %}Sistema Electoral - Admin Municipal{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='admin_municipal') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/tables">
+        <i class="fas fa-table me-1"></i>Mesas
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/candidates/local">
+        <i class="fas fa-users me-1"></i>Candidatos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/reports/municipal">
+        <i class="fas fa-chart-pie me-1"></i>Reportes
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-warning text-dark rounded p-4 mb-4">
+            <h2><i class="fas fa-building me-2"></i>Administración Municipal</h2>
+            <p class="mb-0">Gestión electoral a nivel municipal - Municipio: <strong>Florencia</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas municipales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Mesas Locales</h6>
+                        <h3 class="mb-0">{{ stats.local_tables or 28 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-table fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Votantes Registrados</h6>
+                        <h3 class="mb-0">{{ stats.registered_voters or 15420 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Candidatos</h6>
+                        <h3 class="mb-0">{{ stats.candidates or 12 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-tie fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Participación</h6>
+                        <h3 class="mb-0">{{ stats.participation or 67 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-pie fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gestión municipal -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Gestión Municipal
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="gestionarMesas()">
+                            <i class="fas fa-table me-2"></i>
+                            Gestionar Mesas
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="candidatosLocales()">
+                            <i class="fas fa-users me-2"></i>
+                            Candidatos Locales
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="reportesMunicipales()">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Reportes Municipales
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="configurarPuestos()">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Configurar Puestos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mesas de votación -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Estado de Mesas de Votación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mesa</th>
+                                <th>Puesto de Votación</th>
+                                <th>Jurados</th>
+                                <th>Votantes</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>001-A</strong></td>
+                                <td>Escuela Central</td>
+                                <td>3/3</td>
+                                <td>350</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-warning">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>002-A</strong></td>
+                                <td>Colegio San José</td>
+                                <td>3/3</td>
+                                <td>425</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-warning">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>003-B</strong></td>
+                                <td>Universidad Amazonia</td>
+                                <td>2/3</td>
+                                <td>380</td>
+                                <td><span class="badge bg-warning">Incompleta</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-danger">Completar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>004-A</strong></td>
+                                <td>Centro Comercial</td>
+                                <td>3/3</td>
+                                <td>290</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-warning">Gestionar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-warning me-2">
+                        <i class="fas fa-plus me-2"></i>Nueva Mesa
+                    </button>
+                    <button class="btn btn-outline-warning me-2">
+                        <i class="fas fa-users me-2"></i>Asignar Jurados
+                    </button>
+                    <button class="btn btn-outline-info">
+                        <i class="fas fa-map-marker-alt me-2"></i>Configurar Puestos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Candidatos Locales
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="candidate-item mb-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Juan Pérez</h6>
+                            <small class="text-muted">Alcalde - Partido A</small>
+                        </div>
+                        <span class="badge bg-success">Aprobado</span>
+                    </div>
+                </div>
+                
+                <div class="candidate-item mb-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>María García</h6>
+                            <small class="text-muted">Alcalde - Partido B</small>
+                        </div>
+                        <span class="badge bg-success">Aprobado</span>
+                    </div>
+                </div>
+                
+                <div class="candidate-item mb-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Carlos López</h6>
+                            <small class="text-muted">Concejo - Lista C</small>
+                        </div>
+                        <span class="badge bg-warning">Pendiente</span>
+                    </div>
+                </div>
+                
+                <div class="d-grid">
+                    <button class="btn btn-outline-warning">
+                        <i class="fas fa-user-plus me-2"></i>Registrar Candidato
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Puestos de Votación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Escuela Central</strong><br>
+                    <small class="text-muted">4 mesas configuradas</small>
+                </div>
+                <div class="mb-2">
+                    <strong>Colegio San José</strong><br>
+                    <small class="text-muted">6 mesas configuradas</small>
+                </div>
+                <div class="mb-2">
+                    <strong>Universidad Amazonia</strong><br>
+                    <small class="text-muted">8 mesas configuradas</small>
+                </div>
+                <div class="mb-2">
+                    <strong>Centro Comercial</strong><br>
+                    <small class="text-muted">3 mesas configuradas</small>
+                </div>
+                
+                <div class="d-grid mt-3">
+                    <button class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-plus me-2"></i>Nuevo Puesto
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoMunicipal" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para administrador municipal
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Administrador Municipal cargado');
+    inicializarGraficoMunicipal();
+    configurarEventosBotones();
+});
+
+function inicializarGraficoMunicipal() {
+    const ctx = document.getElementById('graficoMunicipal').getContext('2d');
+    window.graficoMunicipal = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Mesas Activas', 'Jurados Asignados', 'Candidatos', 'Puestos'],
+            datasets: [{
+                label: 'Cantidad',
+                data: [28, 84, 12, 7],
+                backgroundColor: ['#ffc107', '#28a745', '#007bff', '#17a2b8']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function configurarEventosBotones() {
+    // Configurar botones de la tabla de mesas
+    document.querySelectorAll('.btn-outline-primary').forEach(btn => {
+        if (btn.textContent.trim() === 'Ver') {
+            btn.onclick = function() {
+                const mesa = this.closest('tr').querySelector('strong').textContent;
+                verDetalleMesa(mesa);
+            };
+        }
+    });
+    
+    document.querySelectorAll('.btn-outline-warning').forEach(btn => {
+        if (btn.textContent.trim() === 'Gestionar') {
+            btn.onclick = function() {
+                const mesa = this.closest('tr').querySelector('strong').textContent;
+                gestionarMesaEspecifica(mesa);
+            };
+        }
+    });
+}
+
+function gestionarMesas() {
+    mostrarModal('Gestión de Mesas de Votación', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Mesas de Votación - Florencia</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mesa</th>
+                                <th>Puesto</th>
+                                <th>Jurados</th>
+                                <th>Votantes</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>001-A</strong></td>
+                                <td>Escuela Central</td>
+                                <td>3/3</td>
+                                <td>350</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="verDetalleMesa('001-A')">Ver</button>
+                                    <button class="btn btn-sm btn-warning" onclick="editarMesa('001-A')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>002-A</strong></td>
+                                <td>Colegio San José</td>
+                                <td>3/3</td>
+                                <td>425</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="verDetalleMesa('002-A')">Ver</button>
+                                    <button class="btn btn-sm btn-warning" onclick="editarMesa('002-A')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>003-B</strong></td>
+                                <td>Universidad Amazonia</td>
+                                <td>2/3</td>
+                                <td>380</td>
+                                <td><span class="badge bg-warning">Incompleta</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="completarMesa('003-B')">Completar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Acciones Rápidas</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="crearMesa()">
+                        <i class="fas fa-plus me-2"></i>Nueva Mesa
+                    </button>
+                    <button class="btn btn-success" onclick="asignarJurados()">
+                        <i class="fas fa-users me-2"></i>Asignar Jurados
+                    </button>
+                    <button class="btn btn-info" onclick="importarMesas()">
+                        <i class="fas fa-upload me-2"></i>Importar Mesas
+                    </button>
+                    <button class="btn btn-warning" onclick="exportarMesas()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function candidatosLocales() {
+    mostrarModal('Gestión de Candidatos Locales', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Candidatos Registrados - Florencia</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Partido</th>
+                                <th>Cargo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Juan Pérez</strong></td>
+                                <td>12.345.678</td>
+                                <td>Partido A</td>
+                                <td>Alcalde</td>
+                                <td><span class="badge bg-success">Aprobado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="verCandidato('juan')">Ver</button>
+                                    <button class="btn btn-sm btn-warning" onclick="editarCandidato('juan')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>María García</strong></td>
+                                <td>23.456.789</td>
+                                <td>Partido B</td>
+                                <td>Alcalde</td>
+                                <td><span class="badge bg-success">Aprobado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="verCandidato('maria')">Ver</button>
+                                    <button class="btn btn-sm btn-warning" onclick="editarCandidato('maria')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Carlos López</strong></td>
+                                <td>34.567.890</td>
+                                <td>Lista C</td>
+                                <td>Concejo</td>
+                                <td><span class="badge bg-warning">Pendiente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" onclick="aprobarCandidato('carlos')">Aprobar</button>
+                                    <button class="btn btn-sm btn-danger" onclick="rechazarCandidato('carlos')">Rechazar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Estadísticas</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p><strong>Total Candidatos:</strong> 12</p>
+                        <p><strong>Aprobados:</strong> 9</p>
+                        <p><strong>Pendientes:</strong> 3</p>
+                        <p><strong>Rechazados:</strong> 0</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="registrarCandidato()">
+                        <i class="fas fa-user-plus me-2"></i>Registrar Candidato
+                    </button>
+                    <button class="btn btn-success" onclick="aprobarTodos()">
+                        <i class="fas fa-check-double me-2"></i>Aprobar Todos
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function reportesMunicipales() {
+    mostrarModal('Reportes Municipales', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Reportes Disponibles</h6>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteMun('mesas')">
+                        <i class="fas fa-table me-2"></i>Reporte de Mesas
+                        <small class="text-muted d-block">Estado de todas las mesas municipales</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteMun('candidatos')">
+                        <i class="fas fa-users me-2"></i>Reporte de Candidatos
+                        <small class="text-muted d-block">Lista completa de candidatos locales</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteMun('participacion')">
+                        <i class="fas fa-chart-pie me-2"></i>Reporte de Participación
+                        <small class="text-muted d-block">Análisis de participación municipal</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteMun('logistica')">
+                        <i class="fas fa-cogs me-2"></i>Reporte Logístico
+                        <small class="text-muted d-block">Recursos y logística electoral</small>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Estadísticas Municipales</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <canvas id="estadisticasChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Crear gráfico de estadísticas
+    setTimeout(() => {
+        const ctx = document.getElementById('estadisticasChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Mesas Activas', 'En Configuración', 'Pendientes'],
+                    datasets: [{
+                        data: [25, 2, 1],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+function configurarPuestos() {
+    mostrarModal('Configuración de Puestos de Votación', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Puestos de Votación Configurados</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Puesto</th>
+                                <th>Dirección</th>
+                                <th>Mesas</th>
+                                <th>Capacidad</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Escuela Central</strong></td>
+                                <td>Calle 15 #12-34</td>
+                                <td>4</td>
+                                <td>1,400</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="verPuesto('escuela')">Ver</button>
+                                    <button class="btn btn-sm btn-warning" onclick="editarPuesto('escuela')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Colegio San José</strong></td>
+                                <td>Carrera 8 #20-15</td>
+                                <td>6</td>
+                                <td>2,550</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="verPuesto('colegio')">Ver</button>
+                                    <button class="btn btn-sm btn-warning" onclick="editarPuesto('colegio')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Universidad Amazonia</strong></td>
+                                <td>Calle 17 Diagonal 17</td>
+                                <td>8</td>
+                                <td>3,040</td>
+                                <td><span class="badge bg-warning">En Configuración</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="completarPuesto('universidad')">Completar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Acciones de Configuración</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="crearPuesto()">
+                        <i class="fas fa-plus me-2"></i>Nuevo Puesto
+                    </button>
+                    <button class="btn btn-success" onclick="validarPuestos()">
+                        <i class="fas fa-check me-2"></i>Validar Todos
+                    </button>
+                    <button class="btn btn-info" onclick="mapaPuestos()">
+                        <i class="fas fa-map me-2"></i>Ver en Mapa
+                    </button>
+                    <button class="btn btn-warning" onclick="exportarPuestos()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="munModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('munModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('munModal'));
+    modal.show();
+}
+
+function verDetalleMesa(mesa) {
+    mostrarNotificacion(`Abriendo detalles de mesa ${mesa}...`, 'info');
+}
+
+function gestionarMesaEspecifica(mesa) {
+    mostrarNotificacion(`Gestionando mesa ${mesa}...`, 'info');
+}
+
+function editarMesa(mesa) {
+    mostrarNotificacion(`Editando configuración de mesa ${mesa}...`, 'info');
+}
+
+function completarMesa(mesa) {
+    mostrarNotificacion(`Completando configuración de mesa ${mesa}...`, 'warning');
+}
+
+function crearMesa() {
+    mostrarNotificacion('Abriendo formulario de nueva mesa...', 'info');
+}
+
+function asignarJurados() {
+    mostrarNotificacion('Abriendo asignación de jurados...', 'info');
+}
+
+function registrarCandidato() {
+    mostrarNotificacion('Abriendo formulario de registro de candidato...', 'info');
+}
+
+function aprobarCandidato(candidato) {
+    mostrarNotificacion(`Aprobando candidato ${candidato}...`, 'success');
+}
+
+function rechazarCandidato(candidato) {
+    if (confirm(`¿Está seguro de rechazar al candidato ${candidato}?`)) {
+        mostrarNotificacion(`Candidato ${candidato} rechazado`, 'warning');
+    }
+}
+
+function generarReporteMun(tipo) {
+    mostrarNotificacion(`Generando reporte municipal de ${tipo}...`, 'info');
+    setTimeout(() => {
+        mostrarNotificacion(`Reporte de ${tipo} generado exitosamente`, 'success');
+    }, 2000);
+}
+
+function crearPuesto() {
+    mostrarNotificacion('Abriendo formulario de nuevo puesto de votación...', 'info');
+}
+
+function validarPuestos() {
+    mostrarNotificacion('Validando configuración de todos los puestos...', 'info');
+}
+
+function mapaPuestos() {
+    mostrarNotificacion('Abriendo mapa de puestos de votación...', 'info');
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        'success': 'alert-success',
+        'info': 'alert-info',
+        'warning': 'alert-warning',
+        'error': 'alert-danger'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.parentNode.removeChild(notificacion);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

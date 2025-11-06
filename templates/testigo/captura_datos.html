@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}Captura de Datos Electorales - Sistema Electoral ERP{% endblock %}
+{% block body_class %}testigo-captura{% endblock %}
+{% block navbar_class %}navbar-dark bg-info{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-keyboard me-2"></i>
+                        Captura de Datos Electorales - Mesa {{ mesa.numero }}
+                    </h4>
+                    <small>{{ mesa.municipio }} - {{ mesa.puesto }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Información de la mesa -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <strong>Mesa Asignada:</strong> {{ mesa.numero }} | 
+                                <strong>Municipio:</strong> {{ mesa.municipio }} | 
+                                <strong>Puesto:</strong> {{ mesa.puesto }} |
+                                <strong>Hora:</strong> <span id="hora-actual"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario de captura -->
+                    <form id="formCapturaVotos">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Registro de Votos por Candidato</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for candidato in candidatos %}
+                                        <div class="row mb-3">
+                                            <div class="col-md-8">
+                                                <label class="form-label">
+                                                    <strong>{{ candidato.nombre }}</strong><br>
+                                                    <small class="text-muted">{{ candidato.partido }}</small>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" 
+                                                       class="form-control form-control-lg text-center" 
+                                                       id="votos_{{ candidato.id }}" 
+                                                       name="votos_{{ candidato.id }}"
+                                                       min="0" 
+                                                       value="0"
+                                                       onchange="actualizarTotal()">
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        
+                                        <!-- Votos especiales -->
+                                        <hr>
+                                        <div class="row mb-3">
+                                            <div class="col-md-8">
+                                                <label class="form-label">
+                                                    <strong>Votos en Blanco</strong>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" 
+                                                       class="form-control form-control-lg text-center" 
+                                                       id="votos_blancos" 
+                                                       name="votos_blancos"
+                                                       min="0" 
+                                                       value="0"
+                                                       onchange="actualizarTotal()">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-8">
+                                                <label class="form-label">
+                                                    <strong>Votos Nulos</strong>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" 
+                                                       class="form-control form-control-lg text-center" 
+                                                       id="votos_nulos" 
+                                                       name="votos_nulos"
+                                                       min="0" 
+                                                       value="0"
+                                                       onchange="actualizarTotal()">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Total -->
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <label class="form-label">
+                                                    <strong>TOTAL VOTOS</strong>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" 
+                                                       class="form-control form-control-lg text-center bg-light" 
+                                                       id="total_votos" 
+                                                       readonly
+                                                       value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Información Adicional</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="votantes_habilitados" class="form-label">Votantes Habilitados</label>
+                                            <input type="number" class="form-control" id="votantes_habilitados" value="350">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="hora_cierre" class="form-label">Hora de Cierre</label>
+                                            <input type="time" class="form-control" id="hora_cierre" value="16:00">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="observaciones" class="form-label">Observaciones</label>
+                                            <textarea class="form-control" id="observaciones" rows="4" 
+                                                      placeholder="Registre cualquier observación importante sobre el proceso de votación..."></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="proceso_normal">
+                                                <label class="form-check-label" for="proceso_normal">
+                                                    El proceso de votación se desarrolló con normalidad
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="acta_firmada">
+                                                <label class="form-check-label" for="acta_firmada">
+                                                    Acta firmada por todos los jurados
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Estadísticas en tiempo real -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5>Estadísticas</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-6">
+                                                <h4 id="participacion">0%</h4>
+                                                <small>Participación</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <h4 id="votos_validos">0</h4>
+                                                <small>Votos Válidos</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="button" class="btn btn-success btn-lg me-3" onclick="guardarDatos()">
+                                    <i class="fas fa-save me-2"></i>Guardar Datos
+                                </button>
+                                <button type="button" class="btn btn-info btn-lg me-3" onclick="generarActa()">
+                                    <i class="fas fa-file-pdf me-2"></i>Generar Acta
+                                </button>
+                                <button type="button" class="btn btn-warning btn-lg me-3" onclick="reportarIncidencia()">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Reportar Incidencia
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-lg" onclick="limpiarFormulario()">
+                                    <i class="fas fa-eraser me-2"></i>Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="modalConfirmacion" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Datos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que los datos ingresados son correctos?</p>
+                <div id="resumen-datos"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="confirmarGuardado()">Confirmar y Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarHora();
+    setInterval(actualizarHora, 1000);
+    actualizarTotal();
+});
+
+function actualizarHora() {
+    const ahora = new Date();
+    document.getElementById('hora-actual').textContent = ahora.toLocaleTimeString('es-CO');
+}
+
+function actualizarTotal() {
+    let total = 0;
+    
+    // Sumar votos de candidatos
+    {% for candidato in candidatos %}
+    total += parseInt(document.getElementById('votos_{{ candidato.id }}').value) || 0;
+    {% endfor %}
+    
+    // Sumar votos especiales
+    total += parseInt(document.getElementById('votos_blancos').value) || 0;
+    total += parseInt(document.getElementById('votos_nulos').value) || 0;
+    
+    document.getElementById('total_votos').value = total;
+    
+    // Calcular participación
+    const votantesHabilitados = parseInt(document.getElementById('votantes_habilitados').value) || 350;
+    const participacion = ((total / votantesHabilitados) * 100).toFixed(1);
+    document.getElementById('participacion').textContent = participacion + '%';
+    
+    // Calcular votos válidos
+    const votosValidos = total - (parseInt(document.getElementById('votos_nulos').value) || 0);
+    document.getElementById('votos_validos').textContent = votosValidos;
+}
+
+function guardarDatos() {
+    const datos = recopilarDatos();
+    
+    // Mostrar resumen en modal
+    let resumen = '<ul>';
+    {% for candidato in candidatos %}
+    resumen += `<li><strong>{{ candidato.nombre }}:</strong> ${datos.votos_{{ candidato.id }}} votos</li>`;
+    {% endfor %}
+    resumen += `<li><strong>Votos en Blanco:</strong> ${datos.votos_blancos} votos</li>`;
+    resumen += `<li><strong>Votos Nulos:</strong> ${datos.votos_nulos} votos</li>`;
+    resumen += `<li><strong>TOTAL:</strong> ${datos.total_votos} votos</li>`;
+    resumen += '</ul>';
+    
+    document.getElementById('resumen-datos').innerHTML = resumen;
+    new bootstrap.Modal(document.getElementById('modalConfirmacion')).show();
+}
+
+function confirmarGuardado() {
+    const datos = recopilarDatos();
+    
+    // Enviar datos al servidor
+    fetch('/api/testigo/votos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarNotificacion('Datos guardados exitosamente', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion')).hide();
+        } else {
+            mostrarNotificacion('Error al guardar datos: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        mostrarNotificacion('Error de conexión: ' + error, 'error');
+    });
+}
+
+function recopilarDatos() {
+    return {
+        mesa: '{{ mesa.numero }}',
+        municipio: '{{ mesa.municipio }}',
+        {% for candidato in candidatos %}
+        votos_{{ candidato.id }}: parseInt(document.getElementById('votos_{{ candidato.id }}').value) || 0,
+        {% endfor %}
+        votos_blancos: parseInt(document.getElementById('votos_blancos').value) || 0,
+        votos_nulos: parseInt(document.getElementById('votos_nulos').value) || 0,
+        total_votos: parseInt(document.getElementById('total_votos').value) || 0,
+        votantes_habilitados: parseInt(document.getElementById('votantes_habilitados').value) || 0,
+        hora_cierre: document.getElementById('hora_cierre').value,
+        observaciones: document.getElementById('observaciones').value,
+        proceso_normal: document.getElementById('proceso_normal').checked,
+        acta_firmada: document.getElementById('acta_firmada').checked,
+        timestamp: new Date().toISOString()
+    };
+}
+
+function generarActa() {
+    mostrarNotificacion('Generando acta electoral...', 'info');
+    // Aquí se implementaría la generación del PDF
+}
+
+function reportarIncidencia() {
+    window.location.href = '/testigo/incidencias';
+}
+
+function limpiarFormulario() {
+    if (confirm('¿Está seguro de que desea limpiar todos los datos?')) {
+        document.getElementById('formCapturaVotos').reset();
+        actualizarTotal();
+    }
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        'success': 'alert-success',
+        'info': 'alert-info',
+        'warning': 'alert-warning',
+        'error': 'alert-danger'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.parentNode.removeChild(notificacion);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

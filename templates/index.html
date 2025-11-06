@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Sistema Electoral ERP{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Sistema Electoral ERP - Caquetá</h1>
+                <p class="col-md-8 fs-4">
+                    Plataforma integral para la gestión electoral del departamento de Caquetá. 
+                    Administra votaciones, candidatos, reportes y más desde una sola interfaz.
+                </p>
+                {% if not current_user %}
+                <a class="btn btn-light btn-lg" href="/login" role="button">
+                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                </a>
+                {% else %}
+                <a class="btn btn-light btn-lg" href="{{ url_for('dashboard.index') }}" role="button">
+                    <i class="fas fa-tachometer-alt me-2"></i>Ir al Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not current_user %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-vote-yea fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Gestión Electoral</h5>
+                <p class="card-text">
+                    Administra procesos electorales, mesas de votación y resultados 
+                    de manera eficiente y transparente.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Candidatos y Partidos</h5>
+                <p class="card-text">
+                    Gestiona información de candidatos, partidos políticos y 
+                    coaliciones de forma centralizada.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Reportes y Analytics</h5>
+                <p class="card-text">
+                    Genera reportes detallados y visualiza estadísticas 
+                    electorales en tiempo real.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Características Principales:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Gestión completa de procesos electorales</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Control de acceso basado en roles</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Reportes y estadísticas en tiempo real</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Interfaz adaptativa por tipo de usuario</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Roles de Usuario:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-user-shield text-danger me-2"></i>Super Administrador</li>
+                            <li><i class="fas fa-user-cog text-warning me-2"></i>Administrador Departamental</li>
+                            <li><i class="fas fa-user-tie text-info me-2"></i>Administrador Municipal</li>
+                            <li><i class="fas fa-user-check text-success me-2"></i>Testigo de Mesa</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

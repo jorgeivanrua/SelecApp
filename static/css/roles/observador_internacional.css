@@ -1,0 +1,100 @@
+/* Estilos específicos para Observador Internacional */
+.role-observador-internacional {
+    --primary-color: #6c757d;
+    --secondary-color: #495057;
+    --accent-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+}
+
+.role-observador-internacional .welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-left: 5px solid var(--accent-color);
+}
+
+.role-observador-internacional .card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.role-observador-internacional .card:hover {
+    transform: translateY(-2px);
+}
+
+.role-observador-internacional .btn-secondary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.role-observador-internacional .btn-secondary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.role-observador-internacional .table th {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.role-observador-internacional .badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+/* Iconos específicos */
+.role-observador-internacional .fa-globe {
+    color: var(--accent-color);
+}
+
+.role-observador-internacional .fa-eye {
+    color: var(--info-color);
+}
+
+.role-observador-internacional .fa-flag {
+    color: var(--success-color);
+}
+
+/* Estilos para organizaciones internacionales */
+.role-observador-internacional .organization-card {
+    border-left: 4px solid var(--accent-color);
+    background: linear-gradient(90deg, rgba(0,123,255,0.1), transparent);
+}
+
+.role-observador-internacional .progress {
+    height: 20px;
+    border-radius: 10px;
+}
+
+.role-observador-internacional .progress-bar {
+    border-radius: 10px;
+}
+
+/* Animaciones */
+@keyframes globalPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.role-observador-internacional .global-indicator {
+    animation: globalPulse 3s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .role-observador-internacional .welcome-banner h2 {
+        font-size: 1.5rem;
+    }
+    
+    .role-observador-internacional .card-body h3 {
+        font-size: 1.8rem;
+    }
+    
+    .role-observador-internacional .organization-card {
+        margin-bottom: 1rem;
+    }
+}

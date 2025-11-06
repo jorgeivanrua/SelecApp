@@ -1,0 +1,722 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Coordinador Electoral - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/coordinador_electoral.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-coordinador-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-purple{% endblock %}
+{% block brand_text %}Sistema Electoral - Coordinador Electoral{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='coordinador_electoral') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/coordination">
+        <i class="fas fa-tasks me-1"></i>Coordinar Procesos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/schedule">
+        <i class="fas fa-calendar me-1"></i>Cronograma
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/progress">
+        <i class="fas fa-chart-line me-1"></i>Supervisar Avance
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-purple text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-project-diagram me-2"></i>Coordinación Electoral</h2>
+            <p class="mb-0">Gestión y coordinación de procesos electorales del Departamento del Caquetá</p>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas de coordinación -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-purple text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Procesos Activos</h6>
+                        <h3 class="mb-0">{{ stats.active_processes or 2 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Tareas Programadas</h6>
+                        <h3 class="mb-0">{{ stats.scheduled_tasks or 8 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Aprobaciones Pendientes</h6>
+                        <h3 class="mb-0">{{ stats.pending_approvals or 3 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Avance General</h6>
+                        <h3 class="mb-0">{{ stats.completion or 78 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Herramientas de coordinación -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas de Coordinación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-purple btn-lg w-100 mb-2" onclick="coordinarProcesos()">
+                            <i class="fas fa-tasks me-2"></i>
+                            Coordinar Procesos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-purple btn-lg w-100 mb-2" onclick="gestionarCronograma()">
+                            <i class="fas fa-calendar me-2"></i>
+                            Cronograma Electoral
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-purple btn-lg w-100 mb-2" onclick="supervisarAvance()">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Supervisar Avance
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-purple btn-lg w-100 mb-2" onclick="generarReportesCoord()">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Generar Reportes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cronograma y procesos -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Cronograma Electoral Activo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Actividad</th>
+                                <th>Responsable</th>
+                                <th>Estado</th>
+                                <th>Progreso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-11-10</td>
+                                <td>Registro de Candidatos</td>
+                                <td>Admin Municipal</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 100%">100%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-15</td>
+                                <td>Configuración de Mesas</td>
+                                <td>Admin Departamental</td>
+                                <td><span class="badge bg-info">En Proceso</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: 75%">75%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-20</td>
+                                <td>Capacitación Jurados</td>
+                                <td>Coordinador Electoral</td>
+                                <td><span class="badge bg-warning">Programado</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 25%">25%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-11-25</td>
+                                <td>Simulacro Electoral</td>
+                                <td>Todos los Roles</td>
+                                <td><span class="badge bg-secondary">Pendiente</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-secondary" style="width: 0%">0%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-12-01</td>
+                                <td>Jornada Electoral</td>
+                                <td>Todos los Roles</td>
+                                <td><span class="badge bg-secondary">Pendiente</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-secondary" style="width: 0%">0%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Alertas de Coordinación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Atención:</strong> 3 aprobaciones pendientes requieren revisión
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Recordatorio:</strong> Capacitación programada para el 20/11
+                </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Completado:</strong> Registro de candidatos finalizado
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Equipo de Coordinación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Administradores</h6>
+                    <p class="mb-1">• Admin Departamental: Activo</p>
+                    <p class="mb-1">• Admin Municipal (16): 15 Activos</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Personal Electoral</h6>
+                    <p class="mb-1">• Jurados: 450 Asignados</p>
+                    <p class="mb-1">• Testigos: 135 Acreditados</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Supervisión</h6>
+                    <p class="mb-1">• Auditores: 3 Activos</p>
+                    <p class="mb-1">• Observadores: 2 Internacionales</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Resumen de Avance
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoAvance" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para coordinador electoral
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Coordinador Electoral cargado');
+    inicializarGraficoAvance();
+    actualizarProgreso();
+    
+    // Actualizar progreso cada minuto
+    setInterval(actualizarProgreso, 60000);
+});
+
+function inicializarGraficoAvance() {
+    const ctx = document.getElementById('graficoAvance').getContext('2d');
+    window.graficoAvance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completado', 'En Proceso', 'Programado', 'Pendiente'],
+            datasets: [{
+                data: [40, 30, 20, 10],
+                backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        fontSize: 10
+                    }
+                }
+            }
+        }
+    });
+}
+
+function actualizarProgreso() {
+    // Simular actualización de progreso
+    const barras = document.querySelectorAll('.progress-bar');
+    barras.forEach(barra => {
+        const progreso = parseInt(barra.style.width) || 0;
+        if (progreso < 100) {
+            const nuevoProgreso = Math.min(100, progreso + Math.random() * 5);
+            barra.style.width = nuevoProgreso + '%';
+            barra.textContent = Math.round(nuevoProgreso) + '%';
+        }
+    });
+}
+
+function coordinarProcesos() {
+    mostrarModal('Coordinación de Procesos Electorales', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Procesos Activos</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>Municipio</th>
+                                <th>Estado</th>
+                                <th>Progreso</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elección Alcalde</td>
+                                <td>Florencia</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 85%">85%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="gestionarProceso('florencia')">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Elección Concejo</td>
+                                <td>San Vicente</td>
+                                <td><span class="badge bg-warning">En Proceso</span></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 60%">60%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="gestionarProceso('sanvicente')">Revisar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Acciones Rápidas</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="crearProceso()">
+                        <i class="fas fa-plus me-2"></i>Nuevo Proceso
+                    </button>
+                    <button class="btn btn-info" onclick="sincronizarProcesos()">
+                        <i class="fas fa-sync me-2"></i>Sincronizar
+                    </button>
+                    <button class="btn btn-success" onclick="aprobarProcesos()">
+                        <i class="fas fa-check me-2"></i>Aprobar Pendientes
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function gestionarCronograma() {
+    mostrarModal('Cronograma Electoral', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Cronograma de Actividades</h6>
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker bg-success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>10 Nov - Registro de Candidatos</h6>
+                            <p>Completado - 45 candidatos registrados</p>
+                            <small class="text-success">Completado</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item active">
+                        <div class="timeline-marker bg-primary">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>15 Nov - Configuración de Mesas</h6>
+                            <p>En proceso - 75% completado</p>
+                            <small class="text-primary">En Proceso</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item pending">
+                        <div class="timeline-marker bg-secondary">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>20 Nov - Capacitación Jurados</h6>
+                            <p>Programado - 450 jurados por capacitar</p>
+                            <small class="text-secondary">Programado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="editarCronograma()">
+                        <i class="fas fa-edit me-2"></i>Editar Cronograma
+                    </button>
+                    <button class="btn btn-info" onclick="exportarCronograma()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function supervisarAvance() {
+    mostrarModal('Supervisión de Avance', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Avance por Municipio</h6>
+                <div class="mb-3">
+                    <label>Florencia</label>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 95%">95%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>San Vicente del Caguán</label>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" style="width: 80%">80%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>Puerto Rico</label>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: 65%">65%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>El Paujil</label>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" style="width: 45%">45%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Indicadores Clave</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <canvas id="indicadoresChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-warning" onclick="enviarAlertas()">
+                        <i class="fas fa-bell me-2"></i>Enviar Alertas
+                    </button>
+                    <button class="btn btn-info" onclick="generarInforme()">
+                        <i class="fas fa-file-alt me-2"></i>Generar Informe
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Crear gráfico de indicadores
+    setTimeout(() => {
+        const ctx = document.getElementById('indicadoresChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Candidatos', 'Mesas', 'Jurados', 'Testigos', 'Capacitación'],
+                    datasets: [{
+                        label: 'Avance %',
+                        data: [95, 75, 60, 80, 40],
+                        backgroundColor: 'rgba(111, 66, 193, 0.2)',
+                        borderColor: '#6f42c1',
+                        pointBackgroundColor: '#6f42c1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+function generarReportesCoord() {
+    mostrarModal('Generación de Reportes', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Tipos de Reportes</h6>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('avance')">
+                        <i class="fas fa-chart-line me-2"></i>Reporte de Avance General
+                        <small class="text-muted d-block">Estado actual de todos los procesos</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('cronograma')">
+                        <i class="fas fa-calendar me-2"></i>Reporte de Cronograma
+                        <small class="text-muted d-block">Cumplimiento de fechas programadas</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('recursos')">
+                        <i class="fas fa-users me-2"></i>Reporte de Recursos Humanos
+                        <small class="text-muted d-block">Estado del personal electoral</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporte('incidencias')">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Reporte de Incidencias
+                        <small class="text-muted d-block">Problemas reportados y soluciones</small>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Configuración</h6>
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Período</label>
+                        <select class="form-select">
+                            <option>Última semana</option>
+                            <option>Último mes</option>
+                            <option>Período personalizado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Formato</label>
+                        <select class="form-select">
+                            <option>PDF</option>
+                            <option>Excel</option>
+                            <option>Word</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">Incluir gráficos</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="coordModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal existente
+    const existingModal = document.getElementById('coordModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('coordModal'));
+    modal.show();
+}
+
+function gestionarProceso(municipio) {
+    mostrarNotificacion(`Abriendo gestión de proceso para ${municipio}...`, 'info');
+}
+
+function crearProceso() {
+    mostrarNotificacion('Abriendo formulario de nuevo proceso...', 'info');
+}
+
+function sincronizarProcesos() {
+    mostrarNotificacion('Sincronizando procesos con el sistema central...', 'info');
+}
+
+function aprobarProcesos() {
+    mostrarNotificacion('Procesando aprobaciones pendientes...', 'success');
+}
+
+function editarCronograma() {
+    mostrarNotificacion('Abriendo editor de cronograma...', 'info');
+}
+
+function exportarCronograma() {
+    mostrarNotificacion('Exportando cronograma...', 'success');
+}
+
+function enviarAlertas() {
+    mostrarNotificacion('Enviando alertas a municipios con retraso...', 'warning');
+}
+
+function generarInforme() {
+    mostrarNotificacion('Generando informe de supervisión...', 'info');
+}
+
+function generarReporte(tipo) {
+    mostrarNotificacion(`Generando reporte de ${tipo}...`, 'info');
+    setTimeout(() => {
+        mostrarNotificacion(`Reporte de ${tipo} generado exitosamente`, 'success');
+    }, 2000);
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        'success': 'alert-success',
+        'info': 'alert-info',
+        'warning': 'alert-warning',
+        'error': 'alert-danger'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.parentNode.removeChild(notificacion);
+        }
+    }, 5000);
+}
+</script>
+
+<style>
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+.btn-purple {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: white;
+}
+
+.btn-purple:hover {
+    background-color: #5a359a;
+    border-color: #5a359a;
+    color: white;
+}
+
+.navbar-dark.bg-purple {
+    background-color: #6f42c1 !important;
+}
+</style>
+{% endblock %}

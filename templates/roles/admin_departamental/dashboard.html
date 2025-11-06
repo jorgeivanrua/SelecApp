@@ -1,0 +1,713 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Administrador Departamental - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/admin_departamental.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-admin-departamental{% endblock %}
+{% block navbar_class %}navbar-dark bg-success{% endblock %}
+{% block brand_text %}Sistema Electoral - Admin Departamental{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='admin_departamental') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/municipalities">
+        <i class="fas fa-city me-1"></i>Municipios
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/electoral">
+        <i class="fas fa-vote-yea me-1"></i>Procesos Electorales
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/reports">
+        <i class="fas fa-chart-line me-1"></i>Reportes
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-success text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-building me-2"></i>Gestión Departamental del Caquetá</h2>
+            <p class="mb-0">Administración de municipios y procesos electorales departamentales</p>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas departamentales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Municipios</h6>
+                        <h3 class="mb-0">{{ stats.municipalities or 16 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-city fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Procesos Activos</h6>
+                        <h3 class="mb-0">{{ stats.active_processes or 2 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Total Mesas</h6>
+                        <h3 class="mb-0">{{ stats.total_tables or 450 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-table fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Cobertura</h6>
+                        <h3 class="mb-0">{{ stats.coverage or 95 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-pie fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mapa del departamento -->
+<div class="row mb-4">
+    <div class="col-12">
+        {% include 'components/electoral_map.html' %}
+    </div>
+</div>
+
+<!-- Gestión de municipios -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-city me-2"></i>
+                    Gestión de Municipios
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="gestionarMunicipios()">
+                            <i class="fas fa-city me-2"></i>
+                            Gestionar Municipios
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="procesosElectorales()">
+                            <i class="fas fa-vote-yea me-2"></i>
+                            Procesos Electorales
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="reportesDepartamentales()">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Reportes Departamentales
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="supervisarMesas()">
+                            <i class="fas fa-eye me-2"></i>
+                            Supervisar Mesas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estado de municipios -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Estado de Municipios
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Municipio</th>
+                                <th>Mesas</th>
+                                <th>Votantes</th>
+                                <th>Participación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Florencia</strong></td>
+                                <td>28</td>
+                                <td>15,420</td>
+                                <td>75%</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-success">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>San Vicente del Caguán</strong></td>
+                                <td>15</td>
+                                <td>8,500</td>
+                                <td>68%</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-success">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Puerto Rico</strong></td>
+                                <td>12</td>
+                                <td>6,200</td>
+                                <td>72%</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-success">Gestionar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>El Paujil</strong></td>
+                                <td>8</td>
+                                <td>4,100</td>
+                                <td>70%</td>
+                                <td><span class="badge bg-warning">En proceso</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                    <button class="btn btn-sm btn-outline-warning">Revisar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bell me-2"></i>
+                    Alertas Departamentales
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atención:</strong> El Paujil requiere supervisión adicional
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Info:</strong> Nuevo proceso electoral programado
+                </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Completado:</strong> Florencia alcanzó 75% de participación
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para administrador departamental
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Administrador Departamental cargado');
+    inicializarMapaInteractivo();
+    actualizarEstadisticas();
+});
+
+function inicializarMapaInteractivo() {
+    // Hacer el mapa más interactivo
+    const marcadores = document.querySelectorAll('.municipality-marker');
+    marcadores.forEach(marcador => {
+        marcador.addEventListener('click', function() {
+            const municipio = this.getAttribute('data-municipality');
+            mostrarDetallesMunicipio(municipio);
+        });
+    });
+}
+
+function actualizarEstadisticas() {
+    // Actualizar estadísticas cada 2 minutos
+    setInterval(() => {
+        fetch('/api/departamental/stats')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Estadísticas actualizadas:', data);
+            })
+            .catch(error => console.error('Error:', error));
+    }, 120000);
+}
+
+function gestionarMunicipios() {
+    mostrarModal('Gestión de Municipios del Caquetá', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Municipios del Departamento</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Municipio</th>
+                                <th>Código</th>
+                                <th>Mesas</th>
+                                <th>Población</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Florencia</strong></td>
+                                <td>18001</td>
+                                <td>28</td>
+                                <td>185,456</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="configurarMunicipio('florencia')">Configurar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>San Vicente del Caguán</strong></td>
+                                <td>18029</td>
+                                <td>15</td>
+                                <td>61,829</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="configurarMunicipio('sanvicente')">Configurar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Puerto Rico</strong></td>
+                                <td>18592</td>
+                                <td>12</td>
+                                <td>38,452</td>
+                                <td><span class="badge bg-warning">En Proceso</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="configurarMunicipio('puertorico')">Revisar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>El Paujil</strong></td>
+                                <td>18479</td>
+                                <td>8</td>
+                                <td>21,234</td>
+                                <td><span class="badge bg-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="configurarMunicipio('elpaujil')">Configurar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Estadísticas Generales</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p><strong>Total Municipios:</strong> 16</p>
+                        <p><strong>Mesas Configuradas:</strong> 450</p>
+                        <p><strong>Población Electoral:</strong> 485,234</p>
+                        <p><strong>Cobertura:</strong> 95%</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success" onclick="crearMunicipio()">
+                        <i class="fas fa-plus me-2"></i>Nuevo Municipio
+                    </button>
+                    <button class="btn btn-info" onclick="exportarMunicipios()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function procesosElectorales() {
+    mostrarModal('Procesos Electorales Departamentales', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Procesos Activos por Municipio</h6>
+                <div class="accordion" id="procesosAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#florencia">
+                                Florencia - 3 Procesos Activos
+                            </button>
+                        </h2>
+                        <div id="florencia" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Elección Alcalde</span>
+                                        <span class="badge bg-success">85% Completado</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Elección Concejo</span>
+                                        <span class="badge bg-info">70% Completado</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Consulta Popular</span>
+                                        <span class="badge bg-warning">45% Completado</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sanvicente">
+                                San Vicente del Caguán - 2 Procesos Activos
+                            </button>
+                        </h2>
+                        <div id="sanvicente" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Elección Alcalde</span>
+                                        <span class="badge bg-info">60% Completado</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Elección Concejo</span>
+                                        <span class="badge bg-warning">40% Completado</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="crearProcesoDept()">
+                        <i class="fas fa-plus me-2"></i>Nuevo Proceso
+                    </button>
+                    <button class="btn btn-success" onclick="sincronizarProcesos()">
+                        <i class="fas fa-sync me-2"></i>Sincronizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function reportesDepartamentales() {
+    mostrarModal('Reportes Departamentales', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Reportes Disponibles</h6>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteDept('consolidado')">
+                        <i class="fas fa-chart-bar me-2"></i>Reporte Consolidado
+                        <small class="text-muted d-block">Estado general del departamento</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteDept('municipios')">
+                        <i class="fas fa-city me-2"></i>Reporte por Municipios
+                        <small class="text-muted d-block">Desglose por cada municipio</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteDept('participacion')">
+                        <i class="fas fa-users me-2"></i>Reporte de Participación
+                        <small class="text-muted d-block">Análisis de participación ciudadana</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="generarReporteDept('recursos')">
+                        <i class="fas fa-cogs me-2"></i>Reporte de Recursos
+                        <small class="text-muted d-block">Uso de recursos departamentales</small>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Gráfico de Participación</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <canvas id="participacionChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Crear gráfico de participación
+    setTimeout(() => {
+        const ctx = document.getElementById('participacionChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Florencia', 'San Vicente', 'Puerto Rico', 'El Paujil'],
+                    datasets: [{
+                        label: 'Participación %',
+                        data: [75, 68, 72, 70],
+                        backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#fd7e14']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+function supervisarMesas() {
+    mostrarModal('Supervisión de Mesas Electorales', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Estado de Mesas por Municipio</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">420</h5>
+                                <p class="card-text">Mesas Activas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-warning">25</h5>
+                                <p class="card-text">En Configuración</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-danger">5</h5>
+                                <p class="card-text">Con Problemas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-info">450</h5>
+                                <p class="card-text">Total Mesas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h6>Alertas de Supervisión</h6>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        5 mesas en Puerto Rico requieren atención inmediata
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        25 mesas están en proceso de configuración
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-warning" onclick="atenderAlertas()">
+                        <i class="fas fa-bell me-2"></i>Atender Alertas
+                    </button>
+                    <button class="btn btn-info" onclick="monitoreoTiempoReal()">
+                        <i class="fas fa-eye me-2"></i>Monitoreo en Tiempo Real
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function mostrarDetallesMunicipio(municipio) {
+    const municipios = {
+        'florencia': {
+            nombre: 'Florencia',
+            mesas: 28,
+            votantes: 15420,
+            participacion: 75,
+            estado: 'Activo'
+        },
+        'san_vicente': {
+            nombre: 'San Vicente del Caguán',
+            mesas: 15,
+            votantes: 8500,
+            participacion: 68,
+            estado: 'Activo'
+        }
+    };
+    
+    const data = municipios[municipio];
+    if (data) {
+        mostrarModal(`Detalles de ${data.nombre}`, `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Información General</h6>
+                    <p><strong>Mesas:</strong> ${data.mesas}</p>
+                    <p><strong>Votantes:</strong> ${data.votantes.toLocaleString()}</p>
+                    <p><strong>Participación:</strong> ${data.participacion}%</p>
+                    <p><strong>Estado:</strong> <span class="badge bg-success">${data.estado}</span></p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Acciones Disponibles</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="configurarMunicipio('${municipio}')">
+                            <i class="fas fa-cogs me-2"></i>Configurar
+                        </button>
+                        <button class="btn btn-info" onclick="verReporteMunicipio('${municipio}')">
+                            <i class="fas fa-chart-bar me-2"></i>Ver Reporte
+                        </button>
+                        <button class="btn btn-success" onclick="supervisarMunicipio('${municipio}')">
+                            <i class="fas fa-eye me-2"></i>Supervisar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+}
+
+// Funciones auxiliares
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="deptModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('deptModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('deptModal'));
+    modal.show();
+}
+
+function configurarMunicipio(municipio) {
+    mostrarNotificacion(`Abriendo configuración para ${municipio}...`, 'info');
+}
+
+function crearMunicipio() {
+    mostrarNotificacion('Abriendo formulario de nuevo municipio...', 'info');
+}
+
+function exportarMunicipios() {
+    mostrarNotificacion('Exportando datos de municipios...', 'success');
+}
+
+function crearProcesoDept() {
+    mostrarNotificacion('Abriendo formulario de nuevo proceso departamental...', 'info');
+}
+
+function sincronizarProcesos() {
+    mostrarNotificacion('Sincronizando procesos con municipios...', 'info');
+}
+
+function generarReporteDept(tipo) {
+    mostrarNotificacion(`Generando reporte ${tipo}...`, 'info');
+    setTimeout(() => {
+        mostrarNotificacion(`Reporte ${tipo} generado exitosamente`, 'success');
+    }, 2000);
+}
+
+function atenderAlertas() {
+    mostrarNotificacion('Procesando alertas de supervisión...', 'warning');
+}
+
+function monitoreoTiempoReal() {
+    mostrarNotificacion('Abriendo panel de monitoreo en tiempo real...', 'info');
+}
+
+function verReporteMunicipio(municipio) {
+    mostrarNotificacion(`Generando reporte para ${municipio}...`, 'info');
+}
+
+function supervisarMunicipio(municipio) {
+    mostrarNotificacion(`Iniciando supervisión de ${municipio}...`, 'info');
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        'success': 'alert-success',
+        'info': 'alert-info',
+        'warning': 'alert-warning',
+        'error': 'alert-danger'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.parentNode.removeChild(notificacion);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

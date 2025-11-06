@@ -1,115 +1,125 @@
+#!/usr/bin/env python3
 """
-Configuración del Sistema de Recolección Inicial de Votaciones - Caquetá
+Configuración del Sistema Electoral ERP
+Configuraciones para desarrollo, testing y producción
 """
 
 import os
-from typing import Optional
-from pydantic import BaseSettings
+from datetime import timedelta
 
-class Settings(BaseSettings):
-    """Configuración de la aplicación"""
+class Config:
+    """Configuración base"""
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-change-in-production'
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.environ.get('JWT_EXPIRES_HOURS', 24)))
     
     # Base de datos
-    DATABASE_URL: str = "sqlite:///caqueta_electoral.db"
-    DATABASE_ECHO: bool = True  # Para desarrollo, False en producción
-    
-    # Aplicación
-    APP_NAME: str = "Sistema de Recolección Inicial - Caquetá"
-    APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
-    
-    # Departamento específico
-    DEPARTAMENTO_CODIGO: str = "18"
-    DEPARTAMENTO_NOMBRE: str = "CAQUETÁ"
-    
-    # Archivos de datos
-    DIVIPOLA_CSV_PATH: str = "divipola_corregido.csv"
-    
-    # Configuración de logging
-    LOG_LEVEL: str = "INFO"
-    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    
-    # Configuración de seguridad
-    SECRET_KEY: str = "caqueta-electoral-secret-key-change-in-production"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_RECORD_QUERIES = True
     
     # Configuración de archivos
-    UPLOAD_DIR: str = "uploads"
-    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'uploads')
     
-    # Configuración de mapas
-    DEFAULT_MAP_CENTER_LAT: float = 1.6143  # Florencia, Caquetá
-    DEFAULT_MAP_CENTER_LNG: float = -75.6061
-    DEFAULT_MAP_ZOOM: int = 10
+    # Configuración de correo (para notificaciones)
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'localhost')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    # Configuración de logs
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
+    
+    # Configuración de Redis (para cache y sesiones)
+    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://localhost:6379/0'
+    
+    # Configuración de seguridad
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    @staticmethod
+    def init_app(app):
+        pass
 
-# Instancia global de configuración
-settings = Settings()
+class DevelopmentConfig(Config):
+    """Configuración para desarrollo"""
+    DEBUG = True
+    DATABASE_URL = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///caqueta_electoral_dev.db'
+    
+    # Configuración menos estricta para desarrollo
+    SESSION_COOKIE_SECURE = False
 
-# Configuración específica para Caquetá
-CAQUETA_CONFIG = {
-    "departamento": {
-        "codigo": "18",
-        "nombre": "CAQUETÁ",
-        "capital": "FLORENCIA"
-    },
-    "municipios_principales": [
-        "FLORENCIA",
-        "SAN VICENTE DEL CAGUAN",
-        "PUERTO RICO",
-        "EL PAUJIL",
-        "LA MONTAÑITA",
-        "CURILLO",
-        "EL DONCELLO",
-        "BELEN DE LOS ANDAQUIES",
-        "ALBANIA",
-        "MORELIA",
-        "MILAN",
-        "SAN JOSE DEL FRAGUA",
-        "VALPARAISO",
-        "CARTAGENA DEL CHAIRA",
-        "SOLANO",
-        "SOLITA"
-    ],
-    "coordenadas_centro": {
-        "latitud": 1.6143,
-        "longitud": -75.6061
-    },
-    "zona_horaria": "America/Bogota"
+class TestingConfig(Config):
+    """Configuración para testing"""
+    TESTING = True
+    DATABASE_URL = os.environ.get('TEST_DATABASE_URL') or 'sqlite:///caqueta_electoral_test.db'
+    WTF_CSRF_ENABLED = False
+    
+    # Configuración menos estricta para testing
+    SESSION_COOKIE_SECURE = False
+
+class ProductionConfig(Config):
+    """Configuración para producción"""
+    DEBUG = False
+    DATABASE_URL = os.environ.get('DATABASE_URL') or 'postgresql://user:password@localhost/caqueta_electoral'
+    
+    # Configuración de logs para producción
+    @classmethod
+    def init_app(cls, app):
+        Config.init_app(app)
+        
+        # Log de errores por email
+        import logging
+        from logging.handlers import SMTPHandler
+        if app.config['MAIL_SERVER']:
+            auth = None
+            if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
+                auth = (app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+            secure = None
+            if app.config['MAIL_USE_TLS']:
+                secure = ()
+            mail_handler = SMTPHandler(
+                mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
+                fromaddr='no-reply@' + app.config['MAIL_SERVER'],
+                toaddrs=app.config['ADMINS'], subject='Sistema Electoral Error',
+                credentials=auth, secure=secure)
+            mail_handler.setLevel(logging.ERROR)
+            app.logger.addHandler(mail_handler)
+        
+        # Log a archivo
+        from logging.handlers import RotatingFileHandler
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/sistema_electoral.log',
+                                         maxBytes=10240000, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Sistema Electoral startup')
+
+class DockerConfig(ProductionConfig):
+    """Configuración para contenedores Docker"""
+    
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+        
+        # Log a stdout para contenedores
+        import logging
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+config = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig,
+    'docker': DockerConfig,
+    'default': DevelopmentConfig
 }
-
-def get_database_url() -> str:
-    """Obtiene la URL de la base de datos"""
-    return settings.DATABASE_URL
-
-def get_upload_directory() -> str:
-    """Obtiene el directorio de uploads y lo crea si no existe"""
-    upload_dir = settings.UPLOAD_DIR
-    os.makedirs(upload_dir, exist_ok=True)
-    return upload_dir
-
-def is_development() -> bool:
-    """Verifica si estamos en modo desarrollo"""
-    return settings.DEBUG
-
-def get_caqueta_municipalities() -> list:
-    """Obtiene la lista de municipios de Caquetá"""
-    return CAQUETA_CONFIG["municipios_principales"]
-
-def get_map_center() -> tuple:
-    """Obtiene las coordenadas del centro del mapa para Caquetá"""
-    coords = CAQUETA_CONFIG["coordenadas_centro"]
-    return (coords["latitud"], coords["longitud"])
-
-if __name__ == "__main__":
-    print("=== Configuración del Sistema Electoral - Caquetá ===")
-    print(f"Aplicación: {settings.APP_NAME} v{settings.APP_VERSION}")
-    print(f"Base de datos: {settings.DATABASE_URL}")
-    print(f"Departamento: {CAQUETA_CONFIG['departamento']['nombre']}")
-    print(f"Capital: {CAQUETA_CONFIG['departamento']['capital']}")
-    print(f"Municipios configurados: {len(CAQUETA_CONFIG['municipios_principales'])}")
-    print(f"Centro del mapa: {get_map_center()}")
-    print(f"Modo desarrollo: {is_development()}")

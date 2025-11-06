@@ -1,0 +1,693 @@
+{% extends "base.html" %}
+{% block title %}Reportes e Informes - Testigo Electoral{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/testigo_electoral.css') }}" rel="stylesheet">
+<style>
+.report-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #3b82f6;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+.report-generator {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.chart-container {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.export-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+.filter-panel {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+{% block body_class %}role-testigo-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-primary{% endblock %}
+{% block brand_text %}Sistema Electoral - Reportes{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="/dashboard/testigo_electoral">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/observacion">
+        <i class="fas fa-eye me-2"></i>Observaciones
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/incidencias">
+        <i class="fas fa-exclamation-triangle me-2"></i>Incidencias
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/testigo/reportes">
+        <i class="fas fa-file-alt me-2"></i>Reportes
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Reportes e Informes Electorales
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">Genere, visualice y exporte reportes detallados sobre el proceso electoral, observaciones e incidencias registradas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="fas fa-chart-line me-2"></i>
+                Resumen Estadístico del Día
+            </h5>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-eye fa-2x text-primary mb-2"></i>
+                    <h3 class="text-primary" id="total-observaciones">12</h3>
+                    <p class="mb-0">Observaciones Registradas</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                    <h3 class="text-warning" id="total-incidencias">3</h3>
+                    <p class="mb-0">Incidencias Reportadas</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-camera fa-2x text-success mb-2"></i>
+                    <h3 class="text-success" id="total-e14">5</h3>
+                    <p class="mb-0">E14 Capturados</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-table fa-2x text-info mb-2"></i>
+                    <h3 class="text-info" id="mesas-monitoreadas">8</h3>
+                    <p class="mb-0">Mesas Monitoreadas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generador de Reportes -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="report-generator">
+                <h5 class="mb-4">
+                    <i class="fas fa-magic me-2"></i>
+                    Generador de Reportes Personalizados
+                </h5>
+                
+                <form id="report-generator-form">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Reporte</label>
+                                <select class="form-select" id="tipo-reporte" required>
+                                    <option value="">Seleccione...</option>
+                                    <option value="observaciones">Observaciones</option>
+                                    <option value="incidencias">Incidencias</option>
+                                    <option value="e14">Formularios E14</option>
+                                    <option value="resumen_general">Resumen General</option>
+                                    <option value="cronologico">Cronológico</option>
+                                    <option value="por_mesa">Por Mesa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-control" id="fecha-desde" value="2024-11-06">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-control" id="fecha-hasta" value="2024-11-06">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Formato</label>
+                                <select class="form-select" id="formato-reporte">
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                    <option value="word">Word</option>
+                                    <option value="html">HTML</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-panel">
+                        <h6 class="mb-3">Filtros Adicionales</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Mesa Específica</label>
+                                    <select class="form-select" id="filtro-mesa">
+                                        <option value="">Todas las mesas</option>
+                                        <option value="001-A">Mesa 001-A</option>
+                                        <option value="001-B">Mesa 001-B</option>
+                                        <option value="002-A">Mesa 002-A</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Severidad</label>
+                                    <select class="form-select" id="filtro-severidad">
+                                        <option value="">Todas</option>
+                                        <option value="baja">Baja</option>
+                                        <option value="media">Media</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="critica">Crítica</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="incluir-evidencia">
+                                        <label class="form-check-label" for="incluir-evidencia">
+                                            Incluir evidencia fotográfica
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-file-export me-2"></i>Generar Reporte
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="previsualizarReporte()">
+                            <i class="fas fa-eye me-2"></i>Vista Previa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reportes Predefinidos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="fas fa-file-alt me-2"></i>
+                Reportes Predefinidos
+            </h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="report-card" onclick="generarReportePredefinido('diario')">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar-day fa-2x text-primary me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Reporte Diario</h6>
+                                <small class="text-muted">Resumen completo del día electoral</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="report-card" onclick="generarReportePredefinido('incidencias')">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Reporte de Incidencias</h6>
+                                <small class="text-muted">Todas las incidencias registradas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="report-card" onclick="generarReportePredefinido('observaciones')">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-eye fa-2x text-info me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Reporte de Observaciones</h6>
+                                <small class="text-muted">Observaciones del proceso electoral</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="report-card" onclick="generarReportePredefinido('e14')">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-camera fa-2x text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Reporte E14</h6>
+                                <small class="text-muted">Formularios E14 capturados</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="report-card" onclick="generarReportePredefinido('cronologico')">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-clock fa-2x text-secondary me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Cronológico</h6>
+                                <small class="text-muted">Eventos ordenados por tiempo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="report-card" onclick="generarReportePredefinido('estadistico')">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chart-pie fa-2x text-purple me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Estadístico</h6>
+                                <small class="text-muted">Análisis estadístico completo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos y Visualizaciones -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="mb-3">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Distribución de Observaciones
+                </h6>
+                <canvas id="observacionesChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="mb-3">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Incidencias por Severidad
+                </h6>
+                <canvas id="incidenciasChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Reportes Generados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Historial de Reportes Generados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fecha/Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Formato</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-reportes">
+                                <tr>
+                                    <td>06/11/2024 15:30</td>
+                                    <td>Reporte Diario</td>
+                                    <td><span class="badge bg-danger">PDF</span></td>
+                                    <td><span class="badge bg-success">Completado</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary me-1" onclick="descargarReporte('reporte_diario_20241106.pdf')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-info" onclick="previsualizarReporte('reporte_diario_20241106.pdf')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>06/11/2024 14:15</td>
+                                    <td>Incidencias</td>
+                                    <td><span class="badge bg-success">Excel</span></td>
+                                    <td><span class="badge bg-success">Completado</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary me-1" onclick="descargarReporte('incidencias_20241106.xlsx')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-info" onclick="previsualizarReporte('incidencias_20241106.xlsx')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>06/11/2024 13:45</td>
+                                    <td>Observaciones</td>
+                                    <td><span class="badge bg-primary">Word</span></td>
+                                    <td><span class="badge bg-warning">Generando...</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" disabled>
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de reportes cargada');
+    inicializarGraficos();
+    cargarEstadisticas();
+    
+    // Event listener para el generador de reportes
+    document.getElementById('report-generator-form').addEventListener('submit', handleReportGeneration);
+});
+
+function inicializarGraficos() {
+    // Gráfico de observaciones
+    const obsCtx = document.getElementById('observacionesChart').getContext('2d');
+    window.observacionesChart = new Chart(obsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Proceso Normal', 'Irregularidades', 'Problemas Técnicos', 'Otros'],
+            datasets: [{
+                data: [8, 2, 1, 1],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6b7280'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico de incidencias
+    const incCtx = document.getElementById('incidenciasChart').getContext('2d');
+    window.incidenciasChart = new Chart(incCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Baja', 'Media', 'Alta', 'Crítica'],
+            datasets: [{
+                label: 'Incidencias',
+                data: [1, 1, 1, 0],
+                backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#7c2d12'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function cargarEstadisticas() {
+    // Simular carga de estadísticas
+    const stats = {
+        observaciones: 12,
+        incidencias: 3,
+        e14: 5,
+        mesas: 8
+    };
+    
+    document.getElementById('total-observaciones').textContent = stats.observaciones;
+    document.getElementById('total-incidencias').textContent = stats.incidencias;
+    document.getElementById('total-e14').textContent = stats.e14;
+    document.getElementById('mesas-monitoreadas').textContent = stats.mesas;
+}
+
+function handleReportGeneration(event) {
+    event.preventDefault();
+    
+    const tipoReporte = document.getElementById('tipo-reporte').value;
+    const formato = document.getElementById('formato-reporte').value;
+    
+    if (!tipoReporte) {
+        showNotification('Debe seleccionar un tipo de reporte', 'warning');
+        return;
+    }
+    
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Mostrar indicador de carga
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando...';
+    submitBtn.disabled = true;
+    
+    // Simular generación de reporte
+    setTimeout(() => {
+        showNotification(`Reporte ${tipoReporte} generado exitosamente en formato ${formato.toUpperCase()}`, 'success');
+        
+        // Agregar al historial
+        agregarAlHistorial(tipoReporte, formato);
+        
+        // Restaurar botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Simular descarga
+        setTimeout(() => {
+            const filename = `${tipoReporte}_${new Date().toISOString().split('T')[0]}.${formato}`;
+            simularDescarga(filename);
+        }, 1000);
+        
+    }, 3000);
+}
+
+function generarReportePredefinido(tipo) {
+    showNotification(`Generando reporte ${tipo}...`, 'info');
+    
+    // Simular generación
+    setTimeout(() => {
+        showNotification(`Reporte ${tipo} generado exitosamente`, 'success');
+        const filename = `${tipo}_${new Date().toISOString().split('T')[0]}.pdf`;
+        simularDescarga(filename);
+    }, 2000);
+}
+
+function previsualizarReporte(filename = null) {
+    const modalContent = `
+        <div class="text-center">
+            <div style="height: 500px; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <div>
+                    <i class="fas fa-file-pdf fa-5x text-muted mb-3"></i>
+                    <h5>Vista Previa del Reporte</h5>
+                    <p class="text-muted">Aquí se mostraría la vista previa del reporte generado</p>
+                    <div class="mt-3">
+                        <span class="badge bg-primary me-2">12 Observaciones</span>
+                        <span class="badge bg-warning me-2">3 Incidencias</span>
+                        <span class="badge bg-success">5 E14 Capturados</span>
+                    </div>
+                </div>
+            </div>
+            <div class="export-options">
+                <button class="btn btn-danger" onclick="descargarReporte('preview.pdf')">
+                    <i class="fas fa-file-pdf me-2"></i>Descargar PDF
+                </button>
+                <button class="btn btn-success" onclick="descargarReporte('preview.xlsx')">
+                    <i class="fas fa-file-excel me-2"></i>Descargar Excel
+                </button>
+                <button class="btn btn-primary" onclick="descargarReporte('preview.docx')">
+                    <i class="fas fa-file-word me-2"></i>Descargar Word
+                </button>
+                <button class="btn btn-info" onclick="compartirReporte()">
+                    <i class="fas fa-share me-2"></i>Compartir
+                </button>
+            </div>
+        </div>
+    `;
+    
+    mostrarModal('Vista Previa del Reporte', modalContent);
+}
+
+function descargarReporte(filename) {
+    showNotification(`Descargando ${filename}...`, 'info');
+    
+    // Simular descarga
+    setTimeout(() => {
+        showNotification('Descarga completada', 'success');
+    }, 1500);
+}
+
+function simularDescarga(filename) {
+    // Crear elemento de descarga simulado
+    const link = document.createElement('a');
+    link.href = '#';
+    link.download = filename;
+    link.textContent = filename;
+    
+    showNotification(`Archivo ${filename} listo para descarga`, 'success');
+}
+
+function agregarAlHistorial(tipo, formato) {
+    const tbody = document.getElementById('historial-reportes');
+    const now = new Date();
+    const fechaHora = now.toLocaleString('es-CO');
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${fechaHora}</td>
+        <td>${tipo}</td>
+        <td><span class="badge bg-primary">${formato.toUpperCase()}</span></td>
+        <td><span class="badge bg-success">Completado</span></td>
+        <td>
+            <button class="btn btn-sm btn-primary me-1" onclick="descargarReporte('${tipo}_${now.toISOString().split('T')[0]}.${formato}')">
+                <i class="fas fa-download"></i>
+            </button>
+            <button class="btn btn-sm btn-info" onclick="previsualizarReporte('${tipo}_${now.toISOString().split('T')[0]}.${formato}')">
+                <i class="fas fa-eye"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.insertBefore(row, tbody.firstChild);
+}
+
+function compartirReporte() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Reporte Electoral',
+            text: 'Reporte generado por el Sistema Electoral',
+            url: window.location.href
+        });
+    } else {
+        showNotification('Función de compartir copiada al portapapeles', 'success');
+    }
+}
+
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="reportModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal anterior si existe
+    const existingModal = document.getElementById('reportModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+    modal.show();
+}
+
+function showNotification(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

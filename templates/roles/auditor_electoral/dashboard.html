@@ -1,0 +1,713 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Auditor Electoral - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/auditor_electoral.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-auditor-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Sistema Electoral - Auditor{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='auditor_electoral') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/audit/processes">
+        <i class="fas fa-search me-1"></i>Auditar Procesos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/audit/reports">
+        <i class="fas fa-file-alt me-1"></i>Reportes de Auditoría
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/audit/compliance">
+        <i class="fas fa-shield-alt me-1"></i>Cumplimiento
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-dark text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-shield-alt me-2"></i>Panel de Auditoría Electoral</h2>
+            <p class="mb-0">Supervisa y audita todos los procesos electorales del sistema</p>
+        </div>
+    </div>
+</div>
+<!-- Métricas de auditoría -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Auditorías Activas</h6>
+                        <h3 class="mb-0">{{ stats.active_audits or 5 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-search fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Irregularidades</h6>
+                        <h3 class="mb-0">{{ stats.irregularities or 2 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Cumplimiento</h6>
+                        <h3 class="mb-0">{{ stats.compliance or 95 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Reportes Generados</h6>
+                        <h3 class="mb-0">{{ stats.reports_generated or 12 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Acciones de auditoría -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas de Auditoría
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="auditarProcesos()">
+                            <i class="fas fa-search me-2"></i>
+                            Auditar Procesos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="verificarCumplimiento()">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Verificar Cumplimiento
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="generarReporteAuditoria()">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Generar Reporte
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="investigarIrregularidades()">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Investigar Irregularidades
+                        </button>
+                    </div>
+                </div>
+                <!-- Segunda fila de herramientas -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-dark btn-lg w-100 mb-2" onclick="validarDatos()">
+                            <i class="fas fa-check-double me-2"></i>
+                            Validar Datos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-dark btn-lg w-100 mb-2" onclick="monitorearSistema()">
+                            <i class="fas fa-eye me-2"></i>
+                            Monitorear Sistema
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-dark btn-lg w-100 mb-2" onclick="certificarIntegridad()">
+                            <i class="fas fa-certificate me-2"></i>
+                            Certificar Integridad
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-dark btn-lg w-100 mb-2" onclick="programarAuditoria()">
+                            <i class="fas fa-calendar me-2"></i>
+                            Programar Auditoría
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Auditorías recientes y alertas -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Auditorías Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Resultado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elecciones Alcaldía Florencia</td>
+                                <td>2024-11-01</td>
+                                <td><span class="badge bg-success">Completada</span></td>
+                                <td>95% Cumplimiento</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Registro Candidatos Gobernación</td>
+                                <td>2024-10-28</td>
+                                <td><span class="badge bg-warning">En Revisión</span></td>
+                                <td>2 Irregularidades</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning">Revisar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Configuración Mesas San Vicente</td>
+                                <td>2024-10-25</td>
+                                <td><span class="badge bg-success">Aprobada</span></td>
+                                <td>100% Cumplimiento</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-success">Certificar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bell me-2"></i>
+                    Alertas de Auditoría
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atención:</strong> Mesa 045-B requiere verificación adicional
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Info:</strong> Nuevo proceso electoral programado para auditoría
+                </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Completado:</strong> Auditoría mensual finalizada exitosamente
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block role_scripts %}
+<script>
+// Scripts específicos para auditor electoral
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Auditor Electoral cargado');
+    inicializarAuditoria();
+    verificarAlertas();
+    
+    // Verificar alertas cada 2 minutos
+    setInterval(verificarAlertas, 120000);
+});
+
+function inicializarAuditoria() {
+    // Configurar herramientas de auditoría
+    console.log('Herramientas de auditoría inicializadas');
+}
+
+function auditarProcesos() {
+    mostrarModalAuditor('Auditoría de Procesos Electorales', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Procesos Disponibles para Auditoría</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>Municipio</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Riesgo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elección Alcalde</td>
+                                <td>Florencia</td>
+                                <td>2024-12-01</td>
+                                <td><span class="badge bg-info">En Proceso</span></td>
+                                <td><span class="badge bg-success">Bajo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="iniciarAuditoriaDetallada('florencia_alcalde')">Auditar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Registro Candidatos</td>
+                                <td>San Vicente</td>
+                                <td>2024-11-15</td>
+                                <td><span class="badge bg-warning">Revisión</span></td>
+                                <td><span class="badge bg-warning">Medio</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="revisarProceso('sanvicente_registro')">Revisar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Configuración Mesas</td>
+                                <td>Puerto Rico</td>
+                                <td>2024-11-10</td>
+                                <td><span class="badge bg-danger">Alerta</span></td>
+                                <td><span class="badge bg-danger">Alto</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="investigarAlerta('puertorico_mesas')">Investigar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Herramientas de Auditoría</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="nuevaAuditoria()">
+                        <i class="fas fa-plus me-2"></i>Nueva Auditoría
+                    </button>
+                    <button class="btn btn-warning" onclick="auditoriaProgramada()">
+                        <i class="fas fa-calendar me-2"></i>Auditoría Programada
+                    </button>
+                    <button class="btn btn-danger" onclick="auditoriaUrgente()">
+                        <i class="fas fa-exclamation me-2"></i>Auditoría Urgente
+                    </button>
+                    <button class="btn btn-success" onclick="exportarAuditorias()">
+                        <i class="fas fa-download me-2"></i>Exportar Auditorías
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <h6>Estadísticas de Auditoría</h6>
+                    <p><strong>Auditorías Activas:</strong> 5</p>
+                    <p><strong>Irregularidades Detectadas:</strong> 2</p>
+                    <p><strong>Procesos Certificados:</strong> 8</p>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function verificarCumplimiento() {
+    mostrarModalAuditor('Verificación de Cumplimiento Normativo', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Marco Normativo Electoral</h6>
+                <div class="accordion" id="cumplimientoAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#normativaNacional">
+                                <i class="fas fa-gavel me-2"></i>Normativa Nacional - 95% Cumplimiento
+                            </button>
+                        </h2>
+                        <div id="normativaNacional" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Aspectos Evaluados</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Código Electoral</span>
+                                                <span class="badge bg-success">100%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Resoluciones CNE</span>
+                                                <span class="badge bg-success">95%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Decretos Reglamentarios</span>
+                                                <span class="badge bg-warning">90%</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Observaciones</h6>
+                                        <div class="alert alert-warning">
+                                            <small>Revisar aplicación de decreto 1234/2024</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary" onclick="detalleNormativa('nacional')">Ver Detalles</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#procedimientos">
+                                <i class="fas fa-list-ol me-2"></i>Procedimientos Internos - 88% Cumplimiento
+                            </button>
+                        </h2>
+                        <div id="procedimientos" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Procedimientos Evaluados</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Registro de candidatos</span>
+                                                <span class="badge bg-success">95%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Configuración de mesas</span>
+                                                <span class="badge bg-warning">85%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Conteo de votos</span>
+                                                <span class="badge bg-warning">85%</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Recomendaciones</h6>
+                                        <div class="alert alert-info">
+                                            <small>Estandarizar procedimientos de conteo</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-warning" onclick="detalleProcedimientos()">Ver Detalles</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success" onclick="certificarCumplimiento()">
+                        <i class="fas fa-certificate me-2"></i>Certificar Cumplimiento
+                    </button>
+                    <button class="btn btn-warning" onclick="generarRecomendaciones()">
+                        <i class="fas fa-lightbulb me-2"></i>Generar Recomendaciones
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function generarReporteAuditoria() {
+    mostrarModalAuditor('Generación de Reporte de Auditoría', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Configuración del Reporte</h6>
+                <form id="reporteAuditoriaForm">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Reporte</label>
+                        <select class="form-select" id="tipoReporteAuditoria">
+                            <option value="general">Reporte General de Auditoría</option>
+                            <option value="cumplimiento">Reporte de Cumplimiento</option>
+                            <option value="irregularidades">Reporte de Irregularidades</option>
+                            <option value="certificacion">Certificación de Integridad</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alcance de la Auditoría</label>
+                        <select class="form-select" id="alcanceAuditoria">
+                            <option value="departamental">Departamental</option>
+                            <option value="municipal">Por Municipio</option>
+                            <option value="proceso">Por Proceso</option>
+                            <option value="mesa">Por Mesa</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Período de Auditoría</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control" id="fechaInicioAuditoria">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" id="fechaFinAuditoria">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nivel de Detalle</label>
+                        <select class="form-select" id="nivelDetalle">
+                            <option value="ejecutivo">Resumen Ejecutivo</option>
+                            <option value="detallado">Reporte Detallado</option>
+                            <option value="tecnico">Reporte Técnico</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h6>Métricas de Auditoría</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <canvas id="auditoriaChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h4 class="text-success">95%</h4>
+                                <small>Cumplimiento</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h4 class="text-warning">2</h4>
+                                <small>Irregularidades</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="generarReporteAud()">
+                        <i class="fas fa-file-pdf me-2"></i>Generar PDF
+                    </button>
+                    <button class="btn btn-success" onclick="enviarReporteAud()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Crear gráfico de auditoría
+    setTimeout(() => {
+        const ctx = document.getElementById('auditoriaChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Conforme', 'Observaciones', 'Irregularidades'],
+                    datasets: [{
+                        data: [85, 13, 2],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+function investigarIrregularidades() {
+    mostrarModalAuditor('Investigación de Irregularidades', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Irregularidades Detectadas</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Severidad</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>IRR-001</strong></td>
+                                <td>Procedimiento</td>
+                                <td>Discrepancia en conteo Mesa 045-B</td>
+                                <td><span class="badge bg-warning">Media</span></td>
+                                <td><span class="badge bg-info">Investigando</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="investigarDetalle('IRR-001')">Investigar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>IRR-002</strong></td>
+                                <td>Documentación</td>
+                                <td>Acta incompleta Mesa 023-A</td>
+                                <td><span class="badge bg-danger">Alta</span></td>
+                                <td><span class="badge bg-warning">Pendiente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="investigarUrgente('IRR-002')">Urgente</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="nuevaInvestigacion()">
+                        <i class="fas fa-plus me-2"></i>Nueva Investigación
+                    </button>
+                    <button class="btn btn-warning" onclick="generarInformeIrregularidades()">
+                        <i class="fas fa-file-alt me-2"></i>Generar Informe
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Estadísticas de Irregularidades</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p><strong>Total Detectadas:</strong> 2</p>
+                        <p><strong>En Investigación:</strong> 1</p>
+                        <p><strong>Resueltas:</strong> 0</p>
+                        <p><strong>Pendientes:</strong> 1</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6>Acciones Correctivas</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-sm" onclick="implementarCorrectivos()">
+                            <i class="fas fa-tools me-2"></i>Implementar Correctivos
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="seguimientoCorrectivos()">
+                            <i class="fas fa-eye me-2"></i>Seguimiento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModalAuditor(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="auditorModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('auditorModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('auditorModal'));
+    modal.show();
+}
+
+function verificarAlertas() {
+    // Simular verificación de alertas
+    console.log('Verificando alertas de auditoría...');
+}
+
+function mostrarNotificacionAuditor(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Implementar funciones específicas
+function validarDatos() { mostrarNotificacionAuditor('Iniciando validación de datos...', 'info'); }
+function monitorearSistema() { mostrarNotificacionAuditor('Activando monitoreo del sistema...', 'info'); }
+function certificarIntegridad() { mostrarNotificacionAuditor('Iniciando certificación de integridad...', 'success'); }
+function programarAuditoria() { mostrarNotificacionAuditor('Programando nueva auditoría...', 'info'); }
+function iniciarAuditoriaDetallada(proceso) { mostrarNotificacionAuditor(`Iniciando auditoría detallada de ${proceso}...`, 'info'); }
+function revisarProceso(proceso) { mostrarNotificacionAuditor(`Revisando proceso ${proceso}...`, 'warning'); }
+function investigarAlerta(proceso) { mostrarNotificacionAuditor(`Investigando alerta en ${proceso}...`, 'error'); }
+function nuevaAuditoria() { mostrarNotificacionAuditor('Creando nueva auditoría...', 'info'); }
+function auditoriaProgramada() { mostrarNotificacionAuditor('Abriendo auditorías programadas...', 'info'); }
+function auditoriaUrgente() { mostrarNotificacionAuditor('Iniciando auditoría urgente...', 'error'); }
+function exportarAuditorias() { mostrarNotificacionAuditor('Exportando auditorías...', 'success'); }
+function detalleNormativa(tipo) { mostrarNotificacionAuditor(`Mostrando detalles de normativa ${tipo}...`, 'info'); }
+function detalleProcedimientos() { mostrarNotificacionAuditor('Mostrando detalles de procedimientos...', 'info'); }
+function certificarCumplimiento() { mostrarNotificacionAuditor('Certificando cumplimiento normativo...', 'success'); }
+function generarRecomendaciones() { mostrarNotificacionAuditor('Generando recomendaciones...', 'info'); }
+function generarReporteAud() { mostrarNotificacionAuditor('Generando reporte de auditoría...', 'info'); }
+function enviarReporteAud() { mostrarNotificacionAuditor('Enviando reporte de auditoría...', 'success'); }
+function investigarDetalle(id) { mostrarNotificacionAuditor(`Investigando irregularidad ${id}...`, 'info'); }
+function investigarUrgente(id) { mostrarNotificacionAuditor(`Investigación urgente de ${id}...`, 'error'); }
+function nuevaInvestigacion() { mostrarNotificacionAuditor('Iniciando nueva investigación...', 'info'); }
+function generarInformeIrregularidades() { mostrarNotificacionAuditor('Generando informe de irregularidades...', 'warning'); }
+function implementarCorrectivos() { mostrarNotificacionAuditor('Implementando acciones correctivas...', 'success'); }
+function seguimientoCorrectivos() { mostrarNotificacionAuditor('Iniciando seguimiento de correctivos...', 'info'); }
+</script>
+{% endblock %}
+</parameter>
+</invoke>

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema Electoral ERP{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+#mapa-departamental {
+    height: 400px;
+    border-radius: 8px;
+}
+.info-ubicacion {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Información de ubicación general -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="info-ubicacion p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-map-marker-alt me-2"></i>Sistema Electoral ERP - Departamento del Caquetá</h2>
+                    <p class="mb-0 fs-5">Centro de Comando Electoral | 16 Municipios | 180 Puestos de Votación | 720 Mesas</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="me-3">
+                            <small>Estado del Sistema</small><br>
+                            <span class="badge bg-success fs-6">OPERATIVO</span>
+                        </div>
+                        <div>
+                            <small>Cobertura</small><br>
+                            <span class="badge bg-info fs-6">95%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mapa departamental -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-map me-2"></i>
+                    Mapa Electoral - Departamento del Caquetá
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="mapa-departamental"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Estadísticas en Tiempo Real
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Puestos Operativos</span>
+                        <strong class="text-success">171/180</strong>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 95%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Personal Asignado</span>
+                        <strong class="text-info">2,160/2,160</strong>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Materiales Distribuidos</span>
+                        <strong class="text-warning">85%</strong>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: 85%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Comunicaciones</span>
+                        <strong class="text-primary">Activas</strong>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" style="width: 98%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h4><i class="fas fa-info-circle me-2"></i>Acceso por Roles</h4>
+            <p>Seleccione su rol para acceder al dashboard específico con funcionalidades personalizadas:</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-shield fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">Super Administrador</h5>
+                <p class="card-text">Control total del sistema</p>
+                <a href="/dashboard?role=super_admin" class="btn btn-danger">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-cog fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Admin Departamental</h5>
+                <p class="card-text">Gestión departamental</p>
+                <a href="/dashboard?role=admin_departamental" class="btn btn-primary">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-tie fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Admin Municipal</h5>
+                <p class="card-text">Gestión municipal</p>
+                <a href="/dashboard?role=admin_municipal" class="btn btn-warning">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clipboard-list fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Coordinador Electoral</h5>
+                <p class="card-text">Coordinación electoral</p>
+                <a href="/dashboard?role=coordinador_electoral" class="btn btn-success">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-gavel fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Jurado de Votación</h5>
+                <p class="card-text">Gestión de mesa</p>
+                <a href="/dashboard?role=jurado_votacion" class="btn btn-info">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-eye fa-3x text-secondary mb-3"></i>
+                <h5 class="card-title">Testigo de Mesa</h5>
+                <p class="card-text">Observación y registro</p>
+                <a href="/dashboard?role=testigo_mesa" class="btn btn-secondary">Acceder</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estado del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-server fa-2x text-success mb-2"></i>
+                            <h6>Servidor</h6>
+                            <span class="badge bg-success">Activo</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-database fa-2x text-success mb-2"></i>
+                            <h6>Base de Datos</h6>
+                            <span class="badge bg-success">Conectada</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-users fa-2x text-info mb-2"></i>
+                            <h6>Usuarios</h6>
+                            <span class="badge bg-info">6 Demo</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
+                            <h6>Módulos</h6>
+                            <span class="badge bg-warning">5 Activos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar mapa del departamento del Caquetá
+    const mapa = L.map('mapa-departamental').setView([1.6143, -75.6062], 8);
+    
+    // Agregar capa de mapa
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(mapa);
+    
+    // Municipios del Caquetá con coordenadas aproximadas
+    const municipios = [
+        {nombre: 'Florencia', lat: 1.6143, lng: -75.6062, puestos: 12, estado: 'operativo'},
+        {nombre: 'San Vicente del Caguán', lat: 2.1167, lng: -74.7667, puestos: 8, estado: 'operativo'},
+        {nombre: 'Puerto Rico', lat: 1.9333, lng: -75.1500, puestos: 6, estado: 'operativo'},
+        {nombre: 'El Paujil', lat: 1.4167, lng: -75.2833, puestos: 4, estado: 'operativo'},
+        {nombre: 'La Montañita', lat: 1.4833, lng: -75.4167, puestos: 3, estado: 'atencion'},
+        {nombre: 'Curillo', lat: 1.2833, lng: -76.0833, puestos: 2, estado: 'critico'},
+        {nombre: 'El Doncello', lat: 1.6667, lng: -75.2833, puestos: 5, estado: 'operativo'},
+        {nombre: 'Belén de los Andaquíes', lat: 1.4167, lng: -75.8500, puestos: 3, estado: 'operativo'},
+        {nombre: 'Cartagena del Chairá', lat: 1.3333, lng: -74.8667, puestos: 7, estado: 'operativo'},
+        {nombre: 'Morelia', lat: 1.4833, lng: -75.7833, puestos: 2, estado: 'operativo'},
+        {nombre: 'San José del Fragua', lat: 1.2833, lng: -75.9167, puestos: 3, estado: 'operativo'},
+        {nombre: 'Albania', lat: 1.4167, lng: -76.0833, puestos: 2, estado: 'operativo'},
+        {nombre: 'Solano', lat: 1.5833, lng: -74.7500, puestos: 5, estado: 'operativo'},
+        {nombre: 'Milán', lat: 1.3000, lng: -75.9333, puestos: 2, estado: 'operativo'},
+        {nombre: 'Solita', lat: 1.2167, lng: -75.6833, puestos: 1, estado: 'operativo'},
+        {nombre: 'Valparaíso', lat: 1.2500, lng: -75.4167, puestos: 1, estado: 'operativo'}
+    ];
+    
+    // Agregar marcadores para cada municipio
+    municipios.forEach(municipio => {
+        const color = municipio.estado === 'operativo' ? 'green' : 
+                     municipio.estado === 'atencion' ? 'orange' : 'red';
+        
+        const marker = L.circleMarker([municipio.lat, municipio.lng], {
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.7,
+            radius: Math.sqrt(municipio.puestos) * 3
+        }).addTo(mapa);
+        
+        marker.bindPopup(`
+            <div class="text-center">
+                <h6><strong>${municipio.nombre}</strong></h6>
+                <p class="mb-1">Puestos: ${municipio.puestos}</p>
+                <p class="mb-0">Estado: <span class="badge bg-${color === 'green' ? 'success' : color === 'orange' ? 'warning' : 'danger'}">${municipio.estado.toUpperCase()}</span></p>
+            </div>
+        `);
+    });
+    
+    // Agregar leyenda
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        div.innerHTML = `
+            <div class="bg-white p-2 rounded shadow-sm">
+                <h6><strong>Estado de Municipios</strong></h6>
+                <div><i class="fas fa-circle text-success"></i> Operativo</div>
+                <div><i class="fas fa-circle text-warning"></i> Requiere Atención</div>
+                <div><i class="fas fa-circle text-danger"></i> Crítico</div>
+            </div>
+        `;
+        return div;
+    };
+    legend.addTo(mapa);
+    
+    // Actualizar estadísticas cada 30 segundos
+    setInterval(actualizarEstadisticas, 30000);
+});
+
+function actualizarEstadisticas() {
+    // Simular actualización de estadísticas en tiempo real
+    console.log('Actualizando estadísticas del sistema...');
+}
+</script>
+{% endblock %}

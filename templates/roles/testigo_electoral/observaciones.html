@@ -1,0 +1,494 @@
+{% extends "base.html" %}
+{% block title %}Observaciones - Testigo Electoral{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/testigo_electoral.css') }}" rel="stylesheet">
+<style>
+.observacion-form {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.severity-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.severity-option {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.severity-option:hover {
+    border-color: #3b82f6;
+    background: #f0f9ff;
+}
+.severity-option.selected {
+    border-color: #3b82f6;
+    background: #dbeafe;
+}
+.photo-capture {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.photo-capture:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+.photo-preview {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    margin: 0.5rem;
+}
+</style>
+{% endblock %}
+{% block body_class %}role-testigo-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-primary{% endblock %}
+{% block brand_text %}Sistema Electoral - Observaciones{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="/dashboard/testigo_electoral">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/testigo/observacion">
+        <i class="fas fa-eye me-2"></i>Observaciones
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/resultados">
+        <i class="fas fa-chart-bar me-2"></i>Resultados
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/e14">
+        <i class="fas fa-camera me-2"></i>Capturar E14
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>
+                        Registro de Observaciones Electorales
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">Registre observaciones sobre el proceso electoral, irregularidades o aspectos relevantes que requieran documentación oficial.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Nueva Observación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="observacion-form">
+                <h5 class="mb-4">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Nueva Observación
+                </h5>
+                
+                <form id="observacion-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Observación</label>
+                                <select class="form-select" id="tipo-observacion" required>
+                                    <option value="">Seleccione el tipo...</option>
+                                    <option value="proceso_apertura">Proceso de Apertura</option>
+                                    <option value="desarrollo_votacion">Desarrollo de Votación</option>
+                                    <option value="comportamiento_funcionarios">Comportamiento de Funcionarios</option>
+                                    <option value="irregularidad_procedimiento">Irregularidad en Procedimiento</option>
+                                    <option value="incidente_seguridad">Incidente de Seguridad</option>
+                                    <option value="problema_tecnico">Problema Técnico</option>
+                                    <option value="proceso_cierre">Proceso de Cierre</option>
+                                    <option value="escrutinio">Escrutinio</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Mesa Observada</label>
+                                <select class="form-select" id="mesa-observada">
+                                    <option value="">Seleccione la mesa...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Severidad de la Observación</label>
+                        <div class="severity-selector">
+                            <div class="severity-option" data-severity="baja">
+                                <i class="fas fa-info-circle text-info fa-2x mb-2"></i>
+                                <h6>Baja</h6>
+                                <small>Observación informativa</small>
+                            </div>
+                            <div class="severity-option" data-severity="media">
+                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
+                                <h6>Media</h6>
+                                <small>Requiere atención</small>
+                            </div>
+                            <div class="severity-option" data-severity="alta">
+                                <i class="fas fa-exclamation-circle text-danger fa-2x mb-2"></i>
+                                <h6>Alta</h6>
+                                <small>Situación crítica</small>
+                            </div>
+                        </div>
+                        <input type="hidden" id="severidad" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Descripción Detallada</label>
+                        <textarea class="form-control" id="descripcion" rows="4" required
+                                placeholder="Describa detalladamente lo observado, incluyendo hora, personas involucradas y circunstancias..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Evidencia Fotográfica (Opcional)</label>
+                        <div class="photo-capture" onclick="document.getElementById('photo-input').click()">
+                            <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                            <h6>Capturar o Subir Fotos</h6>
+                            <p class="text-muted mb-0">Haga clic para agregar evidencia fotográfica</p>
+                        </div>
+                        <input type="file" id="photo-input" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
+                        <div id="photo-previews" class="mt-3"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Calificación del Proceso</label>
+                                <select class="form-select" id="calificacion-proceso">
+                                    <option value="">Seleccione...</option>
+                                    <option value="excelente">Excelente</option>
+                                    <option value="bueno">Bueno</option>
+                                    <option value="regular">Regular</option>
+                                    <option value="deficiente">Deficiente</option>
+                                    <option value="critico">Crítico</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="obtener-ubicacion">
+                                    <label class="form-check-label" for="obtener-ubicacion">
+                                        Incluir ubicación GPS actual
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" class="btn btn-secondary me-3" onclick="limpiarFormulario()">
+                            <i class="fas fa-times me-2"></i>Limpiar
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Registrar Observación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Observaciones Registradas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Observaciones Registradas Hoy
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="observaciones-lista">
+                        <!-- Las observaciones se cargarán dinámicamente -->
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-eye fa-3x mb-3"></i>
+                            <h6>No hay observaciones registradas</h6>
+                            <p>Las observaciones que registre aparecerán aquí</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+let selectedSeverity = null;
+let uploadedPhotos = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de observaciones cargada');
+    cargarMesasDisponibles();
+    cargarObservacionesExistentes();
+    
+    // Event listeners
+    document.getElementById('observacion-form').addEventListener('submit', handleObservacionSubmit);
+    
+    // Severity selector
+    document.querySelectorAll('.severity-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.severity-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedSeverity = this.dataset.severity;
+            document.getElementById('severidad').value = selectedSeverity;
+        });
+    });
+});
+
+function cargarMesasDisponibles() {
+    // Simular carga de mesas
+    const mesaSelect = document.getElementById('mesa-observada');
+    const mesas = ['001-A', '001-B', '002-A', '002-B', '003-A'];
+    
+    mesas.forEach(mesa => {
+        const option = document.createElement('option');
+        option.value = mesa;
+        option.textContent = `Mesa ${mesa}`;
+        mesaSelect.appendChild(option);
+    });
+}
+
+function cargarObservacionesExistentes() {
+    // Simular observaciones existentes
+    const observacionesDemo = [
+        {
+            id: 1,
+            tipo: 'desarrollo_votacion',
+            descripcion: 'Proceso de votación transcurre con normalidad. Flujo constante de votantes.',
+            severidad: 'baja',
+            hora: '10:30 AM',
+            mesa: '001-A'
+        },
+        {
+            id: 2,
+            tipo: 'irregularidad_procedimiento',
+            descripcion: 'Se observó demora en la verificación de documentos de identidad.',
+            severidad: 'media',
+            hora: '11:45 AM',
+            mesa: '002-A'
+        }
+    ];
+    
+    mostrarObservaciones(observacionesDemo);
+}
+
+function mostrarObservaciones(observaciones) {
+    const container = document.getElementById('observaciones-lista');
+    
+    if (observaciones.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-eye fa-3x mb-3"></i>
+                <h6>No hay observaciones registradas</h6>
+                <p>Las observaciones que registre aparecerán aquí</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = observaciones.map(obs => `
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="card-title">
+                            <span class="badge bg-${getSeverityColor(obs.severidad)} me-2">${obs.severidad.toUpperCase()}</span>
+                            ${getTipoDisplayName(obs.tipo)}
+                        </h6>
+                        <p class="card-text">${obs.descripcion}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>${obs.hora} - Mesa ${obs.mesa}
+                        </small>
+                    </div>
+                    <div class="text-end">
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editarObservacion(${obs.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarObservacion(${obs.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getSeverityColor(severity) {
+    const colors = {
+        'baja': 'info',
+        'media': 'warning',
+        'alta': 'danger'
+    };
+    return colors[severity] || 'secondary';
+}
+
+function getTipoDisplayName(tipo) {
+    const nombres = {
+        'proceso_apertura': 'Proceso de Apertura',
+        'desarrollo_votacion': 'Desarrollo de Votación',
+        'comportamiento_funcionarios': 'Comportamiento de Funcionarios',
+        'irregularidad_procedimiento': 'Irregularidad en Procedimiento',
+        'incidente_seguridad': 'Incidente de Seguridad',
+        'problema_tecnico': 'Problema Técnico',
+        'proceso_cierre': 'Proceso de Cierre',
+        'escrutinio': 'Escrutinio',
+        'otro': 'Otro'
+    };
+    return nombres[tipo] || tipo;
+}
+
+function handlePhotoUpload(event) {
+    const files = event.target.files;
+    const previewContainer = document.getElementById('photo-previews');
+    
+    Array.from(files).forEach(file => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'd-inline-block position-relative';
+                photoDiv.innerHTML = `
+                    <img src="${e.target.result}" class="photo-preview" alt="Evidencia">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" 
+                            onclick="removePhoto(this)" style="transform: translate(50%, -50%);">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                previewContainer.appendChild(photoDiv);
+                uploadedPhotos.push(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+function removePhoto(button) {
+    const photoDiv = button.parentElement;
+    const index = Array.from(photoDiv.parentElement.children).indexOf(photoDiv);
+    uploadedPhotos.splice(index, 1);
+    photoDiv.remove();
+}
+
+function handleObservacionSubmit(event) {
+    event.preventDefault();
+    
+    if (!selectedSeverity) {
+        showNotification('Debe seleccionar la severidad de la observación', 'warning');
+        return;
+    }
+    
+    const formData = {
+        testigo_id: 5, // Laura González
+        tipo_observacion: document.getElementById('tipo-observacion').value,
+        mesa_id: document.getElementById('mesa-observada').value,
+        descripcion: document.getElementById('descripcion').value,
+        severidad: selectedSeverity,
+        calificacion_proceso: document.getElementById('calificacion-proceso').value,
+        evidencia_fotos: uploadedPhotos,
+        incluir_gps: document.getElementById('obtener-ubicacion').checked
+    };
+    
+    // Obtener ubicación si se solicitó
+    if (formData.incluir_gps && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                formData.ubicacion_gps_lat = position.coords.latitude;
+                formData.ubicacion_gps_lng = position.coords.longitude;
+                enviarObservacion(formData);
+            },
+            function(error) {
+                console.warn('Error obteniendo ubicación:', error);
+                enviarObservacion(formData);
+            }
+        );
+    } else {
+        enviarObservacion(formData);
+    }
+}
+
+function enviarObservacion(data) {
+    // Simular envío
+    showNotification('Observación registrada exitosamente', 'success');
+    
+    // Limpiar formulario
+    limpiarFormulario();
+    
+    // Recargar lista
+    setTimeout(() => {
+        cargarObservacionesExistentes();
+    }, 1000);
+}
+
+function limpiarFormulario() {
+    document.getElementById('observacion-form').reset();
+    document.querySelectorAll('.severity-option').forEach(opt => opt.classList.remove('selected'));
+    selectedSeverity = null;
+    uploadedPhotos = [];
+    document.getElementById('photo-previews').innerHTML = '';
+    document.getElementById('severidad').value = '';
+}
+
+function editarObservacion(id) {
+    showNotification('Función de edición en desarrollo', 'info');
+}
+
+function eliminarObservacion(id) {
+    if (confirm('¿Está seguro de que desea eliminar esta observación?')) {
+        showNotification('Observación eliminada', 'success');
+        cargarObservacionesExistentes();
+    }
+}
+
+function showNotification(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

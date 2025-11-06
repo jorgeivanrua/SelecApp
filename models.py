@@ -43,6 +43,33 @@ class TipoEleccion(enum.Enum):
     CONCEJO = "concejo"
     EDILES = "ediles"
 
+class CargoElectoral(enum.Enum):
+    PRESIDENTE = "presidente"
+    VICEPRESIDENTE = "vicepresidente"
+    SENADOR = "senador"
+    REPRESENTANTE_CAMARA = "representante_camara"
+    GOBERNADOR = "gobernador"
+    DIPUTADO_ASAMBLEA = "diputado_asamblea"
+    ALCALDE = "alcalde"
+    CONCEJAL = "concejal"
+    EDIL = "edil"
+    CONSEJERO_JUVENTUD = "consejero_juventud"
+    CITREP = "citrep"
+
+class TipoCircunscripcion(enum.Enum):
+    NACIONAL = "nacional"
+    DEPARTAMENTAL = "departamental"
+    MUNICIPAL = "municipal"
+    DISTRITAL = "distrital"
+    ESPECIAL = "especial"
+
+class EstadoCandidato(enum.Enum):
+    REGISTRADO = "registrado"
+    HABILITADO = "habilitado"
+    INHABILITADO = "inhabilitado"
+    RETIRADO = "retirado"
+    FALLECIDO = "fallecido"
+
 # Modelo principal de ubicaciones geográficas basado en DIVIPOLA
 class Location(Base):
     __tablename__ = 'locations'
@@ -260,6 +287,209 @@ class MesaElectoralProcess(Base):
         # UniqueConstraint('mesa_id', 'proceso_electoral_id'),
     )
 
+# Modelo de partidos políticos
+class PoliticalParty(Base):
+    __tablename__ = 'political_parties'
+    
+    id = Column(Integer, primary_key=True)
+    
+    # Información del partido
+    nombre_oficial = Column(String(200), nullable=False, index=True)
+    siglas = Column(String(20), unique=True, nullable=False, index=True)
+    color_representativo = Column(String(7), nullable=True)  # Código hexadecimal
+    logo_url = Column(String(500), nullable=True)
+    
+    # Información adicional
+    descripcion = Column(Text, nullable=True)
+    fundacion_year = Column(Integer, nullable=True)
+    ideologia = Column(String(100), nullable=True)
+    
+    # Estado
+    activo = Column(Boolean, default=True)
+    reconocido_oficialmente = Column(Boolean, default=True)
+    
+    # Metadatos
+    creado_por = Column(Integer, ForeignKey('users.id'), nullable=True)
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# Modelo de coaliciones
+class Coalition(Base):
+    __tablename__ = 'coalitions'
+    
+    id = Column(Integer, primary_key=True)
+    
+    # Información de la coalición
+    nombre_coalicion = Column(String(200), nullable=False, index=True)
+    descripcion = Column(Text, nullable=True)
+    fecha_formacion = Column(DateTime, nullable=True)
+    fecha_disolucion = Column(DateTime, nullable=True)
+    
+    # Estado
+    activo = Column(Boolean, default=True)
+    
+    # Metadatos
+    creado_por = Column(Integer, ForeignKey('users.id'), nullable=True)
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# Modelo de relación coalición-partido
+class CoalitionParty(Base):
+    __tablename__ = 'coalition_parties'
+    
+    id = Column(Integer, primary_key=True)
+    
+    coalition_id = Column(Integer, ForeignKey('coalitions.id'), nullable=False, index=True)
+    party_id = Column(Integer, ForeignKey('political_parties.id'), nullable=False, index=True)
+    
+    # Información de la relación
+    fecha_adhesion = Column(DateTime, default=datetime.utcnow)
+    fecha_retiro = Column(DateTime, nullable=True)
+    es_partido_principal = Column(Boolean, default=False)
+    porcentaje_participacion = Column(Float, nullable=True)
+    
+    # Relaciones
+    coalicion = relationship("Coalition", backref="partidos")
+    partido = relationship("PoliticalParty", backref="coaliciones")
+
+# Modelo de candidatos
+class Candidate(Base):
+    __tablename__ = 'candidates'
+    
+    id = Column(Integer, primary_key=True)
+    
+    # Información personal
+    nombre_completo = Column(String(200), nullable=False, index=True)
+    cedula = Column(String(20), unique=True, nullable=False, index=True)
+    numero_tarjeton = Column(Integer, nullable=False, index=True)
+    
+    # Información electoral
+    cargo_aspirado = Column(String(100), nullable=False, index=True)
+    election_type_id = Column(Integer, ForeignKey('election_types.id'), nullable=False, index=True)
+    circunscripcion = Column(String(100), nullable=False)
+    
+    # Afiliación política (solo una puede ser no nula)
+    party_id = Column(Integer, ForeignKey('political_parties.id'), nullable=True, index=True)
+    coalition_id = Column(Integer, ForeignKey('coalitions.id'), nullable=True, index=True)
+    es_independiente = Column(Boolean, default=False)
+    
+    # Información adicional
+    foto_url = Column(String(500), nullable=True)
+    biografia = Column(Text, nullable=True)
+    propuestas = Column(Text, nullable=True)
+    experiencia = Column(Text, nullable=True)
+    
+    # Estado
+    activo = Column(Boolean, default=True)
+    habilitado_oficialmente = Column(Boolean, default=True)
+    
+    # Metadatos
+    creado_por = Column(Integer, ForeignKey('users.id'), nullable=True)
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relaciones
+    tipo_eleccion = relationship("ElectionType", backref="candidatos")
+    partido = relationship("PoliticalParty", backref="candidatos")
+    coalicion = relationship("Coalition", backref="candidatos")
+
+# Modelo de resultados por candidato
+class CandidateResults(Base):
+    __tablename__ = 'candidate_results'
+    
+    id = Column(Integer, primary_key=True)
+    
+    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=False, index=True)
+    election_type_id = Column(Integer, ForeignKey('election_types.id'), nullable=False, index=True)
+    
+    # Resultados de votación
+    total_votos = Column(Integer, default=0)
+    porcentaje_votacion = Column(Float, default=0.0)
+    posicion_ranking = Column(Integer, nullable=True)
+    
+    # Distribución geográfica
+    votos_por_municipio = Column(JSON, nullable=True)
+    votos_por_puesto = Column(JSON, nullable=True)
+    mejor_municipio = Column(String(100), nullable=True)
+    peor_municipio = Column(String(100), nullable=True)
+    
+    # Estadísticas
+    promedio_votos_por_mesa = Column(Float, nullable=True)
+    desviacion_estandar = Column(Float, nullable=True)
+    coeficiente_variacion = Column(Float, nullable=True)
+    
+    # Metadatos
+    fecha_calculo = Column(DateTime, default=datetime.utcnow)
+    calculado_por = Column(Integer, ForeignKey('users.id'), nullable=True)
+    total_mesas_incluidas = Column(Integer, default=0)
+    total_votos_validos_contexto = Column(Integer, default=0)
+    
+    # Relaciones
+    candidato = relationship("Candidate", backref="resultados")
+    tipo_eleccion = relationship("ElectionType")
+
+# Modelo de resultados por partido
+class PartyResults(Base):
+    __tablename__ = 'party_results'
+    
+    id = Column(Integer, primary_key=True)
+    
+    party_id = Column(Integer, ForeignKey('political_parties.id'), nullable=False, index=True)
+    election_type_id = Column(Integer, ForeignKey('election_types.id'), nullable=False, index=True)
+    
+    # Resultados agregados
+    total_votos_partido = Column(Integer, default=0)
+    porcentaje_votacion_partido = Column(Float, default=0.0)
+    posicion_ranking_partido = Column(Integer, nullable=True)
+    
+    # Candidatos del partido
+    total_candidatos = Column(Integer, default=0)
+    candidatos_resultados = Column(JSON, nullable=True)
+    mejor_candidato_id = Column(Integer, ForeignKey('candidates.id'), nullable=True)
+    peor_candidato_id = Column(Integer, ForeignKey('candidates.id'), nullable=True)
+    
+    # Distribución geográfica del partido
+    votos_por_municipio = Column(JSON, nullable=True)
+    mejor_municipio_partido = Column(String(100), nullable=True)
+    
+    # Metadatos
+    fecha_calculo = Column(DateTime, default=datetime.utcnow)
+    calculado_por = Column(Integer, ForeignKey('users.id'), nullable=True)
+    
+    # Relaciones
+    partido = relationship("PoliticalParty", backref="resultados")
+    tipo_eleccion = relationship("ElectionType")
+
+# Modelo de resultados por coalición
+class CoalitionResults(Base):
+    __tablename__ = 'coalition_results'
+    
+    id = Column(Integer, primary_key=True)
+    
+    coalition_id = Column(Integer, ForeignKey('coalitions.id'), nullable=False, index=True)
+    election_type_id = Column(Integer, ForeignKey('election_types.id'), nullable=False, index=True)
+    
+    # Resultados agregados
+    total_votos_coalicion = Column(Integer, default=0)
+    porcentaje_votacion_coalicion = Column(Float, default=0.0)
+    posicion_ranking_coalicion = Column(Integer, nullable=True)
+    
+    # Partidos de la coalición
+    partidos_resultados = Column(JSON, nullable=True)
+    mejor_partido_id = Column(Integer, ForeignKey('political_parties.id'), nullable=True)
+    
+    # Candidatos de la coalición
+    total_candidatos_coalicion = Column(Integer, default=0)
+    mejor_candidato_coalicion_id = Column(Integer, ForeignKey('candidates.id'), nullable=True)
+    
+    # Metadatos
+    fecha_calculo = Column(DateTime, default=datetime.utcnow)
+    calculado_por = Column(Integer, ForeignKey('users.id'), nullable=True)
+    
+    # Relaciones
+    coalicion = relationship("Coalition", backref="resultados")
+    tipo_eleccion = relationship("ElectionType")
+
 if __name__ == "__main__":
     print("Modelos de datos para el Sistema de Recolección Inicial de Votaciones - Caquetá")
     print("Modelos definidos:")
@@ -270,3 +500,10 @@ if __name__ == "__main__":
     print("- ElectoralJourney: Jornadas electorales")
     print("- ElectoralProcess: Procesos electorales específicos")
     print("- MesaElectoralProcess: Relación mesa-proceso electoral")
+    print("- PoliticalParty: Partidos políticos")
+    print("- Coalition: Coaliciones entre partidos")
+    print("- CoalitionParty: Relación coalición-partido")
+    print("- Candidate: Candidatos electorales")
+    print("- CandidateResults: Resultados por candidato")
+    print("- PartyResults: Resultados por partido")
+    print("- CoalitionResults: Resultados por coalición")

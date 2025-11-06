@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Sistema Electoral ERP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Iniciar Sesión
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="cedula" class="form-label">
+                            <i class="fas fa-id-card me-1"></i>
+                            Cédula
+                        </label>
+                        <input type="text" class="form-control" id="cedula" name="cedula" 
+                               placeholder="Ingrese su número de cédula" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>
+                            Contraseña
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Ingrese su contraseña" required>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                        <label class="form-check-label" for="remember_me">
+                            Recordarme
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <small class="text-muted">
+                    ¿Olvidaste tu contraseña? 
+                    <a href="#" onclick="alert('Funcionalidad no implementada')">Recuperar</a>
+                </small>
+            </div>
+        </div>
+        
+        <!-- Demo Users Info -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Usuarios de Demostración
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Super Admin:</strong><br>
+                        <small>Cédula: 12345678</small><br>
+                        <small>Contraseña: demo123</small>
+                    </div>
+                    <div class="col-6">
+                        <strong>Coord. Departamental:</strong><br>
+                        <small>Cédula: 87654321</small><br>
+                        <small>Contraseña: demo123</small>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <strong>Coord. Municipal:</strong><br>
+                        <small>Cédula: 11111111</small><br>
+                        <small>Contraseña: demo123</small>
+                    </div>
+                    <div class="col-6">
+                        <strong>Coord. Puesto:</strong><br>
+                        <small>Cédula: 22222222</small><br>
+                        <small>Contraseña: demo123</small>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <strong>Testigo Electoral:</strong><br>
+                        <small>Cédula: 33333333</small><br>
+                        <small>Contraseña: demo123</small>
+                    </div>
+                    <div class="col-6">
+                        <strong>Testigo Mesa:</strong><br>
+                        <small>Cédula: 44444444</small><br>
+                        <small>Contraseña: demo123</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const cedula = document.getElementById('cedula').value;
+        const password = document.getElementById('password').value;
+        
+        if (!cedula || !password) {
+            alert('Por favor ingrese cédula y contraseña');
+            return;
+        }
+        
+        // Mostrar loading
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Iniciando...';
+        submitBtn.disabled = true;
+        
+        // Hacer login
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                cedula: cedula,
+                password: password
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.access_token) {
+                // Login exitoso
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                alert('¡Login exitoso! Bienvenido ' + data.user.nombre_completo);
+                
+                // Redirigir según el rol
+                const rol = data.user.rol;
+                if (rol === 'super_admin') {
+                    window.location.href = '/dashboard/super_admin';
+                } else if (rol === 'admin_departamental') {
+                    window.location.href = '/dashboard/admin_departamental';
+                } else if (rol === 'admin_municipal') {
+                    window.location.href = '/dashboard/admin_municipal';
+                } else if (rol === 'coordinador_departamental') {
+                    window.location.href = '/dashboard/coordinador_departamental';
+                } else if (rol === 'coordinador_municipal') {
+                    window.location.href = '/dashboard/coordinador_municipal';
+                } else if (rol === 'coordinador_puesto') {
+                    window.location.href = '/dashboard/coordinador_puesto';
+                } else if (rol === 'testigo_electoral') {
+                    window.location.href = '/dashboard/testigo_electoral';
+                } else if (rol === 'testigo_mesa') {
+                    window.location.href = '/dashboard/testigo_mesa';
+                } else if (rol === 'jurado_votacion') {
+                    window.location.href = '/dashboard/jurado_votacion';
+                } else if (rol === 'auditor_electoral') {
+                    window.location.href = '/dashboard/auditor_electoral';
+                } else if (rol === 'observador_internacional') {
+                    window.location.href = '/dashboard/observador_internacional';
+                } else {
+                    // Solo el super admin puede ver el dashboard general
+                    window.location.href = '/dashboard';
+                }
+            } else {
+                // Login falló
+                alert('Error: ' + (data.error || 'Credenciales inválidas'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión. Verifique que el servidor esté funcionando.');
+        })
+        .finally(() => {
+            // Restaurar botón
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+});
+</script>
+{% endblock %}

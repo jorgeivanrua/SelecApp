@@ -1,0 +1,1027 @@
+{% extends "base.html" %}
+{% block title %}Captura E14 - Testigo Electoral{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/testigo_electoral.css') }}" rel="stylesheet">
+<style>
+.camera-container {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.camera-preview {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+.camera-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+}
+.capture-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.capture-btn:hover {
+    transform: scale(1.1);
+    background: #007bff;
+    color: white;
+}
+.photo-preview-container {
+    display: none;
+    text-align: center;
+}
+.photo-preview {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+    margin-bottom: 15px;
+}
+.e14-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.step {
+    display: flex;
+    align-items: center;
+    margin: 0 15px;
+}
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 10px;
+}
+.step.active .step-number {
+    background: #007bff;
+}
+.step.completed .step-number {
+    background: #28a745;
+}
+.upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.upload-zone:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+.upload-zone.dragover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+.photo-zoom-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 400px;
+    overflow: hidden;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: #000;
+}
+.photo-preview {
+    max-width: 100%;
+    max-height: 400px;
+    display: block;
+    margin: 0 auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+.zoom-controls {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+.zoom-controls:hover {
+    opacity: 1;
+}
+.zoom-indicator {
+    font-family: monospace;
+    font-weight: bold;
+}
+@media (max-width: 768px) {
+    .photo-zoom-container {
+        max-height: 250px;
+    }
+    .photo-preview {
+        max-height: 250px;
+    }
+    .zoom-controls {
+        opacity: 1;
+    }
+    .zoom-controls .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+{% block body_class %}role-testigo-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-primary{% endblock %}
+{% block brand_text %}Sistema Electoral - Captura E14{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="/dashboard/testigo_electoral">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/resultados">
+        <i class="fas fa-chart-bar me-2"></i>Resultados
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/testigo/e14">
+        <i class="fas fa-camera me-2"></i>Capturar E14
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header con información -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="e14-info">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3><i class="fas fa-file-alt me-2"></i>Captura del Formulario E14</h3>
+                        <p class="mb-0">Capture una foto clara del formulario E14 (Acta de Escrutinio) para registrar oficialmente los resultados de la mesa electoral.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            <div>
+                                <strong>Mesa:</strong> <span id="mesa-info">Cargando...</span><br>
+                                <strong>Puesto:</strong> <span id="puesto-info">Cargando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Indicador de pasos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="step-indicator">
+                <div class="step active" id="step-1">
+                    <div class="step-number">1</div>
+                    <span>Capturar Foto</span>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-number">2</div>
+                    <span>Verificar Calidad</span>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-number">3</div>
+                    <span>Confirmar Datos</span>
+                </div>
+                <div class="step" id="step-4">
+                    <div class="step-number">4</div>
+                    <span>Enviar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Selector de Mesa -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        Seleccionar Mesa Electoral
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Mesa a Capturar:</label>
+                            <select class="form-select" id="mesa-selector" onchange="seleccionarMesa()">
+                                <option value="">Seleccione una mesa...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="mesa-status" class="mt-2"></div>
+                        </div>
+                    </div>
+                    <div id="mesa-warning" class="alert alert-warning mt-3" style="display: none;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="warning-message"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Área de captura -->
+    <div class="row" id="capture-area" style="display: none;">
+        <div class="col-lg-8 col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-camera me-2"></i>
+                        Captura de Imagen - Mesa <span id="selected-mesa-number"></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Cámara -->
+                    <div class="camera-container" id="camera-container">
+                        <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
+                        <div class="camera-controls">
+                            <button class="btn btn-secondary" onclick="switchCamera()" title="Cambiar cámara">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="capture-btn" onclick="capturePhoto()" title="Capturar foto">
+                                <i class="fas fa-camera fa-2x"></i>
+                            </button>
+                            <button class="btn btn-secondary" onclick="toggleFlash()" title="Flash">
+                                <i class="fas fa-bolt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista previa de la foto con zoom -->
+                    <div class="photo-preview-container" id="photo-preview-container">
+                        <div class="photo-zoom-container" style="position: relative; overflow: hidden; border-radius: 8px; background: #000;">
+                            <img id="photo-preview" class="photo-preview" alt="Vista previa de E14" 
+                                 style="cursor: zoom-in; transition: transform 0.3s ease; transform-origin: center;">
+                            
+                            <!-- Controles de zoom -->
+                            <div class="zoom-controls" style="position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px;">
+                                <button class="btn btn-sm btn-light" onclick="zoomIn()" title="Acercar">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light" onclick="zoomOut()" title="Alejar">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light" onclick="resetZoom()" title="Restablecer">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="fullscreenPreview()" title="Pantalla completa">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Indicador de zoom -->
+                            <div class="zoom-indicator" style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem;">
+                                <span id="zoom-level">100%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-secondary me-2" onclick="retakePhoto()">
+                                <i class="fas fa-redo me-2"></i>Tomar Otra Foto
+                            </button>
+                            <button class="btn btn-success" onclick="confirmPhoto()">
+                                <i class="fas fa-check me-2"></i>Confirmar Foto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Zona de subida alternativa -->
+                    <div class="upload-zone mt-3" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <h5>¿No puedes usar la cámara?</h5>
+                        <p class="text-muted">Haz clic aquí para subir una foto desde tu galería</p>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Instrucciones -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Instrucciones
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="instruction-step">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="badge bg-primary rounded-pill me-3">1</div>
+                            <div>
+                                <strong>Posicione el E14</strong><br>
+                                <small class="text-muted">Coloque el formulario sobre una superficie plana y bien iluminada</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="badge bg-primary rounded-pill me-3">2</div>
+                            <div>
+                                <strong>Enfoque correctamente</strong><br>
+                                <small class="text-muted">Asegúrese de que todos los números sean legibles</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="badge bg-primary rounded-pill me-3">3</div>
+                            <div>
+                                <strong>Capture la imagen</strong><br>
+                                <small class="text-muted">Presione el botón de captura cuando esté listo</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="d-flex align-items-start">
+                            <div class="badge bg-primary rounded-pill me-3">4</div>
+                            <div>
+                                <strong>Verifique la calidad</strong><br>
+                                <small class="text-muted">Confirme que la imagen sea clara y legible</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información del E14 -->
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Importante
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            La imagen debe ser clara y legible
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Incluir todos los campos del formulario
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Firmas y sellos deben ser visibles
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Sin sombras que oculten información
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-success me-2"></i>
+                            Formato horizontal recomendado
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formulario de confirmación -->
+    <div class="row mt-4" id="confirmation-form" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        Confirmación de Datos del E14
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="e14-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Total de Votos Válidos</label>
+                                    <input type="number" class="form-control" id="votos_validos" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Votos en Blanco</label>
+                                    <input type="number" class="form-control" id="votos_blanco" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Votos Nulos</label>
+                                    <input type="number" class="form-control" id="votos_nulos" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" rows="3" 
+                                            placeholder="Cualquier observación sobre el proceso de escrutinio..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="confirmo_veracidad" required>
+                                        <label class="form-check-label" for="confirmo_veracidad">
+                                            <strong>Confirmo que la información capturada corresponde exactamente al formulario E14 oficial</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-secondary me-3" onclick="cancelSubmission()">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Enviar E14 al Sistema
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+let currentStream = null;
+let capturedPhoto = null;
+let currentStep = 1;
+let zoomLevel = 1;
+let isDragging = false;
+let startX, startY, translateX = 0, translateY = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de captura E14 cargada');
+    cargarInformacionUbicacion();
+    cargarMesasDisponibles();
+    
+    // Event listener para el formulario
+    document.getElementById('e14-form').addEventListener('submit', handleE14Submit);
+    
+    // Drag and drop para la zona de subida
+    const uploadZone = document.getElementById('upload-zone');
+    uploadZone.addEventListener('dragover', handleDragOver);
+    uploadZone.addEventListener('drop', handleDrop);
+});
+
+let currentUserId = 5; // Laura González - Testigo Electoral
+let currentPuestoId = null;
+let selectedMesaId = null;
+
+function cargarInformacionUbicacion() {
+    fetch(`/api/user/location/${currentUserId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const location = data.location;
+            document.getElementById('puesto-info').textContent = location.puesto || 'N/A';
+            currentPuestoId = location.puesto_id || 1; // Fallback para demo
+            
+            // Actualizar información en el overlay del mapa si existe
+            const mapPuestoName = document.getElementById('map-puesto-name');
+            const mapAddress = document.getElementById('map-address');
+            if (mapPuestoName) mapPuestoName.textContent = location.puesto || 'N/A';
+            if (mapAddress) mapAddress.textContent = location.puesto_direccion || 'N/A';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function cargarMesasDisponibles() {
+    if (!currentPuestoId) {
+        setTimeout(cargarMesasDisponibles, 1000); // Retry después de cargar ubicación
+        return;
+    }
+    
+    fetch(`/api/mesas/puesto/${currentPuestoId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const selector = document.getElementById('mesa-selector');
+            selector.innerHTML = '<option value="">Seleccione una mesa...</option>';
+            
+            data.mesas.forEach(mesa => {
+                const option = document.createElement('option');
+                option.value = mesa.id;
+                option.textContent = `Mesa ${mesa.numero}`;
+                
+                // Marcar mesas que ya tienen E14
+                if (mesa.tiene_e14) {
+                    option.textContent += ` (E14 capturado por ${mesa.e14_testigo_nombre})`;
+                    option.disabled = true;
+                    option.style.color = '#6c757d';
+                }
+                
+                selector.appendChild(option);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error cargando mesas:', error);
+        showNotification('Error cargando mesas disponibles', 'error');
+    });
+}
+
+function seleccionarMesa() {
+    const selector = document.getElementById('mesa-selector');
+    const mesaId = selector.value;
+    const mesaText = selector.options[selector.selectedIndex].text;
+    
+    if (!mesaId) {
+        document.getElementById('capture-area').style.display = 'none';
+        document.getElementById('mesa-warning').style.display = 'none';
+        return;
+    }
+    
+    selectedMesaId = mesaId;
+    
+    // Validar que la mesa no tenga E14
+    fetch(`/api/e14/validar-mesa/${mesaId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.tiene_e14) {
+                // Mesa ya tiene E14
+                document.getElementById('warning-message').textContent = data.mensaje;
+                document.getElementById('mesa-warning').style.display = 'block';
+                document.getElementById('capture-area').style.display = 'none';
+                
+                showNotification('Esta mesa ya tiene un E14 capturado', 'warning');
+            } else {
+                // Mesa disponible
+                document.getElementById('mesa-warning').style.display = 'none';
+                document.getElementById('capture-area').style.display = 'block';
+                document.getElementById('selected-mesa-number').textContent = mesaText.split(' ')[1];
+                
+                // Inicializar cámara solo cuando se selecciona mesa válida
+                initializeCamera();
+                
+                showNotification('Mesa seleccionada. Puede proceder con la captura.', 'success');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error validando mesa:', error);
+        showNotification('Error validando mesa', 'error');
+    });
+}
+
+async function initializeCamera() {
+    try {
+        const constraints = {
+            video: {
+                facingMode: 'environment', // Cámara trasera preferida
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            }
+        };
+        
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('camera-preview');
+        video.srcObject = currentStream;
+        
+        showNotification('Cámara inicializada correctamente', 'success');
+    } catch (error) {
+        console.error('Error accediendo a la cámara:', error);
+        showNotification('No se pudo acceder a la cámara. Use la opción de subir archivo.', 'warning');
+    }
+}
+
+function capturePhoto() {
+    const video = document.getElementById('camera-preview');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+    
+    capturedPhoto = canvas.toDataURL('image/jpeg', 0.9);
+    showPhotoPreview(capturedPhoto);
+    updateStep(2);
+}
+
+function showPhotoPreview(imageSrc) {
+    document.getElementById('camera-container').style.display = 'none';
+    document.getElementById('photo-preview-container').style.display = 'block';
+    
+    const previewImg = document.getElementById('photo-preview');
+    previewImg.src = imageSrc;
+    
+    // Resetear zoom
+    resetZoom();
+    
+    // Agregar event listeners para zoom y pan
+    setupZoomAndPan();
+}
+
+function retakePhoto() {
+    document.getElementById('camera-container').style.display = 'block';
+    document.getElementById('photo-preview-container').style.display = 'none';
+    capturedPhoto = null;
+    updateStep(1);
+}
+
+function confirmPhoto() {
+    if (capturedPhoto) {
+        document.getElementById('confirmation-form').style.display = 'block';
+        updateStep(3);
+        // Scroll hacia el formulario
+        document.getElementById('confirmation-form').scrollIntoView({ 
+            behavior: 'smooth' 
+        });
+    }
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            capturedPhoto = e.target.result;
+            showPhotoPreview(capturedPhoto);
+            updateStep(2);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleDragOver(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add('dragover');
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('dragover');
+    
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                capturedPhoto = e.target.result;
+                showPhotoPreview(capturedPhoto);
+                updateStep(2);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+}
+
+function updateStep(step) {
+    // Remover clases activas
+    document.querySelectorAll('.step').forEach(s => {
+        s.classList.remove('active', 'completed');
+    });
+    
+    // Marcar pasos completados
+    for (let i = 1; i < step; i++) {
+        document.getElementById(`step-${i}`).classList.add('completed');
+    }
+    
+    // Marcar paso actual
+    document.getElementById(`step-${step}`).classList.add('active');
+    currentStep = step;
+}
+
+function handleE14Submit(event) {
+    event.preventDefault();
+    
+    if (!capturedPhoto) {
+        showNotification('Debe capturar una foto del E14 primero', 'error');
+        return;
+    }
+    
+    const formData = new FormData(event.target);
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Mostrar indicador de carga
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+    submitBtn.disabled = true;
+    
+    // Preparar datos para envío
+    const e14Data = {
+        testigo_id: 5, // Laura González
+        mesa_id: 1,
+        puesto_id: 1,
+        imagen_e14: capturedPhoto,
+        votos_validos: parseInt(document.getElementById('votos_validos').value),
+        votos_blanco: parseInt(document.getElementById('votos_blanco').value),
+        votos_nulos: parseInt(document.getElementById('votos_nulos').value),
+        observaciones: document.getElementById('observaciones').value,
+        confirmado: document.getElementById('confirmo_veracidad').checked
+    };
+    
+    // Simular envío (en implementación real sería una llamada a API)
+    setTimeout(() => {
+        showNotification('E14 enviado exitosamente al sistema central', 'success');
+        updateStep(4);
+        
+        // Redirigir a resultados después de 2 segundos
+        setTimeout(() => {
+            window.location.href = '/testigo/resultados';
+        }, 2000);
+        
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 2000);
+}
+
+function cancelSubmission() {
+    document.getElementById('confirmation-form').style.display = 'none';
+    retakePhoto();
+}
+
+function switchCamera() {
+    // Implementar cambio de cámara (frontal/trasera)
+    showNotification('Cambiando cámara...', 'info');
+}
+
+function toggleFlash() {
+    // Implementar toggle de flash
+    showNotification('Flash activado/desactivado', 'info');
+}
+
+function showNotification(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Funciones de zoom y pan
+function setupZoomAndPan() {
+    const previewImg = document.getElementById('photo-preview');
+    
+    // Zoom con rueda del mouse
+    previewImg.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        zoomLevel = Math.max(0.5, Math.min(5, zoomLevel + delta));
+        updateZoom();
+    });
+    
+    // Pan con mouse/touch
+    previewImg.addEventListener('mousedown', startDrag);
+    previewImg.addEventListener('touchstart', startDrag);
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+    
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+    
+    // Doble clic para zoom
+    previewImg.addEventListener('dblclick', function() {
+        if (zoomLevel === 1) {
+            zoomLevel = 2;
+        } else {
+            resetZoom();
+        }
+        updateZoom();
+    });
+}
+
+function startDrag(e) {
+    if (zoomLevel <= 1) return;
+    
+    isDragging = true;
+    const clientX = e.clientX || e.touches[0].clientX;
+    const clientY = e.clientY || e.touches[0].clientY;
+    
+    startX = clientX - translateX;
+    startY = clientY - translateY;
+    
+    document.getElementById('photo-preview').style.cursor = 'grabbing';
+}
+
+function drag(e) {
+    if (!isDragging || zoomLevel <= 1) return;
+    
+    e.preventDefault();
+    const clientX = e.clientX || e.touches[0].clientX;
+    const clientY = e.clientY || e.touches[0].clientY;
+    
+    translateX = clientX - startX;
+    translateY = clientY - startY;
+    
+    updateZoom();
+}
+
+function endDrag() {
+    isDragging = false;
+    document.getElementById('photo-preview').style.cursor = zoomLevel > 1 ? 'grab' : 'zoom-in';
+}
+
+function zoomIn() {
+    zoomLevel = Math.min(5, zoomLevel + 0.25);
+    updateZoom();
+}
+
+function zoomOut() {
+    zoomLevel = Math.max(0.5, zoomLevel - 0.25);
+    if (zoomLevel <= 1) {
+        translateX = 0;
+        translateY = 0;
+    }
+    updateZoom();
+}
+
+function resetZoom() {
+    zoomLevel = 1;
+    translateX = 0;
+    translateY = 0;
+    updateZoom();
+}
+
+function updateZoom() {
+    const previewImg = document.getElementById('photo-preview');
+    previewImg.style.transform = `scale(${zoomLevel}) translate(${translateX/zoomLevel}px, ${translateY/zoomLevel}px)`;
+    previewImg.style.cursor = zoomLevel > 1 ? 'grab' : 'zoom-in';
+    
+    // Actualizar indicador
+    document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+}
+
+function fullscreenPreview() {
+    const previewImg = document.getElementById('photo-preview');
+    
+    const modalContent = `
+        <div class="fullscreen-preview" style="position: relative; height: 80vh;">
+            <img src="${previewImg.src}" id="fullscreen-img" 
+                 style="width: 100%; height: 100%; object-fit: contain; cursor: zoom-in;">
+            
+            <div class="fullscreen-controls" style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-light" onclick="fullscreenZoomIn()">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="btn btn-light" onclick="fullscreenZoomOut()">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="btn btn-light" onclick="fullscreenReset()">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+            </div>
+            
+            <div class="fullscreen-zoom-indicator" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 15px; border-radius: 20px;">
+                <span id="fullscreen-zoom-level">100%</span>
+            </div>
+        </div>
+    `;
+    
+    mostrarModal('Vista Previa E14 - Pantalla Completa', modalContent);
+    
+    // Configurar zoom en pantalla completa
+    setTimeout(() => {
+        setupFullscreenZoom();
+    }, 500);
+}
+
+let fullscreenZoom = 1;
+let fullscreenTranslateX = 0;
+let fullscreenTranslateY = 0;
+
+function setupFullscreenZoom() {
+    const fullscreenImg = document.getElementById('fullscreen-img');
+    if (!fullscreenImg) return;
+    
+    fullscreenImg.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        fullscreenZoom = Math.max(0.5, Math.min(5, fullscreenZoom + delta));
+        updateFullscreenZoom();
+    });
+    
+    fullscreenImg.addEventListener('dblclick', function() {
+        if (fullscreenZoom === 1) {
+            fullscreenZoom = 2;
+        } else {
+            fullscreenReset();
+        }
+        updateFullscreenZoom();
+    });
+}
+
+function fullscreenZoomIn() {
+    fullscreenZoom = Math.min(5, fullscreenZoom + 0.25);
+    updateFullscreenZoom();
+}
+
+function fullscreenZoomOut() {
+    fullscreenZoom = Math.max(0.5, fullscreenZoom - 0.25);
+    if (fullscreenZoom <= 1) {
+        fullscreenTranslateX = 0;
+        fullscreenTranslateY = 0;
+    }
+    updateFullscreenZoom();
+}
+
+function fullscreenReset() {
+    fullscreenZoom = 1;
+    fullscreenTranslateX = 0;
+    fullscreenTranslateY = 0;
+    updateFullscreenZoom();
+}
+
+function updateFullscreenZoom() {
+    const fullscreenImg = document.getElementById('fullscreen-img');
+    if (!fullscreenImg) return;
+    
+    fullscreenImg.style.transform = `scale(${fullscreenZoom}) translate(${fullscreenTranslateX/fullscreenZoom}px, ${fullscreenTranslateY/fullscreenZoom}px)`;
+    fullscreenImg.style.cursor = fullscreenZoom > 1 ? 'grab' : 'zoom-in';
+    
+    const indicator = document.getElementById('fullscreen-zoom-level');
+    if (indicator) {
+        indicator.textContent = Math.round(fullscreenZoom * 100) + '%';
+    }
+}
+
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="previewModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        ${contenido}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal anterior si existe
+    const existingModal = document.getElementById('previewModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+}
+
+// Limpiar stream al salir de la página
+window.addEventListener('beforeunload', function() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+{% endblock %}
+</parameter>
+</invoke>

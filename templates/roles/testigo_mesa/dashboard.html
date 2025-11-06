@@ -1,0 +1,538 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Testigo de Mesa - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/testigo_mesa.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-testigo-mesa{% endblock %}
+{% block navbar_class %}navbar-dark bg-info{% endblock %}
+{% block brand_text %}Sistema Electoral - Testigo de Mesa{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='testigo_mesa') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/captura">
+        <i class="fas fa-keyboard me-1"></i>Capturar Datos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/resultados">
+        <i class="fas fa-chart-bar me-1"></i>Resultados
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/incidencias">
+        <i class="fas fa-exclamation-triangle me-1"></i>Incidencias
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-info text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-eye me-2"></i>Panel de Testigo de Mesa Electoral</h2>
+            <p class="mb-0">Captura y verificación de datos electorales - Mesa asignada: <strong>001-A</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Información de la mesa asignada -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Información de Mesa Asignada
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Mesa:</strong> 001-A<br>
+                        <strong>Municipio:</strong> Florencia<br>
+                        <strong>Puesto:</strong> Escuela Central
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Votantes Habilitados:</strong> 350<br>
+                        <strong>Votos Registrados:</strong> <span id="votos-registrados">234</span><br>
+                        <strong>Participación:</strong> <span id="participacion">67%</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Hora Apertura:</strong> 08:00<br>
+                        <strong>Estado:</strong> <span class="badge bg-success">Activa</span><br>
+                        <strong>Jurados:</strong> 3 presentes
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Última Actualización:</strong><br>
+                        <span id="ultima-actualizacion">15:23</span><br>
+                        <button class="btn btn-sm btn-info mt-2" onclick="actualizarDatos()">
+                            <i class="fas fa-sync me-1"></i>Actualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Captura rápida de datos -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-keyboard me-2"></i>
+                    Captura Rápida de Datos Electorales
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="capturaRapidaForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="candidato" class="form-label">Candidato/Lista</label>
+                                <select class="form-select" id="candidato" required>
+                                    <option value="">Seleccionar candidato</option>
+                                    <option value="1">Juan Pérez - Partido A</option>
+                                    <option value="2">María García - Partido B</option>
+                                    <option value="3">Carlos López - Partido C</option>
+                                    <option value="4">Ana Rodríguez - Partido D</option>
+                                    <option value="votos_blancos">Votos en Blanco</option>
+                                    <option value="votos_nulos">Votos Nulos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="cantidad" class="form-label">Cantidad de Votos</label>
+                                <input type="number" class="form-control" id="cantidad" min="1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="hora" class="form-label">Hora</label>
+                                <input type="time" class="form-control" id="hora" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="fas fa-plus me-1"></i>Registrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resultados actuales -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Resultados Actuales - Mesa 001-A
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="tablaResultados">
+                        <thead>
+                            <tr>
+                                <th>Candidato/Lista</th>
+                                <th>Partido</th>
+                                <th>Votos</th>
+                                <th>Porcentaje</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Juan Pérez</strong></td>
+                                <td>Partido A</td>
+                                <td><span class="votos-candidato" data-candidato="1">85</span></td>
+                                <td><span class="porcentaje-candidato">36.3%</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(1)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>María García</strong></td>
+                                <td>Partido B</td>
+                                <td><span class="votos-candidato" data-candidato="2">72</span></td>
+                                <td><span class="porcentaje-candidato">30.8%</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(2)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Carlos López</strong></td>
+                                <td>Partido C</td>
+                                <td><span class="votos-candidato" data-candidato="3">62</span></td>
+                                <td><span class="porcentaje-candidato">26.5%</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(3)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ana Rodríguez</strong></td>
+                                <td>Partido D</td>
+                                <td><span class="votos-candidato" data-candidato="4">15</span></td>
+                                <td><span class="porcentaje-candidato">6.4%</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(4)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="table-secondary">
+                                <td><strong>Votos en Blanco</strong></td>
+                                <td>-</td>
+                                <td><span class="votos-candidato" data-candidato="blancos">8</span></td>
+                                <td><span class="porcentaje-candidato">3.4%</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="editarVotos('blancos')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td><strong>Votos Nulos</strong></td>
+                                <td>-</td>
+                                <td><span class="votos-candidato" data-candidato="nulos">12</span></td>
+                                <td><span class="porcentaje-candidato">5.1%</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="editarVotos('nulos')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="table-dark">
+                            <tr>
+                                <th colspan="2">TOTAL</th>
+                                <th><span id="total-votos">234</span></th>
+                                <th>100%</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-success me-3" onclick="generarActa()">
+                        <i class="fas fa-file-pdf me-2"></i>Generar Acta
+                    </button>
+                    <button class="btn btn-info me-3" onclick="enviarResultados()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Resultados
+                    </button>
+                    <button class="btn btn-warning" onclick="reportarIncidencia()">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Reportar Incidencia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-doughnut me-2"></i>
+                    Gráfico de Resultados
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoResultados" width="300" height="300"></canvas>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Registro de Actividad
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline" id="timeline-actividad">
+                    <div class="timeline-item">
+                        <small class="text-muted">15:23</small>
+                        <p class="mb-0">Registrados 5 votos para Juan Pérez</p>
+                    </div>
+                    <div class="timeline-item">
+                        <small class="text-muted">15:18</small>
+                        <p class="mb-0">Registrados 3 votos para María García</p>
+                    </div>
+                    <div class="timeline-item">
+                        <small class="text-muted">15:12</small>
+                        <p class="mb-0">Reportada incidencia menor</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar votos -->
+<div class="modal fade" id="modalEditarVotos" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Votos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarVotos">
+                    <div class="mb-3">
+                        <label for="candidatoEditar" class="form-label">Candidato</label>
+                        <input type="text" class="form-control" id="candidatoEditar" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="votosActuales" class="form-label">Votos Actuales</label>
+                        <input type="number" class="form-control" id="votosActuales" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-info" onclick="guardarEdicion()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Variables globales
+let candidatoEditando = null;
+let datosVotos = {
+    1: 85, 2: 72, 3: 62, 4: 15,
+    'blancos': 8, 'nulos': 12
+};
+
+// Inicializar dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Testigo de Mesa cargado');
+    inicializarGrafico();
+    actualizarHora();
+    
+    // Configurar formulario de captura rápida
+    document.getElementById('capturaRapidaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        capturarVoto();
+    });
+});
+
+// Capturar voto rápido
+function capturarVoto() {
+    const candidato = document.getElementById('candidato').value;
+    const cantidad = parseInt(document.getElementById('cantidad').value);
+    const hora = document.getElementById('hora').value;
+    
+    if (!candidato || !cantidad || !hora) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    // Actualizar datos
+    if (candidato === 'votos_blancos') {
+        datosVotos['blancos'] += cantidad;
+    } else if (candidato === 'votos_nulos') {
+        datosVotos['nulos'] += cantidad;
+    } else {
+        datosVotos[candidato] += cantidad;
+    }
+    
+    // Actualizar interfaz
+    actualizarTablaResultados();
+    actualizarGrafico();
+    agregarActividad(`Registrados ${cantidad} votos - ${hora}`);
+    
+    // Limpiar formulario
+    document.getElementById('capturaRapidaForm').reset();
+    
+    // Mostrar confirmación
+    mostrarNotificacion('Votos registrados exitosamente', 'success');
+}
+
+// Actualizar tabla de resultados
+function actualizarTablaResultados() {
+    const total = Object.values(datosVotos).reduce((a, b) => a + b, 0);
+    
+    Object.keys(datosVotos).forEach(candidato => {
+        const elemento = document.querySelector(`[data-candidato="${candidato}"]`);
+        if (elemento) {
+            elemento.textContent = datosVotos[candidato];
+            const porcentaje = ((datosVotos[candidato] / total) * 100).toFixed(1);
+            elemento.parentElement.nextElementSibling.querySelector('.porcentaje-candidato').textContent = porcentaje + '%';
+        }
+    });
+    
+    document.getElementById('total-votos').textContent = total;
+    document.getElementById('votos-registrados').textContent = total;
+    document.getElementById('participacion').textContent = Math.round((total / 350) * 100) + '%';
+}
+
+// Inicializar gráfico
+function inicializarGrafico() {
+    const ctx = document.getElementById('graficoResultados').getContext('2d');
+    window.graficoResultados = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Juan Pérez', 'María García', 'Carlos López', 'Ana Rodríguez', 'Blancos', 'Nulos'],
+            datasets: [{
+                data: [85, 72, 62, 15, 8, 12],
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        fontSize: 10
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Actualizar gráfico
+function actualizarGrafico() {
+    if (window.graficoResultados) {
+        window.graficoResultados.data.datasets[0].data = [
+            datosVotos[1], datosVotos[2], datosVotos[3], datosVotos[4],
+            datosVotos['blancos'], datosVotos['nulos']
+        ];
+        window.graficoResultados.update();
+    }
+}
+
+// Editar votos
+function editarVotos(candidato) {
+    candidatoEditando = candidato;
+    const nombres = {
+        1: 'Juan Pérez', 2: 'María García', 3: 'Carlos López', 4: 'Ana Rodríguez',
+        'blancos': 'Votos en Blanco', 'nulos': 'Votos Nulos'
+    };
+    
+    document.getElementById('candidatoEditar').value = nombres[candidato];
+    document.getElementById('votosActuales').value = datosVotos[candidato];
+    
+    new bootstrap.Modal(document.getElementById('modalEditarVotos')).show();
+}
+
+// Guardar edición
+function guardarEdicion() {
+    const nuevosVotos = parseInt(document.getElementById('votosActuales').value);
+    const observaciones = document.getElementById('observaciones').value;
+    
+    datosVotos[candidatoEditando] = nuevosVotos;
+    
+    actualizarTablaResultados();
+    actualizarGrafico();
+    
+    if (observaciones) {
+        agregarActividad(`Editados votos: ${observaciones}`);
+    }
+    
+    bootstrap.Modal.getInstance(document.getElementById('modalEditarVotos')).hide();
+    mostrarNotificacion('Votos actualizados correctamente', 'success');
+}
+
+// Funciones adicionales
+function actualizarDatos() {
+    mostrarNotificacion('Datos actualizados', 'info');
+    document.getElementById('ultima-actualizacion').textContent = new Date().toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
+}
+
+function generarActa() {
+    mostrarNotificacion('Generando acta electoral...', 'info');
+    // Aquí se implementaría la generación del PDF
+}
+
+function enviarResultados() {
+    mostrarNotificacion('Enviando resultados al sistema central...', 'info');
+    // Aquí se implementaría el envío de datos
+}
+
+function reportarIncidencia() {
+    window.location.href = '/testigo/incidencias';
+}
+
+function agregarActividad(mensaje) {
+    const timeline = document.getElementById('timeline-actividad');
+    const hora = new Date().toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
+    
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.innerHTML = `
+        <small class="text-muted">${hora}</small>
+        <p class="mb-0">${mensaje}</p>
+    `;
+    
+    timeline.insertBefore(item, timeline.firstChild);
+    
+    // Mantener solo los últimos 5 elementos
+    while (timeline.children.length > 5) {
+        timeline.removeChild(timeline.lastChild);
+    }
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        'success': 'bg-success',
+        'info': 'bg-info',
+        'warning': 'bg-warning',
+        'error': 'bg-danger'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notificacion.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.parentNode.removeChild(notificacion);
+        }
+    }, 5000);
+}
+
+function actualizarHora() {
+    const ahora = new Date();
+    document.getElementById('hora').value = ahora.toTimeString().slice(0, 5);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,394 @@
+<!-- Panel de Alertas y Notificaciones -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-bell me-2"></i>
+            Alertas y Notificaciones
+        </h5>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-primary active" data-filter="all">
+                Todas
+            </button>
+            <button type="button" class="btn btn-outline-warning" data-filter="warning">
+                Advertencias
+            </button>
+            <button type="button" class="btn btn-outline-danger" data-filter="critical">
+                Críticas
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="alerts-container" id="alerts-container">
+            <!-- Alerta crítica -->
+            <div class="alert-item critical" data-type="critical">
+                <div class="alert-icon bg-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <h6 class="mb-1">Mesa 045-B Fuera de Línea</h6>
+                        <small class="text-muted">Hace 5 minutos</small>
+                    </div>
+                    <p class="mb-2">La mesa de votación 045-B en Florencia no responde desde las 14:30. Se requiere intervención inmediata.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-danger">Atender</button>
+                        <button class="btn btn-sm btn-outline-secondary">Ver Detalles</button>
+                    </div>
+                </div>
+                <div class="alert-status">
+                    <span class="badge bg-danger">Crítica</span>
+                </div>
+            </div>
+            
+            <!-- Alerta de advertencia -->
+            <div class="alert-item warning" data-type="warning">
+                <div class="alert-icon bg-warning">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <h6 class="mb-1">Baja Participación en San Vicente</h6>
+                        <small class="text-muted">Hace 12 minutos</small>
+                    </div>
+                    <p class="mb-2">La participación en San Vicente del Caguán está por debajo del promedio esperado (45% vs 60% esperado).</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-warning">Revisar</button>
+                        <button class="btn btn-sm btn-outline-secondary">Generar Reporte</button>
+                    </div>
+                </div>
+                <div class="alert-status">
+                    <span class="badge bg-warning">Advertencia</span>
+                </div>
+            </div>
+            
+            <!-- Alerta informativa -->
+            <div class="alert-item info" data-type="info">
+                <div class="alert-icon bg-info">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <h6 class="mb-1">Nuevo Candidato Registrado</h6>
+                        <small class="text-muted">Hace 25 minutos</small>
+                    </div>
+                    <p class="mb-2">Se ha registrado un nuevo candidato para la alcaldía de Puerto Rico. Documentación completa.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-info">Ver Candidato</button>
+                        <button class="btn btn-sm btn-outline-secondary">Aprobar</button>
+                    </div>
+                </div>
+                <div class="alert-status">
+                    <span class="badge bg-info">Información</span>
+                </div>
+            </div>
+            
+            <!-- Alerta de éxito -->
+            <div class="alert-item success" data-type="success">
+                <div class="alert-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <h6 class="mb-1">Auditoría Completada</h6>
+                        <small class="text-muted">Hace 1 hora</small>
+                    </div>
+                    <p class="mb-2">La auditoría del proceso electoral en El Paujil se completó exitosamente. Cumplimiento: 98%.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-success">Ver Reporte</button>
+                        <button class="btn btn-sm btn-outline-secondary">Archivar</button>
+                    </div>
+                </div>
+                <div class="alert-status">
+                    <span class="badge bg-success">Completado</span>
+                </div>
+            </div>
+            
+            <!-- Alerta de mantenimiento -->
+            <div class="alert-item warning" data-type="warning">
+                <div class="alert-icon bg-secondary">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <h6 class="mb-1">Mantenimiento Programado</h6>
+                        <small class="text-muted">Hace 2 horas</small>
+                    </div>
+                    <p class="mb-2">Mantenimiento del sistema programado para mañana a las 02:00. Duración estimada: 30 minutos.</p>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-secondary">Confirmar</button>
+                        <button class="btn btn-sm btn-outline-secondary">Reprogramar</button>
+                    </div>
+                </div>
+                <div class="alert-status">
+                    <span class="badge bg-secondary">Programado</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pie del panel -->
+        <div class="alerts-footer p-3 border-top">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="fas fa-sync-alt me-1"></i>
+                    Última actualización: <span id="last-update">15:23</span>
+                </small>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="refreshAlerts()">
+                        <i class="fas fa-refresh me-1"></i>Actualizar
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double me-1"></i>Marcar como Leídas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.alerts-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s ease;
+}
+
+.alert-item:hover {
+    background-color: #f8f9fa;
+}
+
+.alert-item.unread {
+    background-color: #f0f8ff;
+    border-left: 4px solid #007bff;
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.alert-content {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
+.alert-header {
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.alert-header h6 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.alert-content p {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.alert-status {
+    flex-shrink: 0;
+}
+
+.alert-item.critical {
+    border-left: 4px solid #dc3545;
+}
+
+.alert-item.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.alert-item.info {
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-item.success {
+    border-left: 4px solid #28a745;
+}
+
+.alerts-footer {
+    background-color: #f8f9fa;
+}
+
+/* Animación para nuevas alertas */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-item.new {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .alert-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .alert-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+        align-self: flex-start;
+    }
+    
+    .alert-actions {
+        margin-top: 10px;
+    }
+    
+    .alert-status {
+        margin-top: 10px;
+        align-self: flex-start;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros de alertas
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    const alertItems = document.querySelectorAll('.alert-item');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            
+            // Actualizar botones activos
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filtrar alertas
+            alertItems.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-type') === filter) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Marcar alertas como leídas al hacer clic
+    alertItems.forEach(item => {
+        item.addEventListener('click', function() {
+            this.classList.remove('unread');
+        });
+    });
+    
+    // Actualizar timestamp
+    function updateTimestamp() {
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                       now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('last-update').textContent = timeStr;
+    }
+    
+    setInterval(updateTimestamp, 60000); // Actualizar cada minuto
+});
+
+function refreshAlerts() {
+    // Simular actualización de alertas
+    const container = document.getElementById('alerts-container');
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'text-center p-3';
+    loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Actualizando alertas...';
+    
+    container.appendChild(loadingIndicator);
+    
+    setTimeout(() => {
+        container.removeChild(loadingIndicator);
+        
+        // Simular nueva alerta
+        const newAlert = document.createElement('div');
+        newAlert.className = 'alert-item info new unread';
+        newAlert.setAttribute('data-type', 'info');
+        newAlert.innerHTML = `
+            <div class="alert-icon bg-info">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="alert-content">
+                <div class="alert-header">
+                    <h6 class="mb-1">Sistema Actualizado</h6>
+                    <small class="text-muted">Ahora</small>
+                </div>
+                <p class="mb-2">Las alertas han sido actualizadas exitosamente.</p>
+                <div class="alert-actions">
+                    <button class="btn btn-sm btn-info">Ver Detalles</button>
+                </div>
+            </div>
+            <div class="alert-status">
+                <span class="badge bg-info">Nuevo</span>
+            </div>
+        `;
+        
+        container.insertBefore(newAlert, container.firstChild);
+        
+        // Actualizar timestamp
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                       now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('last-update').textContent = timeStr;
+    }, 1000);
+}
+
+function markAllAsRead() {
+    const unreadAlerts = document.querySelectorAll('.alert-item.unread');
+    unreadAlerts.forEach(alert => {
+        alert.classList.remove('unread');
+    });
+    
+    // Mostrar confirmación
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = '<i class="fas fa-check me-2"></i>Todas las alertas marcadas como leídas';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        document.body.removeChild(toast);
+    }, 3000);
+}
+</script>
+</parameter>
+</invoke>

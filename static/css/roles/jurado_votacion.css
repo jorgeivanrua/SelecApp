@@ -1,0 +1,298 @@
+/* Estilos específicos para Jurado de Votación */
+
+.role-jurado-votacion {
+    --primary-color: #17a2b8;
+    --secondary-color: #20c997;
+    --accent-color: #6f42c1;
+    --text-color: #0c5460;
+}
+
+/* Navbar personalizada */
+.role-jurado-votacion .navbar {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    box-shadow: 0 2px 10px rgba(23, 162, 184, 0.3);
+}
+
+.role-jurado-votacion .navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+/* Banner de bienvenida */
+.welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-left: 5px solid #fff;
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2);
+}
+
+/* Cards personalizadas */
+.role-jurado-votacion .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.role-jurado-votacion .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.role-jurado-votacion .card-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 12px 12px 0 0 !important;
+    border: none;
+    font-weight: 600;
+}
+
+/* Card de mesa asignada */
+.role-jurado-votacion .card.border-info {
+    border: 2px solid var(--primary-color) !important;
+    background: linear-gradient(135deg, #f8fdff, #e6f7ff);
+}
+
+/* Métricas de votación */
+.role-jurado-votacion .card.bg-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+}
+
+.role-jurado-votacion .card.bg-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+}
+
+.role-jurado-votacion .card.bg-secondary {
+    background: linear-gradient(135deg, #6c757d, #545b62) !important;
+}
+
+.role-jurado-votacion .card.bg-info {
+    background: linear-gradient(135deg, var(--primary-color), #138496) !important;
+}
+
+/* Botones de acción */
+.role-jurado-votacion .btn-lg {
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.role-jurado-votacion .btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.role-jurado-votacion .btn-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.role-jurado-votacion .btn-info {
+    background: linear-gradient(135deg, var(--primary-color), #138496);
+}
+
+.role-jurado-votacion .btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+}
+
+/* Tabla de candidatos */
+.role-jurado-votacion .table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.role-jurado-votacion .table thead th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-jurado-votacion .table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.role-jurado-votacion .table tbody tr:hover {
+    background-color: rgba(23, 162, 184, 0.1);
+}
+
+/* Timeline de actividad */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.timeline-content small {
+    color: #6c757d;
+}
+
+/* Modal personalizado */
+.role-jurado-votacion .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.role-jurado-votacion .modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border: none;
+}
+
+.role-jurado-votacion .modal-title {
+    font-weight: 600;
+}
+
+.role-jurado-votacion .form-select,
+.role-jurado-votacion .form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.role-jurado-votacion .form-select:focus,
+.role-jurado-votacion .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+/* Badges de estado */
+.role-jurado-votacion .badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+    border-radius: 20px;
+}
+
+.role-jurado-votacion .badge.bg-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+}
+
+.role-jurado-votacion .badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+    color: #212529;
+}
+
+/* Footer personalizado */
+.role-jurado-votacion footer {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-top: 3px solid var(--primary-color);
+}
+
+/* Animaciones */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.role-jurado-votacion .card {
+    animation: fadeInScale 0.6s ease-out;
+}
+
+.role-jurado-votacion .timeline-item {
+    animation: slideInRight 0.6s ease-out;
+}
+
+.role-jurado-votacion .timeline-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.role-jurado-votacion .timeline-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* Estados de votación */
+.voting-status {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.voting-status.active {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.voting-status.closed {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .role-jurado-votacion .welcome-banner h2 {
+        font-size: 1.5rem;
+    }
+    
+    .role-jurado-votacion .btn-lg {
+        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline-marker {
+        left: -17px;
+        width: 10px;
+        height: 10px;
+    }
+}

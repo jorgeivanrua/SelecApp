@@ -1,0 +1,86 @@
+/* Estilos específicos para Auditor Electoral */
+.role-auditor-electoral {
+    --primary-color: #343a40;
+    --secondary-color: #6c757d;
+    --accent-color: #ffc107;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+}
+
+.role-auditor-electoral .welcome-banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-left: 5px solid var(--accent-color);
+}
+
+.role-auditor-electoral .card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.role-auditor-electoral .card:hover {
+    transform: translateY(-2px);
+}
+
+.role-auditor-electoral .btn-dark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.role-auditor-electoral .btn-dark:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.role-auditor-electoral .table th {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.role-auditor-electoral .alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.role-auditor-electoral .badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+/* Iconos específicos */
+.role-auditor-electoral .fa-shield-alt {
+    color: var(--primary-color);
+}
+
+.role-auditor-electoral .fa-search {
+    color: var(--info-color);
+}
+
+.role-auditor-electoral .fa-exclamation-triangle {
+    color: var(--warning-color);
+}
+
+/* Animaciones */
+@keyframes auditPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.role-auditor-electoral .audit-active {
+    animation: auditPulse 2s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .role-auditor-electoral .welcome-banner h2 {
+        font-size: 1.5rem;
+    }
+    
+    .role-auditor-electoral .card-body h3 {
+        font-size: 1.8rem;
+    }
+}

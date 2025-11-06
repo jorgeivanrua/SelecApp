@@ -1,150 +1,326 @@
-# Sistema de Recolección Inicial de Votaciones - Caquetá
+# Sistema Electoral ERP - Caquetá
 
-## Descripción
+Sistema integral de gestión electoral desarrollado para el departamento del Caquetá, Colombia. Diseñado para facilitar la supervisión, monitoreo y reporte de procesos electorales con funcionalidades específicas para diferentes roles.
 
-Sistema electoral especializado para la recolección inicial de información de votaciones en el departamento de Caquetá, Colombia. Este sistema permite la captura, validación y consolidación de datos electorales desde las mesas de votación hasta los niveles de consolidación municipal y departamental.
+## 🚀 Características Principales
 
-## Estado Actual: ✅ Tarea 1 Completada
+### ✅ **Gestión Multi-Rol**
+- **Super Administrador**: Control total del sistema
+- **Administradores**: Departamental y Municipal
+- **Coordinadores**: Electoral, Departamental, Municipal y de Puesto
+- **Testigos Electorales**: Observación y reporte
+- **Jurados de Votación**: Gestión de mesas
+- **Auditores**: Supervisión y control
+- **Observadores Internacionales**: Monitoreo externo
 
-### ✅ Configuración Inicial y Base de Datos DIVIPOLA
+### 📱 **Optimización Móvil Completa**
+- Diseño responsive mobile-first
+- Controles táctiles optimizados
+- Funcionalidades offline preparadas
+- Rendimiento optimizado para dispositivos móviles
 
-**Implementado:**
-- ✅ Base de datos SQLite con estructura completa para Caquetá
-- ✅ Modelos de datos optimizados para el proceso electoral
-- ✅ Carga automática de datos DIVIPOLA específicos de Caquetá
-- ✅ Validación de integridad geográfica
-- ✅ Coordenadas GPS para todos los puestos electorales
+### 📊 **Sistema de Reportes Avanzado**
+- Generador de reportes personalizados
+- Múltiples formatos: PDF, Excel, Word, HTML
+- Gráficos interactivos con Chart.js
+- Reportes predefinidos y cronológicos
+- Exportación y compartir reportes
 
-**Estadísticas de la Base de Datos:**
-- **Departamento:** 1 (Caquetá)
-- **Municipios:** 16
-- **Puestos electorales:** 150
-- **Mesas electorales:** 144
-- **Total votantes habilitados:** 225,368
-- **Cobertura GPS:** 100% de los puestos
+### 📸 **Captura de Formularios con Zoom**
+- **E14 (Acta de Escrutinio)**: Captura de resultados
+- **E24 (Acta de Instalación)**: Documentación de apertura
+- Zoom avanzado (0.5x a 5x) con controles táctiles
+- Vista en pantalla completa
+- Pan y zoom con gestos
+- Validación de duplicados por mesa
 
-**Municipios incluidos:**
-1. Florencia (capital) - 51 puestos, 28 mesas
-2. San Vicente del Caguán - 25 puestos, 21 mesas
-3. Solano - 12 puestos, 13 mesas
-4. Puerto Rico - 9 puestos, 12 mesas
-5. Cartagena del Chairá - 7 puestos, 11 mesas
-6. El Doncello - 7 puestos, 10 mesas
-7. Milán - 7 puestos, 7 mesas
-8. San José del Fragua - 6 puestos, 7 mesas
-9. La Montañita - 5 puestos, 6 mesas
-10. Morelia - 4 puestos, 4 mesas
-11. Valparaíso - 4 puestos, 5 mesas
-12. Belén de los Andaquíes - 3 puestos, 5 mesas
-13. Curillo - 3 puestos, 4 mesas
-14. El Paujil - 3 puestos, 5 mesas
-15. Albania - 2 puestos, 3 mesas
-16. Solita - 2 puestos, 3 mesas
+### 🗺️ **Geolocalización Visual**
+- Mapas interactivos en dashboard
+- Ubicación GPS en tiempo real
+- Cálculo de distancias
+- Integración con Google Maps
+- Compartir ubicación
 
-## Archivos Implementados
+### 🔍 **Observaciones e Incidencias**
+- Sistema completo de observaciones electorales
+- Reporte de incidencias con niveles de urgencia
+- Evidencia fotográfica y multimedia
+- Notificaciones automáticas a coordinadores
+- Seguimiento y resolución de incidencias
 
-### Modelos de Datos
-- **`models.py`** - Modelos SQLAlchemy para toda la estructura electoral
-  - `Location` - Ubicaciones geográficas (departamento, municipios, puestos)
-  - `MesaElectoral` - Mesas electorales con datos de votantes
-  - `User` - Usuarios del sistema (testigos, coordinadores, administradores)
-  - `ElectionType` - Tipos de elecciones
-  - `ElectoralJourney` - Jornadas electorales
-  - `ElectoralProcess` - Procesos electorales específicos
+## 🛠️ Tecnologías Utilizadas
 
-### Servicios
-- **`initialization_service.py`** - Servicio de inicialización y carga de datos
-  - Carga automática de datos DIVIPOLA
-  - Creación de estructura jerárquica
-  - Validación de integridad geográfica
-  - Generación de reportes de inicialización
+### Backend
+- **Python 3.13+**
+- **Flask** - Framework web
+- **SQLite** - Base de datos
+- **Werkzeug** - Utilidades WSGI
+- **JWT** - Autenticación (opcional)
 
-### Configuración
-- **`config.py`** - Configuración específica para Caquetá
-- **`requirements.txt`** - Dependencias del proyecto
+### Frontend
+- **HTML5** - Estructura
+- **CSS3** - Estilos responsive
+- **JavaScript ES6+** - Interactividad
+- **Bootstrap 5** - Framework UI
+- **Chart.js** - Gráficos interactivos
+- **Font Awesome** - Iconografía
 
-### Utilidades
-- **`query_database.py`** - Script para consultar y verificar la base de datos
-- **`muestra_mesas_caqueta.json`** - Muestra de datos exportados
+### APIs y Servicios
+- **Geolocation API** - Ubicación GPS
+- **Camera API** - Captura de fotos
+- **Canvas API** - Procesamiento de imágenes
+- **Web Share API** - Compartir contenido
 
-## Estructura de la Base de Datos
+## 📦 Instalación
 
-```
-caqueta_electoral.db (SQLite)
-├── locations (Ubicaciones geográficas)
-│   ├── Departamento: Caquetá
-│   ├── 16 Municipios
-│   └── 150 Puestos electorales
-├── mesas_electorales (144 mesas)
-├── users (Sistema de usuarios)
-├── election_types (Tipos de elecciones)
-├── electoral_journeys (Jornadas electorales)
-└── electoral_processes (Procesos específicos)
-```
+### Prerrequisitos
+- Python 3.13 o superior
+- pip (gestor de paquetes de Python)
 
-## Cómo Usar
+### Instalación Rápida
 
-### 1. Instalación de Dependencias
 ```bash
-pip install SQLAlchemy==1.4.53
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/sistema-electoral-caqueta.git
+cd sistema-electoral-caqueta
+
+# Instalar dependencias
+pip install flask werkzeug
+
+# Crear la base de datos
+python create_complete_database.py
+
+# Ejecutar la aplicación
+python app.py
 ```
 
-### 2. Inicializar la Base de Datos
+### Instalación con Entorno Virtual (Recomendado)
+
 ```bash
-python initialization_service.py
+# Crear entorno virtual
+python -m venv venv
+
+# Activar entorno virtual
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Crear base de datos
+python create_complete_database.py
+
+# Ejecutar aplicación
+python app.py
 ```
 
-### 3. Consultar la Base de Datos
+## 🚀 Uso del Sistema
+
+### Acceso al Sistema
+1. Abrir navegador en: `http://localhost:5000`
+2. Usar las credenciales demo o crear nuevos usuarios
+
+### Usuarios Demo
+- **Super Admin**: `superadmin` / `demo123`
+- **Testigo Electoral**: `testigo_electoral` / `demo123`
+- **Coordinador**: `coord_dept` / `demo123`
+
+### Rutas Principales
+- **Dashboard General**: `/dashboard`
+- **Dashboard por Rol**: `/dashboard/{rol}`
+- **Testigo Electoral**: `/dashboard/testigo_electoral`
+- **Captura E14**: `/testigo/e14`
+- **Captura E24**: `/testigo/e24`
+- **Observaciones**: `/testigo/observacion`
+- **Incidencias**: `/testigo/incidencias`
+- **Reportes**: `/testigo/reportes`
+
+## 📱 Funcionalidades Móviles
+
+### Controles Táctiles
+- Botones optimizados (mínimo 44px)
+- Gestos de zoom y pan
+- Navegación por swipe
+- Formularios mobile-friendly
+
+### Captura de Fotos
+- Acceso a cámara del dispositivo
+- Zoom con pellizco (pinch-to-zoom)
+- Rotación automática
+- Compresión optimizada
+
+### Geolocalización
+- GPS de alta precisión
+- Modo offline preparado
+- Cálculo de distancias
+- Mapas interactivos
+
+## 🗄️ Estructura de Base de Datos
+
+### Tablas Principales
+- `users` - Usuarios del sistema
+- `municipios` - Municipios del Caquetá
+- `puestos_votacion` - Puestos electorales
+- `mesas_votacion` - Mesas de votación
+- `observaciones` - Observaciones electorales
+- `incidencias` - Incidencias reportadas
+- `e14_capturas` - Formularios E14 capturados
+- `notificaciones` - Sistema de notificaciones
+
+### Relaciones
+- Usuarios asignados a municipios, puestos y mesas
+- Observaciones e incidencias vinculadas a ubicaciones
+- Sistema de auditoría completo
+
+## 🔧 Configuración
+
+### Variables de Entorno
 ```bash
-python query_database.py
+SECRET_KEY=tu-clave-secreta-aqui
+JWT_SECRET_KEY=tu-jwt-secreto-aqui
+DATABASE_URL=sqlite:///caqueta_electoral.db
+FLASK_ENV=development
 ```
 
-### 4. Verificar Configuración
+### Configuración de Producción
+```python
+# Para producción, cambiar en app.py:
+app.run(debug=False, host='0.0.0.0', port=80)
+```
+
+## 📊 APIs Disponibles
+
+### Autenticación
+- `POST /api/auth/login` - Iniciar sesión
+- `GET /api/auth/me` - Usuario actual
+
+### Ubicación
+- `GET /api/user/location/{user_id}` - Ubicación del usuario
+- `GET /api/mesas/puesto/{puesto_id}` - Mesas por puesto
+
+### Formularios E14
+- `GET /api/e14/validar-mesa/{mesa_id}` - Validar duplicados
+- `POST /api/e14/capturar` - Capturar E14
+
+### Observaciones e Incidencias
+- `GET/POST /api/observaciones` - CRUD observaciones
+- `GET/POST /api/incidencias` - CRUD incidencias
+
+### Sistema
+- `GET /api/system/info` - Información del sistema
+- `GET /api/health` - Estado del sistema
+
+## 🧪 Testing
+
+### Ejecutar Tests
 ```bash
-python config.py
+# Tests de funcionalidad completa
+python test_complete_functionality.py
+
+# Tests de APIs
+python test_apis.py
 ```
 
-## Características Técnicas
+### Tests Incluidos
+- Validación de rutas
+- Funcionalidad de base de datos
+- APIs RESTful
+- Autenticación
+- Captura de formularios
 
-### Coordenadas GPS
-- **100% de cobertura** - Todos los puestos tienen coordenadas GPS
-- **Centro geográfico:** Florencia (1.6143, -75.6061)
-- **Preparado para mapas interactivos** con OpenStreetMap
+## 📁 Estructura del Proyecto
 
-### Códigos de Mesa
-- **Formato:** `{dept}{municipio}{puesto}{mesa}`
-- **Ejemplo:** `181.00101` = Caquetá (18), Florencia (1), Puesto 01, Mesa 01
+```
+sistema-electoral-caqueta/
+├── app.py                          # Aplicación principal
+├── api_endpoints.py                # Endpoints de API
+├── create_complete_database.py     # Creación de BD
+├── recreate_database.py           # Recreación de BD
+├── requirements.txt               # Dependencias
+├── README.md                     # Documentación
+├── static/                       # Archivos estáticos
+│   ├── css/
+│   │   ├── base.css             # Estilos base
+│   │   ├── mobile-responsive.css # Estilos móviles
+│   │   └── roles/               # Estilos por rol
+│   └── js/
+│       └── base.js              # JavaScript base
+├── templates/                    # Templates HTML
+│   ├── base.html               # Template base
+│   ├── dashboard.html          # Dashboard general
+│   ├── roles/                  # Templates por rol
+│   │   └── testigo_electoral/  # Testigo electoral
+│   │       ├── dashboard.html
+│   │       ├── e14.html        # Captura E14
+│   │       ├── e24.html        # Captura E24
+│   │       ├── observaciones.html
+│   │       ├── incidencias.html
+│   │       ├── reportes.html
+│   │       └── resultados.html
+│   └── components/             # Componentes reutilizables
+└── .kiro/                      # Especificaciones del proyecto
+    └── specs/
+        └── funcionalidad-completa-sistema/
+```
 
-### Validaciones Implementadas
-- ✅ Integridad de jerarquía geográfica
-- ✅ Códigos DIVIPOLA válidos
-- ✅ Coordenadas GPS completas
-- ✅ Distribución equitativa de votantes por mesa
+## 🤝 Contribución
 
-## Próximos Pasos
+### Cómo Contribuir
+1. Fork del repositorio
+2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
 
-### Tarea 2: Gestión de Tipos de Elecciones
-- Implementar modelos para múltiples elecciones simultáneas
-- Crear plantillas E-14 dinámicas
-- Configurar OCR específico por tipo de elección
+### Estándares de Código
+- Seguir PEP 8 para Python
+- Comentarios en español
+- Tests para nuevas funcionalidades
+- Documentación actualizada
 
-### Tarea 3: Plantillas de Formularios E-14
-- Crear plantillas para diferentes tipos de elecciones
-- Configurar validaciones específicas
-- Implementar generación dinámica de formularios
+## 📄 Licencia
 
-## Tecnologías Utilizadas
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-- **Base de Datos:** SQLite (desarrollo) / PostgreSQL (producción)
-- **ORM:** SQLAlchemy 1.4.53
-- **Lenguaje:** Python 3.13
-- **Datos:** DIVIPOLA oficial de Colombia
+## 👥 Equipo de Desarrollo
 
-## Contacto y Soporte
+- **Desarrollador Principal**: Sistema desarrollado con Kiro AI
+- **Cliente**: Departamento del Caquetá
+- **Propósito**: Modernización de procesos electorales
 
-Este sistema está diseñado específicamente para el departamento de Caquetá y sigue las especificaciones técnicas del Sistema de Recolección Inicial de Información de Votaciones.
+## 📞 Soporte
+
+Para soporte técnico o consultas:
+- **Email**: soporte@sistema-electoral-caqueta.gov.co
+- **Documentación**: Ver carpeta `/docs`
+- **Issues**: Usar el sistema de issues de GitHub
+
+## 🔄 Changelog
+
+### v1.0.0 (2024-11-06)
+- ✅ Sistema completo multi-rol
+- ✅ Captura E14 y E24 con zoom
+- ✅ Sistema de reportes avanzado
+- ✅ Geolocalización visual
+- ✅ Optimización móvil completa
+- ✅ Observaciones e incidencias
+- ✅ APIs RESTful completas
+- ✅ Base de datos completa
+- ✅ Sistema de autenticación
+- ✅ Validaciones y seguridad
+
+## 🎯 Roadmap
+
+### Próximas Versiones
+- [ ] Integración con sistemas externos
+- [ ] Notificaciones push
+- [ ] Modo offline completo
+- [ ] Análisis de datos con IA
+- [ ] Integración blockchain para auditoría
+- [ ] App móvil nativa
 
 ---
 
-**Estado:** ✅ Tarea 1 Completada - Base de datos inicializada y validada
-**Siguiente:** Implementar gestión de tipos de elecciones y plantillas E-14
+**Sistema Electoral ERP - Caquetá** | Desarrollado con ❤️ para la democracia colombiana

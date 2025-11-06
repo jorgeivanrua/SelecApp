@@ -1,0 +1,704 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Coordinador Departamental - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/coordinador_departamental.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-coordinador-departamental{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Sistema Electoral - Coordinador Departamental{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='coordinador_departamental') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/departamental/municipios">
+        <i class="fas fa-city me-1"></i>Municipios
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/departamental/coordinacion">
+        <i class="fas fa-network-wired me-1"></i>Coordinación
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/departamental/supervision">
+        <i class="fas fa-eye me-1"></i>Supervisión
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-dark text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-globe-americas me-2"></i>Coordinación Departamental Electoral</h2>
+            <p class="mb-0">Gestión integral del Departamento del <strong>{{ stats.departamento or 'Caquetá' }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas departamentales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Municipios</h6>
+                        <h3 class="mb-0">{{ stats.municipios or 16 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-city fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Puestos Totales</h6>
+                        <h3 class="mb-0">{{ stats.puestos or 180 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Mesas Totales</h6>
+                        <h3 class="mb-0">{{ stats.mesas or 720 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-table fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Cobertura</h6>
+                        <h3 class="mb-0">{{ stats.cobertura or 92 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-pie fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Herramientas de coordinación departamental -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Centro de Comando Departamental
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-dark btn-lg w-100 mb-2" onclick="coordinarMunicipios()">
+                            <i class="fas fa-city me-2"></i>
+                            Coordinar Municipios
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary btn-lg w-100 mb-2" onclick="supervisarOperaciones()">
+                            <i class="fas fa-eye me-2"></i>
+                            Supervisar Operaciones
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="gestionarRecursos()">
+                            <i class="fas fa-boxes me-2"></i>
+                            Gestionar Recursos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="centroControl()">
+                            <i class="fas fa-broadcast-tower me-2"></i>
+                            Centro de Control
+                        </button>
+                    </div>
+                </div>
+                <!-- Segunda fila -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-dark btn-lg w-100 mb-2" onclick="comunicarNacional()">
+                            <i class="fas fa-satellite me-2"></i>
+                            Comunicar Nacional
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-lg w-100 mb-2" onclick="monitorearTiempoReal()">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Monitoreo Real
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success btn-lg w-100 mb-2" onclick="generarReportesEjecutivos()">
+                            <i class="fas fa-file-contract me-2"></i>
+                            Reportes Ejecutivos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-warning btn-lg w-100 mb-2" onclick="gestionarCrisis()">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Gestión de Crisis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mapa departamental y estado -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-map me-2"></i>
+                    Mapa de Estado Departamental
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Zona Norte</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Municipio</th>
+                                        <th>Estado</th>
+                                        <th>Avance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Florencia</td>
+                                        <td><span class="badge bg-success">Operativo</span></td>
+                                        <td>95%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>San Vicente</td>
+                                        <td><span class="badge bg-success">Operativo</span></td>
+                                        <td>88%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Puerto Rico</td>
+                                        <td><span class="badge bg-warning">Atención</span></td>
+                                        <td>75%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Zona Sur</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Municipio</th>
+                                        <th>Estado</th>
+                                        <th>Avance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>El Paujil</td>
+                                        <td><span class="badge bg-success">Operativo</span></td>
+                                        <td>90%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>La Montañita</td>
+                                        <td><span class="badge bg-info">En Proceso</span></td>
+                                        <td>82%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Curillo</td>
+                                        <td><span class="badge bg-danger">Crítico</span></td>
+                                        <td>65%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Alertas Departamentales</h6>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Crítico:</strong> Curillo requiere intervención inmediata - Falta 35% del personal
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Atención:</strong> Puerto Rico necesita apoyo logístico adicional
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Info:</strong> 12 municipios reportan estado operativo completo
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Panel de Control Ejecutivo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Estado General Departamental</h6>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" style="width: 92%">92%</div>
+                    </div>
+                    <small class="text-muted">Preparación electoral departamental</small>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Indicadores Críticos</h6>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border rounded p-2 mb-2">
+                                <h4 class="text-success">14</h4>
+                                <small>Municipios OK</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2 mb-2">
+                                <h4 class="text-danger">2</h4>
+                                <small>Requieren Apoyo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-danger btn-sm" onclick="activarEmergencia()">
+                        <i class="fas fa-exclamation me-2"></i>Protocolo Emergencia
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="enviarApoyo()">
+                        <i class="fas fa-helicopter me-2"></i>Enviar Apoyo
+                    </button>
+                    <button class="btn btn-info btn-sm" onclick="comunicarGobernacion()">
+                        <i class="fas fa-building me-2"></i>Comunicar Gobernación
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>
+                    Métricas Departamentales
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="departamentalChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para coordinador departamental
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Coordinador Departamental cargado');
+    inicializarGrafico();
+    actualizarEstadoDepartamental();
+    
+    // Actualizar cada 60 segundos
+    setInterval(actualizarEstadoDepartamental, 60000);
+});
+
+function inicializarGrafico() {
+    const ctx = document.getElementById('departamentalChart').getContext('2d');
+    window.departamentalChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['08:00', '10:00', '12:00', '14:00', '16:00'],
+            datasets: [{
+                label: 'Avance Departamental',
+                data: [45, 62, 78, 85, 92],
+                borderColor: '#343a40',
+                backgroundColor: 'rgba(52, 58, 64, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+function coordinarMunicipios() {
+    mostrarModalDepartamental('Coordinación de Municipios', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Estado de Coordinación Municipal</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Municipio</th>
+                                <th>Coordinador</th>
+                                <th>Puestos</th>
+                                <th>Personal</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Florencia</strong></td>
+                                <td>Carlos Mendoza</td>
+                                <td>12/12</td>
+                                <td>180/180</td>
+                                <td><span class="badge bg-success">Operativo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" onclick="coordinarMunicipio('florencia')">Coordinar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>San Vicente</strong></td>
+                                <td>Ana Patricia</td>
+                                <td>8/8</td>
+                                <td>120/125</td>
+                                <td><span class="badge bg-warning">Atención</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="apoyarMunicipio('sanvicente')">Apoyar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Curillo</strong></td>
+                                <td>Miguel Torres</td>
+                                <td>4/6</td>
+                                <td>45/70</td>
+                                <td><span class="badge bg-danger">Crítico</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="intervenirMunicipio('curillo')">Intervenir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Acciones de Coordinación</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="redistribuirRecursosDept()">
+                        <i class="fas fa-exchange-alt me-2"></i>Redistribuir Recursos
+                    </button>
+                    <button class="btn btn-success" onclick="comunicarTodosMunicipios()">
+                        <i class="fas fa-broadcast-tower me-2"></i>Comunicar Todos
+                    </button>
+                    <button class="btn btn-warning" onclick="activarContingenciaDept()">
+                        <i class="fas fa-shield-alt me-2"></i>Plan Contingencia
+                    </button>
+                    <button class="btn btn-info" onclick="generarReporteDept()">
+                        <i class="fas fa-file-alt me-2"></i>Reporte Ejecutivo
+                    </button>
+                </div>
+                
+                <h6 class="mt-3">Recursos Disponibles</h6>
+                <div class="alert alert-info">
+                    <small><strong>Personal de Reserva:</strong> 45 personas</small>
+                </div>
+                <div class="alert alert-success">
+                    <small><strong>Materiales Extra:</strong> 15% disponible</small>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function supervisarOperaciones() {
+    mostrarModalDepartamental('Supervisión de Operaciones Departamentales', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Centro de Supervisión en Tiempo Real</h6>
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h4>14</h4>
+                                <small>Municipios Operativos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-warning text-dark">
+                            <div class="card-body">
+                                <h4>1</h4>
+                                <small>Requiere Atención</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-danger text-white">
+                            <div class="card-body">
+                                <h4>1</h4>
+                                <small>Estado Crítico</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <h4>720</h4>
+                                <small>Mesas Totales</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <h4>2160</h4>
+                                <small>Personal Total</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-center bg-dark text-white">
+                            <div class="card-body">
+                                <h4>92%</h4>
+                                <small>Cobertura</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h6>Operaciones Críticas</h6>
+                <div class="alert alert-danger">
+                    <strong>CRÍTICO:</strong> Curillo - Falta 35% del personal, 2 puestos sin configurar
+                    <button class="btn btn-sm btn-danger ms-2" onclick="resolverCriticoDept('curillo')">Resolver Ahora</button>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>ATENCIÓN:</strong> Puerto Rico - Materiales en tránsito, llegada estimada 14:00
+                    <button class="btn btn-sm btn-warning ms-2" onclick="seguirMaterialesDept('puerto_rico')">Seguir</button>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-success me-2" onclick="actualizarSupervisionDept()">
+                        <i class="fas fa-sync me-2"></i>Actualizar Estado
+                    </button>
+                    <button class="btn btn-primary me-2" onclick="comunicarNacional()">
+                        <i class="fas fa-satellite me-2"></i>Comunicar Nacional
+                    </button>
+                    <button class="btn btn-warning" onclick="alertarGobernacion()">
+                        <i class="fas fa-bell me-2"></i>Alertar Gobernación
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function gestionarRecursos() {
+    mostrarModalDepartamental('Gestión de Recursos Departamentales', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Inventario Departamental</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Recurso</th>
+                                <th>Disponible</th>
+                                <th>Asignado</th>
+                                <th>Reserva</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Personal Electoral</td>
+                                <td>2160</td>
+                                <td>2115</td>
+                                <td>45</td>
+                                <td><span class="badge bg-success">OK</span></td>
+                            </tr>
+                            <tr>
+                                <td>Urnas</td>
+                                <td>720</td>
+                                <td>720</td>
+                                <td>72</td>
+                                <td><span class="badge bg-success">OK</span></td>
+                            </tr>
+                            <tr>
+                                <td>Materiales</td>
+                                <td>95%</td>
+                                <td>85%</td>
+                                <td>10%</td>
+                                <td><span class="badge bg-warning">Atención</span></td>
+                            </tr>
+                            <tr>
+                                <td>Transporte</td>
+                                <td>45</td>
+                                <td>42</td>
+                                <td>3</td>
+                                <td><span class="badge bg-info">Suficiente</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Gestión de Recursos</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="redistribuirPersonalDept()">
+                        <i class="fas fa-users me-2"></i>Redistribuir Personal
+                    </button>
+                    <button class="btn btn-success" onclick="enviarMaterialesDept()">
+                        <i class="fas fa-truck me-2"></i>Enviar Materiales
+                    </button>
+                    <button class="btn btn-info" onclick="coordinarTransporteDept()">
+                        <i class="fas fa-route me-2"></i>Coordinar Transporte
+                    </button>
+                    <button class="btn btn-warning" onclick="activarReservaDept()">
+                        <i class="fas fa-box-open me-2"></i>Activar Reservas
+                    </button>
+                </div>
+                
+                <h6 class="mt-3">Solicitudes Pendientes</h6>
+                <div class="alert alert-warning">
+                    <small><strong>Curillo:</strong> Solicita 25 personas adicionales</small>
+                    <button class="btn btn-sm btn-success" onclick="aprobarSolicitud('curillo_personal')">Aprobar</button>
+                </div>
+                <div class="alert alert-info">
+                    <small><strong>Puerto Rico:</strong> Solicita transporte adicional</small>
+                    <button class="btn btn-sm btn-info" onclick="evaluarSolicitud('puerto_rico_transporte')">Evaluar</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModalDepartamental(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="departamentalModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('departamentalModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('departamentalModal'));
+    modal.show();
+}
+
+function actualizarEstadoDepartamental() {
+    console.log('Actualizando estado departamental...');
+}
+
+function mostrarNotificacionDepartamental(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Implementar funciones específicas
+function centroControl() { mostrarNotificacionDepartamental('Activando centro de control departamental...', 'info'); }
+function comunicarNacional() { mostrarNotificacionDepartamental('Comunicando con coordinación nacional...', 'info'); }
+function monitorearTiempoReal() { mostrarNotificacionDepartamental('Activando monitoreo departamental en tiempo real...', 'info'); }
+function generarReportesEjecutivos() { mostrarNotificacionDepartamental('Generando reportes ejecutivos...', 'info'); }
+function gestionarCrisis() { mostrarNotificacionDepartamental('Activando protocolo de gestión de crisis...', 'error'); }
+function activarEmergencia() { mostrarNotificacionDepartamental('ACTIVANDO PROTOCOLO DE EMERGENCIA DEPARTAMENTAL', 'error'); }
+function enviarApoyo() { mostrarNotificacionDepartamental('Enviando apoyo de emergencia...', 'warning'); }
+function comunicarGobernacion() { mostrarNotificacionDepartamental('Comunicando con la Gobernación...', 'info'); }
+function coordinarMunicipio(municipio) { mostrarNotificacionDepartamental(`Coordinando con ${municipio}...`, 'info'); }
+function apoyarMunicipio(municipio) { mostrarNotificacionDepartamental(`Enviando apoyo a ${municipio}...`, 'warning'); }
+function intervenirMunicipio(municipio) { mostrarNotificacionDepartamental(`INTERVINIENDO ${municipio} - Protocolo de emergencia`, 'error'); }
+function redistribuirRecursosDept() { mostrarNotificacionDepartamental('Redistribuyendo recursos departamentales...', 'info'); }
+function comunicarTodosMunicipios() { mostrarNotificacionDepartamental('Comunicando con todos los municipios...', 'info'); }
+function activarContingenciaDept() { mostrarNotificacionDepartamental('Activando plan de contingencia departamental...', 'error'); }
+function generarReporteDept() { mostrarNotificacionDepartamental('Generando reporte ejecutivo departamental...', 'info'); }
+function resolverCriticoDept(municipio) { mostrarNotificacionDepartamental(`RESOLVIENDO SITUACIÓN CRÍTICA EN ${municipio}`, 'error'); }
+function seguirMaterialesDept(municipio) { mostrarNotificacionDepartamental(`Siguiendo materiales para ${municipio}...`, 'info'); }
+function actualizarSupervisionDept() { mostrarNotificacionDepartamental('Actualizando supervisión departamental...', 'info'); }
+function alertarGobernacion() { mostrarNotificacionDepartamental('Enviando alerta a la Gobernación...', 'warning'); }
+function redistribuirPersonalDept() { mostrarNotificacionDepartamental('Redistribuyendo personal departamental...', 'info'); }
+function enviarMaterialesDept() { mostrarNotificacionDepartamental('Enviando materiales de emergencia...', 'info'); }
+function coordinarTransporteDept() { mostrarNotificacionDepartamental('Coordinando transporte departamental...', 'info'); }
+function activarReservaDept() { mostrarNotificacionDepartamental('Activando recursos de reserva...', 'warning'); }
+function aprobarSolicitud(solicitud) { mostrarNotificacionDepartamental(`Aprobando solicitud: ${solicitud}`, 'success'); }
+function evaluarSolicitud(solicitud) { mostrarNotificacionDepartamental(`Evaluando solicitud: ${solicitud}`, 'info'); }
+</script>
+{% endblock %}

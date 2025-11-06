@@ -1,0 +1,222 @@
+<!-- Mapa Electoral Interactivo -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-map me-2"></i>
+            Mapa Electoral - Departamento del Caquetá
+        </h5>
+    </div>
+    <div class="card-body">
+        <div id="electoral-map" style="height: 400px; background: #f8f9fa; border-radius: 8px; position: relative;">
+            <!-- Mapa SVG simplificado del Caquetá -->
+            <svg width="100%" height="100%" viewBox="0 0 400 300" style="position: absolute; top: 0; left: 0;">
+                <!-- Municipios del Caquetá (representación simplificada) -->
+                
+                <!-- Florencia (centro) -->
+                <circle cx="200" cy="150" r="25" fill="#28a745" stroke="#fff" stroke-width="2" 
+                        class="municipality-marker" data-municipality="florencia" 
+                        data-bs-toggle="tooltip" title="Florencia - 28 mesas configuradas">
+                    <animate attributeName="r" values="25;30;25" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                
+                <!-- San Vicente del Caguán -->
+                <circle cx="120" cy="100" r="18" fill="#17a2b8" stroke="#fff" stroke-width="2" 
+                        class="municipality-marker" data-municipality="san_vicente"
+                        data-bs-toggle="tooltip" title="San Vicente - 15 mesas configuradas">
+                </circle>
+                
+                <!-- Puerto Rico -->
+                <circle cx="280" cy="120" r="15" fill="#ffc107" stroke="#fff" stroke-width="2" 
+                        class="municipality-marker" data-municipality="puerto_rico"
+                        data-bs-toggle="tooltip" title="Puerto Rico - 12 mesas configuradas">
+                </circle>
+                
+                <!-- El Paujil -->
+                <circle cx="160" cy="200" r="12" fill="#fd7e14" stroke="#fff" stroke-width="2" 
+                        class="municipality-marker" data-municipality="el_paujil"
+                        data-bs-toggle="tooltip" title="El Paujil - 8 mesas configuradas">
+                </circle>
+                
+                <!-- La Montañita -->
+                <circle cx="240" cy="180" r="10" fill="#6f42c1" stroke="#fff" stroke-width="2" 
+                        class="municipality-marker" data-municipality="la_montanita"
+                        data-bs-toggle="tooltip" title="La Montañita - 6 mesas configuradas">
+                </circle>
+                
+                <!-- Curillo -->
+                <circle cx="320" cy="200" r="8" fill="#e83e8c" stroke="#fff" stroke-width="2" 
+                        class="municipality-marker" data-municipality="curillo"
+                        data-bs-toggle="tooltip" title="Curillo - 4 mesas configuradas">
+                </circle>
+                
+                <!-- Conexiones entre municipios -->
+                <line x1="200" y1="150" x2="120" y2="100" stroke="#6c757d" stroke-width="1" opacity="0.3"/>
+                <line x1="200" y1="150" x2="280" y2="120" stroke="#6c757d" stroke-width="1" opacity="0.3"/>
+                <line x1="200" y1="150" x2="160" y2="200" stroke="#6c757d" stroke-width="1" opacity="0.3"/>
+                <line x1="200" y1="150" x2="240" y2="180" stroke="#6c757d" stroke-width="1" opacity="0.3"/>
+                
+                <!-- Etiquetas -->
+                <text x="200" y="185" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Florencia</text>
+                <text x="120" y="90" text-anchor="middle" font-size="10" fill="#333">San Vicente</text>
+                <text x="280" y="110" text-anchor="middle" font-size="10" fill="#333">Puerto Rico</text>
+                <text x="160" y="220" text-anchor="middle" font-size="9" fill="#333">El Paujil</text>
+                <text x="240" y="200" text-anchor="middle" font-size="9" fill="#333">La Montañita</text>
+                <text x="320" y="220" text-anchor="middle" font-size="8" fill="#333">Curillo</text>
+            </svg>
+            
+            <!-- Panel de información -->
+            <div class="position-absolute top-0 end-0 m-3">
+                <div class="card" style="width: 200px;">
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-2">Información</h6>
+                        <div id="map-info">
+                            <small class="text-muted">Haz clic en un municipio para ver detalles</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leyenda -->
+            <div class="position-absolute bottom-0 start-0 m-3">
+                <div class="card">
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-2">Leyenda</h6>
+                        <div class="d-flex flex-column">
+                            <small><span class="badge bg-success me-1">●</span> > 20 mesas</small>
+                            <small><span class="badge bg-info me-1">●</span> 10-20 mesas</small>
+                            <small><span class="badge bg-warning me-1">●</span> 5-10 mesas</small>
+                            <small><span class="badge bg-secondary me-1">●</span> < 5 mesas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.municipality-marker {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.municipality-marker:hover {
+    filter: brightness(1.2);
+    transform: scale(1.1);
+}
+
+#electoral-map {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Datos de municipios
+    const municipalityData = {
+        florencia: {
+            name: 'Florencia',
+            tables: 28,
+            voters: 15420,
+            participation: 75,
+            status: 'Activo'
+        },
+        san_vicente: {
+            name: 'San Vicente del Caguán',
+            tables: 15,
+            voters: 8500,
+            participation: 68,
+            status: 'Activo'
+        },
+        puerto_rico: {
+            name: 'Puerto Rico',
+            tables: 12,
+            voters: 6200,
+            participation: 72,
+            status: 'Activo'
+        },
+        el_paujil: {
+            name: 'El Paujil',
+            tables: 8,
+            voters: 4100,
+            participation: 70,
+            status: 'Activo'
+        },
+        la_montanita: {
+            name: 'La Montañita',
+            tables: 6,
+            voters: 3200,
+            participation: 65,
+            status: 'Activo'
+        },
+        curillo: {
+            name: 'Curillo',
+            tables: 4,
+            voters: 2100,
+            participation: 63,
+            status: 'Activo'
+        }
+    };
+    
+    // Agregar eventos de clic a los marcadores
+    document.querySelectorAll('.municipality-marker').forEach(marker => {
+        marker.addEventListener('click', function() {
+            const municipalityId = this.getAttribute('data-municipality');
+            const data = municipalityData[municipalityId];
+            
+            if (data) {
+                document.getElementById('map-info').innerHTML = `
+                    <h6 class="mb-1">${data.name}</h6>
+                    <small class="d-block">Mesas: ${data.tables}</small>
+                    <small class="d-block">Votantes: ${data.voters.toLocaleString()}</small>
+                    <small class="d-block">Participación: ${data.participation}%</small>
+                    <small class="d-block">Estado: <span class="badge bg-success">${data.status}</span></small>
+                `;
+            }
+        });
+    });
+    
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+        },
+        curillo: {
+            name: 'Curillo',
+            tables: 4,
+            voters: 2100,
+            participation: 63,
+            status: 'Activo'
+        }
+    };
+    
+    // Agregar eventos de clic a los marcadores
+    document.querySelectorAll('.municipality-marker').forEach(marker => {
+        marker.addEventListener('click', function() {
+            const municipalityId = this.getAttribute('data-municipality');
+            const data = municipalityData[municipalityId];
+            
+            if (data) {
+                document.getElementById('map-info').innerHTML = `
+                    <h6 class="mb-1">${data.name}</h6>
+                    <small class="d-block">Mesas: ${data.tables}</small>
+                    <small class="d-block">Votantes: ${data.voters.toLocaleString()}</small>
+                    <small class="d-block">Participación: ${data.participation}%</small>
+                    <small class="d-block">Estado: <span class="badge bg-success">${data.status}</span></small>
+                `;
+            }
+        });
+    });
+    
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+</parameter>
+</invoke>

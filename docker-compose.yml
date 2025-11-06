@@ -1,0 +1,112 @@
+# Sistema Electoral ERP - Docker Compose para Producción
+version: '3.8'
+
+services:
+  # Aplicación principal
+  app:
+    build: .
+    container_name: sistema-electoral-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://electoral_user:electoral_pass@db:5432/caqueta_electoral
+      - REDIS_URL=redis://redis:6379/0
+      - RUN_MIGRATIONS=true
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    networks:
+      - electoral-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: sistema-electoral-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=caqueta_electoral
+      - POSTGRES_USER=electoral_user
+      - POSTGRES_PASSWORD=electoral_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - electoral-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U electoral_user -d caqueta_electoral"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis para cache y sesiones
+  redis:
+    image: redis:7-alpine
+    container_name: sistema-electoral-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - electoral-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx como proxy reverso
+  nginx:
+    image: nginx:alpine
+    container_name: sistema-electoral-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./static:/var/www/static:ro
+    depends_on:
+      - app
+    networks:
+      - electoral-network
+
+  # Servicio de backup automático
+  backup:
+    image: postgres:15-alpine
+    container_name: sistema-electoral-backup
+    restart: unless-stopped
+    environment:
+      - PGPASSWORD=electoral_pass
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    command: >
+      sh -c "
+        echo '0 2 * * * /backup.sh' | crontab - &&
+        crond -f
+      "
+    depends_on:
+      - db
+    networks:
+      - electoral-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  electoral-network:
+    driver: bridge

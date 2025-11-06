@@ -1,0 +1,712 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Observador Internacional - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/observador_internacional.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-observador-internacional{% endblock %}
+{% block navbar_class %}navbar-dark bg-secondary{% endblock %}
+{% block brand_text %}Sistema Electoral - Observador Internacional{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='observador_internacional') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/observation/processes">
+        <i class="fas fa-eye me-1"></i>Observar Procesos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/observation/reports">
+        <i class="fas fa-file-alt me-1"></i>Reportes Internacionales
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/observation/standards">
+        <i class="fas fa-globe me-1"></i>Estándares Internacionales
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-secondary text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-globe me-2"></i>Panel de Observación Internacional</h2>
+            <p class="mb-0">Monitoreo y evaluación de procesos electorales según estándares internacionales</p>
+        </div>
+    </div>
+</div>
+<!-- Métricas de observación -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Procesos Observados</h6>
+                        <h3 class="mb-0">{{ stats.observed_processes or 8 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-eye fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Estándares Evaluados</h6>
+                        <h3 class="mb-0">{{ stats.standards_evaluated or 15 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-double fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Cumplimiento Global</h6>
+                        <h3 class="mb-0">{{ stats.global_compliance or 92 }}%</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-globe fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Reportes Enviados</h6>
+                        <h3 class="mb-0">{{ stats.reports_sent or 6 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-paper-plane fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Herramientas de observación -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas de Observación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-secondary btn-lg w-100 mb-2" onclick="observarProcesos()">
+                            <i class="fas fa-eye me-2"></i>
+                            Observar Procesos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-secondary btn-lg w-100 mb-2" onclick="evaluarEstandares()">
+                            <i class="fas fa-check-double me-2"></i>
+                            Evaluar Estándares
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-secondary btn-lg w-100 mb-2" onclick="generarReporteInternacional()">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Generar Reporte
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-secondary btn-lg w-100 mb-2" onclick="comunicarOrganizaciones()">
+                            <i class="fas fa-globe me-2"></i>
+                            Comunicar Organizaciones
+                        </button>
+                    </div>
+                </div>
+                <!-- Segunda fila de herramientas -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary btn-lg w-100 mb-2" onclick="registrarObservacion()">
+                            <i class="fas fa-clipboard me-2"></i>
+                            Registrar Observación
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary btn-lg w-100 mb-2" onclick="verificarTransparencia()">
+                            <i class="fas fa-search me-2"></i>
+                            Verificar Transparencia
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary btn-lg w-100 mb-2" onclick="monitorearAcceso()">
+                            <i class="fas fa-universal-access me-2"></i>
+                            Monitorear Acceso
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary btn-lg w-100 mb-2" onclick="certificarProceso()">
+                            <i class="fas fa-certificate me-2"></i>
+                            Certificar Proceso
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Observaciones y estándares -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Evaluación de Estándares Internacionales
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Estándar</th>
+                                <th>Categoría</th>
+                                <th>Cumplimiento</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Transparencia Electoral</td>
+                                <td>Proceso</td>
+                                <td>95%</td>
+                                <td><span class="badge bg-success">Excelente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Acceso Universal</td>
+                                <td>Participación</td>
+                                <td>88%</td>
+                                <td><span class="badge bg-warning">Bueno</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning">Revisar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Seguridad del Voto</td>
+                                <td>Integridad</td>
+                                <td>98%</td>
+                                <td><span class="badge bg-success">Excelente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-success">Certificar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Resolución de Disputas</td>
+                                <td>Justicia</td>
+                                <td>85%</td>
+                                <td><span class="badge bg-info">Satisfactorio</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info">Evaluar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-flag me-2"></i>
+                    Organizaciones Internacionales
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-globe me-2"></i>OEA - Organización de Estados Americanos</h6>
+                    <p class="small text-muted">Último reporte enviado: 2024-11-01</p>
+                    <span class="badge bg-success">Conectado</span>
+                </div>
+                <div class="mb-3">
+                    <h6><i class="fas fa-users me-2"></i>IDEA Internacional</h6>
+                    <p class="small text-muted">Próximo reporte: 2024-11-15</p>
+                    <span class="badge bg-info">Programado</span>
+                </div>
+                <div class="mb-3">
+                    <h6><i class="fas fa-balance-scale me-2"></i>Transparencia Internacional</h6>
+                    <p class="small text-muted">Estado: Monitoreo activo</p>
+                    <span class="badge bg-warning">Observando</span>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fas fa-plus me-2"></i>
+                        Agregar Organización
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Resumen de Cumplimiento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 92%">92%</div>
+                </div>
+                <p class="small text-muted">Cumplimiento general de estándares internacionales</p>
+                <div class="mt-3">
+                    <small class="text-success"><i class="fas fa-check me-1"></i>Transparencia: Excelente</small><br>
+                    <small class="text-warning"><i class="fas fa-exclamation me-1"></i>Acceso: Mejorable</small><br>
+                    <small class="text-success"><i class="fas fa-check me-1"></i>Seguridad: Excelente</small><br>
+                    <small class="text-info"><i class="fas fa-info me-1"></i>Justicia: Satisfactorio</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block role_scripts %}
+<script>
+// Scripts específicos para observador internacional
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Observador Internacional cargado');
+    inicializarObservacion();
+    actualizarEstandares();
+    
+    // Actualizar datos cada 5 minutos
+    setInterval(actualizarEstandares, 300000);
+});
+
+function inicializarObservacion() {
+    // Configurar herramientas de observación
+    console.log('Herramientas de observación inicializadas');
+}
+
+function observarProcesos() {
+    mostrarModalObservador('Observación de Procesos Electorales', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Procesos Disponibles para Observación</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>Municipio</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Observación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elección Alcalde</td>
+                                <td>Florencia</td>
+                                <td>2024-12-01</td>
+                                <td><span class="badge bg-info">En Proceso</span></td>
+                                <td><span class="badge bg-success">Observando</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="detalleObservacion('florencia_alcalde')">Ver Detalles</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Elección Concejo</td>
+                                <td>San Vicente</td>
+                                <td>2024-12-01</td>
+                                <td><span class="badge bg-warning">Programado</span></td>
+                                <td><span class="badge bg-secondary">Pendiente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="iniciarObservacion('sanvicente_concejo')">Iniciar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Registro Candidatos</td>
+                                <td>Puerto Rico</td>
+                                <td>2024-11-15</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                                <td><span class="badge bg-success">Certificado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" onclick="verCertificacion('puertorico_registro')">Certificación</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Herramientas de Observación</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="nuevaObservacion()">
+                        <i class="fas fa-plus me-2"></i>Nueva Observación
+                    </button>
+                    <button class="btn btn-info" onclick="programarObservacion()">
+                        <i class="fas fa-calendar me-2"></i>Programar Observación
+                    </button>
+                    <button class="btn btn-success" onclick="exportarObservaciones()">
+                        <i class="fas fa-download me-2"></i>Exportar Observaciones
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <h6>Estadísticas</h6>
+                    <p><strong>Procesos Observados:</strong> 8</p>
+                    <p><strong>Certificaciones Emitidas:</strong> 5</p>
+                    <p><strong>Recomendaciones:</strong> 12</p>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function evaluarEstandares() {
+    mostrarModalObservador('Evaluación de Estándares Internacionales', `
+        <div class="row">
+            <div class="col-12">
+                <h6>Marco de Evaluación Internacional</h6>
+                <div class="accordion" id="estandaresAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#transparencia">
+                                <i class="fas fa-eye me-2"></i>Transparencia Electoral - 95% Cumplimiento
+                            </button>
+                        </h2>
+                        <div id="transparencia" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Criterios Evaluados</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Acceso a información</span>
+                                                <span class="badge bg-success">100%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Publicidad de procesos</span>
+                                                <span class="badge bg-success">95%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Rendición de cuentas</span>
+                                                <span class="badge bg-warning">90%</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Recomendaciones</h6>
+                                        <div class="alert alert-info">
+                                            <small>Mejorar la publicación de resultados preliminares</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary" onclick="detalleEstandar('transparencia')">Ver Detalles</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acceso">
+                                <i class="fas fa-universal-access me-2"></i>Acceso Universal - 88% Cumplimiento
+                            </button>
+                        </h2>
+                        <div id="acceso" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Criterios Evaluados</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Accesibilidad física</span>
+                                                <span class="badge bg-warning">85%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Inclusión de minorías</span>
+                                                <span class="badge bg-success">90%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <span>Apoyo a discapacitados</span>
+                                                <span class="badge bg-warning">88%</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Recomendaciones</h6>
+                                        <div class="alert alert-warning">
+                                            <small>Mejorar accesibilidad en zonas rurales</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-warning" onclick="detalleEstandar('acceso')">Ver Detalles</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success" onclick="generarCertificacion()">
+                        <i class="fas fa-certificate me-2"></i>Generar Certificación
+                    </button>
+                    <button class="btn btn-info" onclick="compararEstandares()">
+                        <i class="fas fa-balance-scale me-2"></i>Comparar con Estándares
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function generarReporteInternacional() {
+    mostrarModalObservador('Generación de Reporte Internacional', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Configuración del Reporte</h6>
+                <form id="reporteInternacionalForm">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Reporte</label>
+                        <select class="form-select" id="tipoReporte">
+                            <option value="preliminar">Reporte Preliminar</option>
+                            <option value="final">Reporte Final</option>
+                            <option value="seguimiento">Reporte de Seguimiento</option>
+                            <option value="certificacion">Certificación Internacional</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Organización Destinataria</label>
+                        <select class="form-select" id="organizacion">
+                            <option value="oea">OEA - Organización de Estados Americanos</option>
+                            <option value="idea">IDEA Internacional</option>
+                            <option value="transparencia">Transparencia Internacional</option>
+                            <option value="todas">Todas las Organizaciones</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Período de Observación</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control" id="fechaInicio">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control" id="fechaFin">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="incluirRecomendaciones" checked>
+                            <label class="form-check-label">Incluir Recomendaciones</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="incluirEvidencias" checked>
+                            <label class="form-check-label">Incluir Evidencias</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h6>Vista Previa del Reporte</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6>Reporte de Observación Electoral</h6>
+                        <p><strong>Departamento:</strong> Caquetá, Colombia</p>
+                        <p><strong>Período:</strong> Noviembre 2024</p>
+                        <p><strong>Observador:</strong> Misión Internacional</p>
+                        <hr>
+                        <h6>Resumen Ejecutivo</h6>
+                        <p class="small">Los procesos electorales observados muestran un alto nivel de cumplimiento con los estándares internacionales...</p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 92%">92% Cumplimiento</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="generarReporte()">
+                        <i class="fas fa-file-pdf me-2"></i>Generar PDF
+                    </button>
+                    <button class="btn btn-info" onclick="enviarReporte()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function comunicarOrganizaciones() {
+    mostrarModalObservador('Comunicación con Organizaciones Internacionales', `
+        <div class="row">
+            <div class="col-md-8">
+                <h6>Organizaciones Conectadas</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Organización</th>
+                                <th>Estado</th>
+                                <th>Último Contacto</th>
+                                <th>Próximo Reporte</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>OEA</strong></td>
+                                <td><span class="badge bg-success">Conectado</span></td>
+                                <td>2024-11-05</td>
+                                <td>2024-11-15</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="contactarOrganizacion('oea')">Contactar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>IDEA Internacional</strong></td>
+                                <td><span class="badge bg-info">Programado</span></td>
+                                <td>2024-11-01</td>
+                                <td>2024-11-20</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="programarContacto('idea')">Programar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Transparencia Internacional</strong></td>
+                                <td><span class="badge bg-warning">Pendiente</span></td>
+                                <td>2024-10-28</td>
+                                <td>2024-11-10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="urgentContacto('transparencia')">Urgente</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6>Comunicación Rápida</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="enviarActualizacion()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Actualización
+                    </button>
+                    <button class="btn btn-success" onclick="programarReunion()">
+                        <i class="fas fa-calendar me-2"></i>Programar Reunión
+                    </button>
+                    <button class="btn btn-info" onclick="solicitarAsistencia()">
+                        <i class="fas fa-hands-helping me-2"></i>Solicitar Asistencia
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <h6>Estadísticas de Comunicación</h6>
+                    <p><strong>Reportes Enviados:</strong> 6</p>
+                    <p><strong>Reuniones Realizadas:</strong> 3</p>
+                    <p><strong>Recomendaciones Recibidas:</strong> 8</p>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModalObservador(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="observadorModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-secondary text-white">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('observadorModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('observadorModal'));
+    modal.show();
+}
+
+function actualizarEstandares() {
+    // Simular actualización de estándares
+    console.log('Actualizando evaluación de estándares internacionales...');
+}
+
+function mostrarNotificacionObservador(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Implementar funciones específicas
+function registrarObservacion() { mostrarNotificacionObservador('Abriendo formulario de nueva observación...', 'info'); }
+function verificarTransparencia() { mostrarNotificacionObservador('Iniciando verificación de transparencia...', 'info'); }
+function monitorearAcceso() { mostrarNotificacionObservador('Monitoreando acceso universal...', 'info'); }
+function certificarProceso() { mostrarNotificacionObservador('Iniciando proceso de certificación...', 'success'); }
+function detalleObservacion(proceso) { mostrarNotificacionObservador(`Abriendo detalles de ${proceso}...`, 'info'); }
+function iniciarObservacion(proceso) { mostrarNotificacionObservador(`Iniciando observación de ${proceso}...`, 'info'); }
+function verCertificacion(proceso) { mostrarNotificacionObservador(`Mostrando certificación de ${proceso}...`, 'success'); }
+function nuevaObservacion() { mostrarNotificacionObservador('Creando nueva observación...', 'info'); }
+function programarObservacion() { mostrarNotificacionObservador('Programando nueva observación...', 'info'); }
+function exportarObservaciones() { mostrarNotificacionObservador('Exportando observaciones...', 'success'); }
+function detalleEstandar(estandar) { mostrarNotificacionObservador(`Mostrando detalles del estándar ${estandar}...`, 'info'); }
+function generarCertificacion() { mostrarNotificacionObservador('Generando certificación internacional...', 'success'); }
+function compararEstandares() { mostrarNotificacionObservador('Comparando con estándares internacionales...', 'info'); }
+function generarReporte() { mostrarNotificacionObservador('Generando reporte PDF...', 'info'); }
+function enviarReporte() { mostrarNotificacionObservador('Enviando reporte a organizaciones...', 'success'); }
+function contactarOrganizacion(org) { mostrarNotificacionObservador(`Contactando ${org}...`, 'info'); }
+function programarContacto(org) { mostrarNotificacionObservador(`Programando contacto con ${org}...`, 'info'); }
+function urgentContacto(org) { mostrarNotificacionObservador(`Contacto urgente con ${org}...`, 'warning'); }
+function enviarActualizacion() { mostrarNotificacionObservador('Enviando actualización...', 'info'); }
+function programarReunion() { mostrarNotificacionObservador('Programando reunión...', 'info'); }
+function solicitarAsistencia() { mostrarNotificacionObservador('Solicitando asistencia técnica...', 'info'); }
+</script>
+{% endblock %}
+</parameter>
+</invoke>

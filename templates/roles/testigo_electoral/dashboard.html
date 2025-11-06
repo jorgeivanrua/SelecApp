@@ -1,0 +1,1331 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Testigo Electoral - Sistema Electoral ERP{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/testigo_electoral.css') }}" rel="stylesheet">
+{% endblock %}
+{% block body_class %}role-testigo-electoral{% endblock %}
+{% block navbar_class %}navbar-dark bg-primary{% endblock %}
+{% block brand_text %}Sistema Electoral - Testigo Electoral{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='testigo_electoral') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/observacion">
+        <i class="fas fa-eye me-1"></i>Observación
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/reportes">
+        <i class="fas fa-file-alt me-1"></i>Reportes
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/testigo/incidencias">
+        <i class="fas fa-exclamation-triangle me-1"></i>Incidencias
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="welcome-banner bg-primary text-white rounded p-4 mb-4">
+            <h2><i class="fas fa-user-shield me-2"></i>Panel de Testigo Electoral</h2>
+            <p class="mb-0">Supervisión y testimonio de procesos electorales - Partido: <strong>{{ stats.party or 'Partido Democrático' }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Información de ubicación del testigo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Mi Ubicación de Asignación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <strong>Departamento:</strong><br>
+                        <span class="text-primary fs-5">Caquetá</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Municipio:</strong><br>
+                        <span class="text-primary fs-5">Florencia</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Zona:</strong><br>
+                        <span class="text-primary fs-5">Centro</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Puesto de Votación:</strong><br>
+                        <span class="text-primary fs-5">Escuela Central</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Mesa Asignada:</strong><br>
+                        <span class="text-primary fs-5">001-A</span>
+                    </div>
+                    <div class="col-md-1">
+                        <strong>Partido:</strong><br>
+                        <span class="text-success fs-5">Democrático</span>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-map-pin me-1"></i>
+                            Dirección: Carrera 11 # 15-20, Centro, Florencia, Caquetá
+                        </small>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">
+                            <i class="fas fa-users me-1"></i>
+                            Votantes habilitados: 350
+                        </small>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Horario: 8:00 AM - 4:00 PM
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas del testigo -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Mesas Asignadas</h6>
+                        <h3 class="mb-0">{{ stats.assigned_tables or 5 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-table fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Observaciones</h6>
+                        <h3 class="mb-0">{{ stats.observations or 12 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-eye fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Incidencias</h6>
+                        <h3 class="mb-0">{{ stats.incidents or 2 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Reportes</h6>
+                        <h3 class="mb-0">{{ stats.reports or 8 }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Herramientas del testigo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Herramientas de Testigo Electoral
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-primary btn-lg w-100 mb-2" onclick="observarProceso()">
+                            <i class="fas fa-eye me-2"></i>
+                            Observar Proceso
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="registrarObservacion()">
+                            <i class="fas fa-clipboard me-2"></i>
+                            Registrar Observación
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="reportarIncidencia()">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Reportar Incidencia
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info btn-lg w-100 mb-2" onclick="generarReporte()">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Generar Reporte
+                        </button>
+                    </div>
+                </div>
+                <!-- Tercera fila - Captura E14 -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="capturarE14()">
+                            <i class="fas fa-camera me-2"></i>
+                            Capturar E14
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="capturarE24()">
+                            <i class="fas fa-clipboard-check me-2"></i>
+                            Capturar E24
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="verResultados()">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Ver Resultados
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info btn-lg w-100 mb-2" onclick="transmitirDatos()">
+                            <i class="fas fa-upload me-2"></i>
+                            Transmitir Datos
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-secondary btn-lg w-100 mb-2" onclick="sincronizarSistema()">
+                            <i class="fas fa-sync me-2"></i>
+                            Sincronizar
+                        </button>
+                    </div>
+                </div>
+                <!-- Segunda fila -->
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-lg w-100 mb-2" onclick="verificarActas()">
+                            <i class="fas fa-check-double me-2"></i>
+                            Verificar Actas
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success btn-lg w-100 mb-2" onclick="monitorearConteo()">
+                            <i class="fas fa-calculator me-2"></i>
+                            Monitorear Conteo
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-warning btn-lg w-100 mb-2" onclick="comunicarPartido()">
+                            <i class="fas fa-phone me-2"></i>
+                            Comunicar Partido
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-info btn-lg w-100 mb-2" onclick="consultarNormativa()">
+                            <i class="fas fa-book me-2"></i>
+                            Consultar Normativa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mapa y ubicación -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-map me-2"></i>
+                    Ubicación del Puesto Electoral
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="map-container" style="height: 300px; background: #f8f9fa; border-radius: 8px; position: relative;">
+                    <!-- Mapa interactivo -->
+                    <div id="interactive-map" style="width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt fa-4x mb-3"></i>
+                            <h6>Mapa Interactivo</h6>
+                            <p class="mb-0" style="font-size: 0.875rem;">Cargando ubicación...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Overlay de información -->
+                    <div class="map-overlay" style="position: absolute; top: 10px; left: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 6px; font-size: 0.875rem;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <div>
+                                <strong id="map-puesto-name">Cargando...</strong><br>
+                                <small class="text-muted" id="map-address">Cargando ubicación...</small>
+                            </div>
+                            <button class="btn btn-sm btn-primary ms-auto" onclick="mostrarMapaCompleto()">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Controles del mapa -->
+                    <div class="map-controls" style="position: absolute; bottom: 10px; right: 10px;">
+                        <button class="btn btn-sm btn-light me-1" onclick="centrarMapa()" title="Centrar">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light" onclick="obtenerUbicacionActual()" title="Mi ubicación">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Información adicional -->
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <small class="text-muted">Coordenadas:</small><br>
+                        <span id="coordinates" class="badge bg-secondary">Cargando...</span>
+                    </div>
+                    <div class="col-6 text-end">
+                        <small class="text-muted">Distancia:</small><br>
+                        <span id="distance" class="badge bg-info">Calculando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Cronología del Día
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6>08:00 AM</h6>
+                            <p>Llegada al puesto electoral</p>
+                            <small class="text-muted">Verificación de credenciales</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6>08:30 AM</h6>
+                            <p>Inicio de observación</p>
+                            <small class="text-muted">Proceso de apertura</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <h6>12:00 PM</h6>
+                            <p>Reporte intermedio</p>
+                            <small class="text-muted">Estado del proceso</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6>Pendiente</h6>
+                            <p>Cierre y escrutinio</p>
+                            <small class="text-muted">Captura de E14</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mesas asignadas y observaciones -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Mesas Asignadas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mesa</th>
+                                <th>Puesto</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
+                                <th>Última Actividad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>001-A</strong></td>
+                                <td>Escuela Central</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>3</td>
+                                <td>15:30</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="observarMesa('001-A')">Observar</button>
+                                    <button class="btn btn-sm btn-info" onclick="verDetalles('001-A')">Detalles</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>002-B</strong></td>
+                                <td>Colegio San José</td>
+                                <td><span class="badge bg-warning">En Proceso</span></td>
+                                <td>1</td>
+                                <td>15:25</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="observarMesa('002-B')">Observar</button>
+                                    <button class="btn btn-sm btn-warning" onclick="reportarProblema('002-B')">Problema</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>003-C</strong></td>
+                                <td>Universidad</td>
+                                <td><span class="badge bg-success">Activa</span></td>
+                                <td>2</td>
+                                <td>15:20</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="observarMesa('003-C')">Observar</button>
+                                    <button class="btn btn-sm btn-info" onclick="verDetalles('003-C')">Detalles</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>
+                    Observaciones Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <small class="text-muted">15:30</small>
+                        <p class="mb-1"><strong>Mesa 001-A:</strong> Proceso normal</p>
+                        <small class="text-success">Sin irregularidades</small>
+                    </div>
+                    <div class="timeline-item">
+                        <small class="text-muted">15:25</small>
+                        <p class="mb-1"><strong>Mesa 002-B:</strong> Demora en conteo</p>
+                        <small class="text-warning">Observación registrada</small>
+                    </div>
+                    <div class="timeline-item">
+                        <small class="text-muted">15:20</small>
+                        <p class="mb-1"><strong>Mesa 003-C:</strong> Cambio de jurado</p>
+                        <small class="text-info">Procedimiento correcto</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Resumen de Actividad
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="actividadChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Scripts específicos para testigo electoral
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard Testigo Electoral cargado');
+    inicializarGrafico();
+    actualizarActividad();
+    
+    // Actualizar cada 2 minutos
+    setInterval(actualizarActividad, 120000);
+});
+
+function inicializarGrafico() {
+    const ctx = document.getElementById('actividadChart').getContext('2d');
+    window.actividadChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Observaciones', 'Incidencias', 'Reportes', 'Verificaciones'],
+            datasets: [{
+                data: [12, 2, 8, 15],
+                backgroundColor: ['#007bff', '#ffc107', '#28a745', '#17a2b8']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function observarProceso() {
+    mostrarModalTestigo('Observación de Proceso Electoral', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Seleccionar Mesa</h6>
+                <select class="form-select mb-3" id="mesaObservacion">
+                    <option value="001-A">Mesa 001-A - Escuela Central</option>
+                    <option value="002-B">Mesa 002-B - Colegio San José</option>
+                    <option value="003-C">Mesa 003-C - Universidad</option>
+                </select>
+                
+                <h6>Tipo de Observación</h6>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoObservacion" value="apertura">
+                        <label class="form-check-label">Apertura de Mesa</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoObservacion" value="votacion">
+                        <label class="form-check-label">Proceso de Votación</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoObservacion" value="conteo">
+                        <label class="form-check-label">Conteo de Votos</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipoObservacion" value="cierre">
+                        <label class="form-check-label">Cierre de Mesa</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Observaciones</h6>
+                <textarea class="form-control mb-3" rows="6" placeholder="Describa sus observaciones detalladamente..."></textarea>
+                
+                <div class="mb-3">
+                    <label class="form-label">Calificación del Proceso</label>
+                    <select class="form-select">
+                        <option value="excelente">Excelente</option>
+                        <option value="bueno">Bueno</option>
+                        <option value="regular">Regular</option>
+                        <option value="deficiente">Deficiente</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" onclick="guardarObservacion()">
+                    <i class="fas fa-save me-2"></i>Guardar Observación
+                </button>
+            </div>
+        </div>
+    `);
+}
+
+function registrarObservacion() {
+    mostrarModalTestigo('Registro de Observación', `
+        <form id="observacionForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Mesa *</label>
+                        <select class="form-select" id="mesa_id" name="mesa_id" required>
+                            <option value="">Seleccionar mesa</option>
+                            <option value="1">001-A - Escuela Central</option>
+                            <option value="2">002-A - Escuela Central</option>
+                            <option value="3">003-B - Escuela Central</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Observación *</label>
+                        <select class="form-select" id="tipo_observacion" name="tipo_observacion" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="apertura">Apertura de Mesa</option>
+                            <option value="votacion">Proceso de Votación</option>
+                            <option value="conteo">Conteo de Votos</option>
+                            <option value="cierre">Cierre de Mesa</option>
+                            <option value="procedimiento">Procedimiento General</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Severidad</label>
+                        <select class="form-select" id="severidad" name="severidad">
+                            <option value="normal">Normal</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Crítica</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Calificación del Proceso</label>
+                        <select class="form-select" id="calificacion_proceso" name="calificacion_proceso">
+                            <option value="">Seleccionar calificación</option>
+                            <option value="excelente">Excelente</option>
+                            <option value="bueno">Bueno</option>
+                            <option value="regular">Regular</option>
+                            <option value="deficiente">Deficiente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Descripción Detallada *</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="6" 
+                                placeholder="Describa detalladamente lo observado..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Evidencia Fotográfica</label>
+                        <input type="file" class="form-control" id="evidencia" name="evidencia" 
+                               accept="image/*" multiple>
+                        <small class="form-text text-muted">Puede seleccionar múltiples imágenes</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="capturar_ubicacion" checked>
+                            <label class="form-check-label" for="capturar_ubicacion">
+                                Capturar ubicación GPS automáticamente
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-2"></i>Registrar Observación
+                </button>
+            </div>
+        </form>
+    `);
+    
+    // Agregar event listener al formulario
+    setTimeout(() => {
+        const form = document.getElementById('observacionForm');
+        if (form) {
+            form.addEventListener('submit', handleObservacionSubmit);
+            
+            // Capturar ubicación GPS si está habilitado
+            if (navigator.geolocation && document.getElementById('capturar_ubicacion').checked) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    form.dataset.lat = position.coords.latitude;
+                    form.dataset.lng = position.coords.longitude;
+                }, function(error) {
+                    console.log('Error obteniendo ubicación:', error);
+                });
+            }
+        }
+    }, 100);
+}
+
+function reportarIncidencia() {
+    mostrarModalTestigo('Reporte de Incidencia', `
+        <form id="incidenciaForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Incidencia *</label>
+                        <select class="form-select" id="tipo_incidencia" name="tipo_incidencia" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="irregularidad_procesal">Irregularidad Procesal</option>
+                            <option value="violacion_normas">Violación de Normas</option>
+                            <option value="intimidacion">Intimidación o Coacción</option>
+                            <option value="fraude_sospecha">Sospecha de Fraude</option>
+                            <option value="problema_tecnico">Problema Técnico</option>
+                            <option value="falta_material">Falta de Material</option>
+                            <option value="personal_ausente">Personal Ausente</option>
+                            <option value="alteracion_orden">Alteración del Orden</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Severidad *</label>
+                        <select class="form-select" id="severidad_inc" name="severidad" required>
+                            <option value="">Seleccionar severidad</option>
+                            <option value="baja">Baja - Observación menor</option>
+                            <option value="media">Media - Requiere seguimiento</option>
+                            <option value="alta">Alta - Requiere acción inmediata</option>
+                            <option value="critica">Crítica - Emergencia electoral</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mesa Afectada</label>
+                        <select class="form-select" id="mesa_id_inc" name="mesa_id">
+                            <option value="">Seleccionar mesa (opcional)</option>
+                            <option value="1">001-A - Escuela Central</option>
+                            <option value="2">002-A - Escuela Central</option>
+                            <option value="3">003-B - Escuela Central</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Descripción Detallada *</label>
+                        <textarea class="form-control" id="descripcion_inc" name="descripcion" rows="6" 
+                                placeholder="Describa detalladamente la incidencia, incluyendo personas involucradas, hora exacta, y cualquier evidencia relevante..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Evidencia Fotográfica</label>
+                        <input type="file" class="form-control" id="evidencia_inc" name="evidencia" 
+                               accept="image/*" multiple>
+                        <small class="form-text text-muted">Adjunte fotos que documenten la incidencia</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="requiere_atencion" name="requiere_atencion">
+                    <label class="form-check-label" for="requiere_atencion">
+                        <strong>Requiere atención inmediata</strong> - Marque si la incidencia necesita intervención urgente
+                    </label>
+                </div>
+            </div>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Importante:</strong> Las incidencias de severidad alta o crítica serán notificadas automáticamente a los coordinadores.
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Reportar Incidencia
+                </button>
+            </div>
+        </form>
+    `);
+    
+    // Agregar event listener al formulario
+    setTimeout(() => {
+        const form = document.getElementById('incidenciaForm');
+        if (form) {
+            form.addEventListener('submit', handleIncidenciaSubmit);
+            
+            // Capturar ubicación GPS automáticamente
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    form.dataset.lat = position.coords.latitude;
+                    form.dataset.lng = position.coords.longitude;
+                }, function(error) {
+                    console.log('Error obteniendo ubicación:', error);
+                });
+            }
+        }
+    }, 100);
+}
+
+function generarReporte() {
+    mostrarModalTestigo('Generar Reporte de Testigo', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Configuración del Reporte</h6>
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Reporte</label>
+                        <select class="form-select">
+                            <option value="diario">Reporte Diario</option>
+                            <option value="mesa">Reporte por Mesa</option>
+                            <option value="incidencias">Reporte de Incidencias</option>
+                            <option value="final">Reporte Final</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Período</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">Incluir observaciones</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">Incluir incidencias</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h6>Vista Previa</h6>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6>Reporte de Testigo Electoral</h6>
+                        <p><strong>Partido:</strong> Partido Democrático</p>
+                        <p><strong>Testigo:</strong> Juan Pérez</p>
+                        <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
+                        <hr>
+                        <p><strong>Mesas Observadas:</strong> 5</p>
+                        <p><strong>Observaciones:</strong> 12</p>
+                        <p><strong>Incidencias:</strong> 2</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-info" onclick="generarPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Generar PDF
+                    </button>
+                    <button class="btn btn-success" onclick="enviarReporte()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+// Funciones auxiliares
+function mostrarModalTestigo(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="testigoModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('testigoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('testigoModal'));
+    modal.show();
+}
+
+function actualizarActividad() {
+    console.log('Actualizando actividad del testigo...');
+}
+
+function mostrarNotificacionTestigo(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Implementar funciones específicas
+function verificarActas() { mostrarNotificacionTestigo('Verificando actas electorales...', 'info'); }
+function monitorearConteo() { mostrarNotificacionTestigo('Monitoreando conteo de votos...', 'info'); }
+function comunicarPartido() { mostrarNotificacionTestigo('Comunicando con representantes del partido...', 'info'); }
+function consultarNormativa() { window.open('/normativa', '_blank'); }
+function observarMesa(mesa) { mostrarNotificacionTestigo(`Observando mesa ${mesa}...`, 'info'); }
+function verDetalles(mesa) { mostrarNotificacionTestigo(`Mostrando detalles de mesa ${mesa}...`, 'info'); }
+function reportarProblema(mesa) { mostrarNotificacionTestigo(`Reportando problema en mesa ${mesa}...`, 'warning'); }
+function guardarObservacion() { mostrarNotificacionTestigo('Observación guardada exitosamente', 'success'); }
+function generarPDF() { mostrarNotificacionTestigo('Generando reporte PDF...', 'info'); }
+function enviarReporte() { mostrarNotificacionTestigo('Enviando reporte al partido...', 'success'); }
+
+// Nuevas funciones para captura E14 y resultados
+function capturarE14() {
+    // Redirigir a la página específica de captura E14
+    window.location.href = '/testigo/resultados';
+}
+
+function verResultados() {
+    mostrarModalTestigo('Resultados de Votación - Mesa 001-A', `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Resultados Actuales</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Candidato</th>
+                                <th>Votos</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Juan Pérez</td>
+                                <td>156</td>
+                                <td>45.2%</td>
+                            </tr>
+                            <tr>
+                                <td>María González</td>
+                                <td>98</td>
+                                <td>28.4%</td>
+                            </tr>
+                            <tr>
+                                <td>Carlos Rodríguez</td>
+                                <td>91</td>
+                                <td>26.4%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <strong>Votos en Blanco:</strong> 12<br>
+                    <strong>Votos Nulos:</strong> 8<br>
+                    <strong>Total Votos:</strong> 365
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Gráfico de Resultados</h6>
+                <canvas id="graficoResultadosModal" width="300" height="200"></canvas>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="actualizarResultados()">
+                        <i class="fas fa-sync me-2"></i>Actualizar
+                    </button>
+                    <button class="btn btn-success" onclick="exportarResultados()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Inicializar gráfico en el modal
+    setTimeout(() => {
+        const ctx = document.getElementById('graficoResultadosModal');
+        if (ctx) {
+            new Chart(ctx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Juan Pérez', 'María González', 'Carlos Rodríguez', 'Blancos', 'Nulos'],
+                    datasets: [{
+                        data: [156, 98, 91, 12, 8],
+                        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#6c757d', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    }, 500);
+}
+
+function transmitirDatos() {
+    mostrarNotificacionTestigo('Transmitiendo datos al sistema central...', 'info');
+    
+    // Simular transmisión
+    setTimeout(() => {
+        mostrarNotificacionTestigo('Datos transmitidos exitosamente al sistema central electoral.', 'success');
+    }, 3000);
+}
+
+function sincronizarSistema() {
+    mostrarNotificacionTestigo('Sincronizando con el sistema central...', 'info');
+    
+    // Simular sincronización
+    setTimeout(() => {
+        mostrarNotificacionTestigo('Sincronización completada. Todos los datos están actualizados.', 'success');
+        
+        // Actualizar contadores
+        updateObservacionesCount();
+        updateIncidenciasCount();
+    }, 2000);
+}
+
+function actualizarResultados() {
+    mostrarNotificacionTestigo('Actualizando resultados desde el sistema central...', 'info');
+}
+
+function exportarResultados() {
+    mostrarNotificacionTestigo('Exportando resultados en formato PDF...', 'success');
+}
+
+// Función para manejar el envío del formulario de observación
+function handleObservacionSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Mostrar indicador de carga
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+    submitBtn.disabled = true;
+    
+    // Preparar datos para envío
+    const observacionData = {
+        testigo_id: getCurrentUserId(), // Función que obtiene el ID del usuario actual
+        mesa_id: parseInt(formData.get('mesa_id')),
+        puesto_id: 1, // ID del puesto actual del testigo
+        tipo_observacion: formData.get('tipo_observacion'),
+        descripcion: formData.get('descripcion'),
+        severidad: formData.get('severidad') || 'normal',
+        calificacion_proceso: formData.get('calificacion_proceso')
+    };
+    
+    // Agregar ubicación GPS si está disponible
+    if (form.dataset.lat && form.dataset.lng) {
+        observacionData.ubicacion_gps_lat = parseFloat(form.dataset.lat);
+        observacionData.ubicacion_gps_lng = parseFloat(form.dataset.lng);
+    }
+    
+    // Enviar datos a la API
+    fetch('/api/observaciones', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(observacionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarNotificacionTestigo('Observación registrada exitosamente', 'success');
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('testigoModal'));
+            if (modal) modal.hide();
+            
+            // Actualizar contador de observaciones si existe
+            updateObservacionesCount();
+            
+        } else {
+            mostrarNotificacionTestigo('Error: ' + (data.error || 'No se pudo registrar la observación'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacionTestigo('Error de conexión. Verifique su conexión a internet.', 'error');
+    })
+    .finally(() => {
+        // Restaurar botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Función auxiliar para obtener el ID del usuario actual
+function getCurrentUserId() {
+    // En una implementación real, esto vendría del token de sesión
+    // Por ahora, usamos el ID del testigo electoral demo
+    return 5; // Laura González - Testigo Electoral
+}
+
+// Función para actualizar el contador de observaciones
+function updateObservacionesCount() {
+    fetch('/api/observaciones?testigo_id=' + getCurrentUserId())
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const countElement = document.querySelector('.card.bg-success h3');
+            if (countElement) {
+                countElement.textContent = data.total;
+            }
+        }
+    })
+    .catch(error => console.error('Error actualizando contador:', error));
+}
+
+// Función para manejar el envío del formulario de incidencias
+function handleIncidenciaSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Mostrar indicador de carga
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Reportando...';
+    submitBtn.disabled = true;
+    
+    // Preparar datos para envío
+    const incidenciaData = {
+        reportado_por: getCurrentUserId(),
+        mesa_id: formData.get('mesa_id') ? parseInt(formData.get('mesa_id')) : null,
+        puesto_id: 1, // ID del puesto actual del testigo
+        tipo_incidencia: formData.get('tipo_incidencia'),
+        descripcion: formData.get('descripcion'),
+        severidad: formData.get('severidad')
+    };
+    
+    // Agregar ubicación GPS si está disponible
+    if (form.dataset.lat && form.dataset.lng) {
+        incidenciaData.ubicacion_gps_lat = parseFloat(form.dataset.lat);
+        incidenciaData.ubicacion_gps_lng = parseFloat(form.dataset.lng);
+    }
+    
+    // Enviar datos a la API
+    fetch('/api/incidencias', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(incidenciaData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const severidad = formData.get('severidad');
+            let mensaje = 'Incidencia reportada exitosamente';
+            
+            if (severidad === 'alta' || severidad === 'critica') {
+                mensaje += '. Los coordinadores han sido notificados automáticamente.';
+            }
+            
+            mostrarNotificacionTestigo(mensaje, 'success');
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('testigoModal'));
+            if (modal) modal.hide();
+            
+            // Actualizar contador de incidencias si existe
+            updateIncidenciasCount();
+            
+        } else {
+            mostrarNotificacionTestigo('Error: ' + (data.error || 'No se pudo reportar la incidencia'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacionTestigo('Error de conexión. Verifique su conexión a internet.', 'error');
+    })
+    .finally(() => {
+        // Restaurar botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Función para actualizar el contador de incidencias
+function updateIncidenciasCount() {
+    // Actualizar el contador en el dashboard si existe
+    const countElement = document.querySelector('.card.bg-warning h3');
+    if (countElement) {
+        const currentCount = parseInt(countElement.textContent) || 0;
+        countElement.textContent = currentCount + 1;
+    }
+}
+
+// Funciones de geolocalización
+function centrarMapa() {
+    mostrarNotificacionTestigo('Centrando mapa en el puesto electoral...', 'info');
+}
+
+function obtenerUbicacionActual() {
+    if (navigator.geolocation) {
+        mostrarNotificacionTestigo('Obteniendo ubicación actual...', 'info');
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                document.getElementById('coordinates').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                
+                const distancia = calcularDistancia(lat, lng, 1.6143, -75.6062);
+                document.getElementById('distance').textContent = `${distancia.toFixed(2)} km`;
+                
+                mostrarNotificacionTestigo('Ubicación actualizada correctamente', 'success');
+            },
+            function(error) {
+                console.error('Error obteniendo ubicación:', error);
+                mostrarNotificacionTestigo('No se pudo obtener la ubicación actual', 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+        );
+    } else {
+        mostrarNotificacionTestigo('Geolocalización no soportada en este dispositivo', 'warning');
+    }
+}
+
+function calcularDistancia(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+function mostrarMapaCompleto() {
+    const mapContent = `
+        <div class="text-center">
+            <div style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 20px;">
+                <div>
+                    <i class="fas fa-map-marked-alt fa-5x mb-3"></i>
+                    <h4>Mapa Interactivo Completo</h4>
+                    <p>Ubicación del puesto electoral</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Dirección:</strong><br>
+                    <span id="modal-map-address">Cargando...</span>
+                </div>
+                <div class="col-md-6">
+                    <strong>Coordenadas:</strong><br>
+                    <span id="modal-coordinates">Cargando...</span>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-primary me-2" onclick="abrirEnGoogleMaps()">
+                    <i class="fas fa-external-link-alt me-2"></i>Abrir en Google Maps
+                </button>
+                <button class="btn btn-success" onclick="compartirUbicacion()">
+                    <i class="fas fa-share me-2"></i>Compartir Ubicación
+                </button>
+            </div>
+        </div>
+    `;
+    
+    mostrarModalTestigo('Mapa del Puesto Electoral', mapContent);
+}
+
+function abrirEnGoogleMaps() {
+    const coords = document.getElementById('coordinates').textContent;
+    if (coords && coords !== 'Cargando...') {
+        const [lat, lng] = coords.split(', ');
+        const url = `https://www.google.com/maps?q=${lat},${lng}`;
+        window.open(url, '_blank');
+    } else {
+        mostrarNotificacionTestigo('Coordenadas no disponibles', 'warning');
+    }
+}
+
+function compartirUbicacion() {
+    const coords = document.getElementById('coordinates').textContent;
+    const address = document.getElementById('map-address').textContent;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Ubicación del Puesto Electoral',
+            text: `Puesto Electoral: ${address}`,
+            url: `https://www.google.com/maps?q=${coords}`
+        });
+    } else {
+        const shareText = `Puesto Electoral: ${address}\nCoordenadas: ${coords}\nhttps://www.google.com/maps?q=${coords}`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            mostrarNotificacionTestigo('Información de ubicación copiada al portapapeles', 'success');
+        });
+    }
+}
+
+function capturarE14() {
+    window.location.href = '/testigo/e14';
+}
+
+function capturarE24() {
+    window.location.href = '/testigo/e24';
+}
+
+function verResultados() {
+    window.location.href = '/testigo/resultados';
+}
+
+function transmitirDatos() {
+    mostrarNotificacionTestigo('Transmitiendo datos al servidor central...', 'info');
+}
+
+function sincronizarSistema() {
+    mostrarNotificacionTestigo('Sincronizando con el sistema...', 'info');
+}
+
+function verificarActas() {
+    mostrarNotificacionTestigo('Verificando actas electorales...', 'info');
+}
+
+function monitorearConteo() {
+    mostrarNotificacionTestigo('Monitoreando proceso de conteo...', 'info');
+}
+
+function comunicarPartido() {
+    mostrarNotificacionTestigo('Estableciendo comunicación con el partido...', 'info');
+}
+
+function consultarNormativa() {
+    mostrarNotificacionTestigo('Consultando normativa electoral...', 'info');
+}
+</script>
+{% endblock %}
