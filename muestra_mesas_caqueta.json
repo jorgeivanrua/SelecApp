@@ -1,0 +1,62 @@
+[
+  {
+    "codigo_mesa": "441.00101",
+    "numero_mesa": 1,
+    "votantes_habilitados": 2675,
+    "puesto": "I.E. JUAN BAUTISTA LA SALLE",
+    "direccion": "CLL 14 No 14-19 ESQ. B/CENTRO",
+    "coordenadas": {
+      "latitud": 1.613433351,
+      "longitud": -75.6157642099999
+    },
+    "estado": "pendiente"
+  },
+  {
+    "codigo_mesa": "441.00102",
+    "numero_mesa": 2,
+    "votantes_habilitados": 2674,
+    "puesto": "I.E. JUAN BAUTISTA LA SALLE",
+    "direccion": "CLL 14 No 14-19 ESQ. B/CENTRO",
+    "coordenadas": {
+      "latitud": 1.613433351,
+      "longitud": -75.6157642099999
+    },
+    "estado": "pendiente"
+  },
+  {
+    "codigo_mesa": "441.00103",
+    "numero_mesa": 3,
+    "votantes_habilitados": 2674,
+    "puesto": "I.E. JUAN BAUTISTA LA SALLE",
+    "direccion": "CLL 14 No 14-19 ESQ. B/CENTRO",
+    "coordenadas": {
+      "latitud": 1.613433351,
+      "longitud": -75.6157642099999
+    },
+    "estado": "pendiente"
+  },
+  {
+    "codigo_mesa": "441.00201",
+    "numero_mesa": 1,
+    "votantes_habilitados": 2727,
+    "puesto": "I.E. JUAN BAUTISTA MIGANI",
+    "direccion": "CLL 14 CRA 16 ESQ. B/ CENTRO",
+    "coordenadas": {
+      "latitud": 1.61417584859262,
+      "longitud": -75.6119441986082
+    },
+    "estado": "pendiente"
+  },
+  {
+    "codigo_mesa": "441.00202",
+    "numero_mesa": 2,
+    "votantes_habilitados": 2726,
+    "puesto": "I.E. JUAN BAUTISTA MIGANI",
+    "direccion": "CLL 14 CRA 16 ESQ. B/ CENTRO",
+    "coordenadas": {
+      "latitud": 1.61417584859262,
+      "longitud": -75.6119441986082
+    },
+    "estado": "pendiente"
+  }
+]

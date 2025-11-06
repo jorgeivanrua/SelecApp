@@ -1,0 +1,45 @@
+# Dependencias para el Sistema de Recolección Inicial de Votaciones - Caquetá
+
+# Base de datos
+SQLAlchemy==2.0.23
+alembic==1.12.1
+
+# Base de datos SQLite (incluida en Python)
+# Para PostgreSQL en producción: psycopg2-binary==2.9.7
+
+# Framework web
+FastAPI==0.104.1
+uvicorn[standard]==0.24.0
+
+# Validación de datos
+pydantic==2.5.0
+
+# Utilidades
+python-dotenv==1.0.0
+python-multipart==0.0.6
+
+# Logging y monitoreo
+structlog==23.2.0
+
+# Fechas y tiempo
+python-dateutil==2.8.2
+
+# Testing (opcional)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# OCR (para futuras implementaciones)
+# Pillow==10.1.0
+# pytesseract==0.3.10
+
+# Mapas y geolocalización (para futuras implementaciones)
+# folium==0.15.0
+# geopy==2.4.0
+
+# Notificaciones (para futuras implementaciones)
+# requests==2.31.0
+# twilio==8.10.0
+
+# Generación de PDFs (para futuras implementaciones)
+# reportlab==4.0.7
+# weasyprint==60.2
