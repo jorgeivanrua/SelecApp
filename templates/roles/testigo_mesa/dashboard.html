@@ -18,9 +18,20 @@
         transition: all 0.3s;
     }
 
-    .card-testigo:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card-testigo {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid var(--testigo-primary);
     }
 
     .btn-testigo {
@@ -39,27 +50,100 @@
         color: white;
     }
 
-    .stat-card-testigo {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid var(--testigo-primary);
+    #preview-container {
+        min-height: 300px;
+        max-height: 500px;
+        background-color: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        overflow: auto;
     }
 
-    .form-section {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    #preview-container:hover {
+        border-color: var(--testigo-primary);
+        background-color: #f0f9ff;
     }
 
-    .secondary-actions {
-        background: #f8fafc;
-        border-radius: 12px;
+    #preview-container.has-image {
+        border-style: solid;
+        border-color: var(--testigo-accent);
+        position: relative;
+    }
+
+    #preview-container img {
+        cursor: zoom-in;
+        transition: transform 0.3s;
+    }
+
+    #preview-container.zoomed img {
+        cursor: zoom-out;
+        transform: scale(2);
+        transform-origin: center;
+    }
+
+    .zoom-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        display: flex;
+        gap: 5px;
+    }
+
+    .zoom-btn {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: all 0.3s;
+    }
+
+    .zoom-btn:hover {
+        background: white;
+        transform: scale(1.1);
+    }
+
+    .ocr-processing {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
         padding: 20px;
-        margin-top: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .candidato-row {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 4px solid #dee2e6;
+    }
+
+    .candidato-row:hover {
+        background: #e9ecef;
+        border-left-color: var(--testigo-primary);
+    }
+
+    .total-box {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
     }
 
     .quick-action-btn {
@@ -70,6 +154,7 @@
         border: 2px solid #e2e8f0;
         background: white;
         transition: all 0.3s;
+        text-align: left;
     }
 
     .quick-action-btn:hover {
@@ -78,8 +163,30 @@
         transform: translateX(5px);
     }
 
-    .progress-bar-testigo {
-        background: linear-gradient(135deg, var(--testigo-primary) 0%, var(--testigo-accent) 100%);
+    .campo-valido {
+        border-color: #10b981 !important;
+        background-color: #f0fdf4 !important;
+    }
+
+    .campo-invalido {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+    }
+
+    .campo-advertencia {
+        border-color: #f59e0b !important;
+        background-color: #fffbeb !important;
+    }
+
+    .badge-guardado {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+    }
+
+    #alertasValidacion .alert {
+        margin-bottom: 10px;
     }
 </style>
 {% endblock %}
@@ -94,7 +201,11 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h2><i class="fas fa-user-check me-2"></i>Dashboard Testigo Electoral</h2>
-                            <p class="mb-0 text-muted">Mesa Asignada: <strong id="mesaAsignada">001-A</strong> | Puesto: <strong id="puestoVotacion">Colegio Nacional</strong></p>
+                            <p class="mb-0 text-muted">
+                                Mesa: <strong id="mesaAsignada">001-A</strong> | 
+                                Puesto: <strong id="puestoVotacion">Colegio Nacional</strong> |
+                                Municipio: <strong id="municipio">Florencia</strong>
+                            </p>
                         </div>
                         <div class="col-md-4 text-end">
                             <span class="badge bg-success fs-6">Activo</span>
@@ -111,13 +222,10 @@
             <div class="stat-card-testigo">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <small class="text-muted">Votos Registrados</small>
-                        <h3 class="mb-0" id="votosRegistrados">0</h3>
+                        <small class="text-muted">Votantes Habilitados</small>
+                        <h3 class="mb-0" id="votantesHabilitados">350</h3>
                     </div>
-                    <i class="fas fa-vote-yea fa-2x text-primary"></i>
-                </div>
-                <div class="progress mt-2" style="height: 6px;">
-                    <div class="progress-bar progress-bar-testigo" id="progressVotos" style="width: 0%"></div>
+                    <i class="fas fa-users fa-2x text-info"></i>
                 </div>
             </div>
         </div>
@@ -125,10 +233,10 @@
             <div class="stat-card-testigo">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <small class="text-muted">Votantes Habilitados</small>
-                        <h3 class="mb-0" id="votantesHabilitados">350</h3>
+                        <small class="text-muted">Votos Registrados</small>
+                        <h3 class="mb-0" id="votosRegistrados">0</h3>
                     </div>
-                    <i class="fas fa-users fa-2x text-info"></i>
+                    <i class="fas fa-vote-yea fa-2x text-primary"></i>
                 </div>
             </div>
         </div>
@@ -147,264 +255,1265 @@
             <div class="stat-card-testigo">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <small class="text-muted">Estado Mesa</small>
-                        <h3 class="mb-0"><span class="badge bg-warning">En Proceso</span></h3>
+                        <small class="text-muted">Capturas E14</small>
+                        <h3 class="mb-0" id="capturasE14">0</h3>
                     </div>
-                    <i class="fas fa-clipboard-check fa-2x text-warning"></i>
+                    <i class="fas fa-camera fa-2x text-warning"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SECCIÓN PRINCIPAL: CAPTURA DE DATOS -->
+    <!-- SECCIÓN PRINCIPAL: CAPTURA E14 CON OCR -->
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-5">
+            <!-- Captura de Foto -->
             <div class="form-section">
-                <h4 class="mb-4"><i class="fas fa-edit me-2"></i>Captura de Datos - Registro de Votación</h4>
+                <h4 class="mb-3"><i class="fas fa-camera me-2"></i>1. Captura del Formulario E14</h4>
                 
-                <!-- Tabs para diferentes formularios -->
-                <ul class="nav nav-tabs mb-4" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#registroVotos">
-                            <i class="fas fa-vote-yea me-2"></i>Registro de Votos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#capturaE14">
-                            <i class="fas fa-camera me-2"></i>Captura E14
-                        </a>
-                    </li>
-                </ul>
+                <div id="preview-container" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-camera fa-4x text-muted mb-3"></i>
+                    <p class="text-muted mb-2">Click para tomar foto o subir imagen</p>
+                    <small class="text-muted">El OCR se activará automáticamente</small>
+                </div>
+                
+                <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Recomendaciones:</strong>
+                    <ul class="mb-0 mt-2 small">
+                        <li>Buena iluminación</li>
+                        <li>Foto nítida y enfocada</li>
+                        <li>Formulario completo visible</li>
+                        <li>Sin sombras ni reflejos</li>
+                    </ul>
+                </div>
 
-                <div class="tab-content">
-                    <!-- Tab: Registro de Votos -->
-                    <div class="tab-pane fade show active" id="registroVotos">
-                        <form id="formRegistroVoto">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Candidato</label>
-                                    <select class="form-select" id="candidato" required>
-                                        <option value="">Seleccionar candidato...</option>
-                                        <option value="1">Candidato 1 - Partido A</option>
-                                        <option value="2">Candidato 2 - Partido B</option>
-                                        <option value="3">Candidato 3 - Partido C</option>
-                                        <option value="voto_blanco">Voto en Blanco</option>
-                                        <option value="voto_nulo">Voto Nulo</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Número de Votos</label>
-                                    <input type="number" class="form-control" id="numeroVotos" value="1" min="1" required>
+                <div id="ocr-status" class="alert alert-warning mt-3" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Procesando OCR automáticamente...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <!-- Formulario de Datos E14 -->
+            <div class="form-section">
+                <h4 class="mb-3"><i class="fas fa-edit me-2"></i>2. Datos del Formulario E14</h4>
+                
+                <form id="formE14">
+                    <!-- Información de la Mesa -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Departamento</strong></label>
+                            <input type="text" class="form-control" id="departamento" value="Caquetá" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Municipio</strong></label>
+                            <input type="text" class="form-control" id="municipioForm" value="Florencia" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Zona</strong></label>
+                            <input type="text" class="form-control" id="zona" value="Zona 01" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Puesto de Votación</strong></label>
+                            <input type="text" class="form-control" id="puestoForm" value="Colegio Nacional" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Mesa</strong> <span class="text-danger">*</span></label>
+                            <select class="form-select" id="mesaForm" onchange="cambiarMesa()">
+                                <option value="">Seleccione mesa...</option>
+                            </select>
+                            <small class="text-muted">Puede cambiar de mesa si reporta varias</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Tipo de Elección</strong> <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tipoEleccion" onchange="cambiarTipoEleccion()">
+                                <option value="senado">Senado</option>
+                                <option value="camara">Cámara de Representantes</option>
+                                <option value="concejo">Concejo Municipal</option>
+                                <option value="alcaldia">Alcaldía</option>
+                                <option value="gobernacion">Gobernación</option>
+                                <option value="asamblea">Asamblea Departamental</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Hora de Apertura</strong></label>
+                            <input type="time" class="form-control" id="horaApertura" value="08:00">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Hora de Cierre</strong></label>
+                            <input type="time" class="form-control" id="horaCierre" value="16:00">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Votos por Candidato/Partido -->
+                    <h5 class="mb-3"><i class="fas fa-users me-2"></i>Votos por Candidato</h5>
+                    
+                    <div id="candidatos-container">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarCandidato()">
+                            <i class="fas fa-plus me-2"></i>Agregar Candidato
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="limpiarCandidatos()">
+                            <i class="fas fa-eraser me-2"></i>Limpiar Todo
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Votos Especiales y Conteo -->
+                    <h5 class="mb-3"><i class="fas fa-clipboard-list me-2"></i>Conteo de Votos</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Votos en Blanco</label>
+                            <input type="number" class="form-control voto-input" id="votosBlanco" min="0" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Votos Nulos</label>
+                            <input type="number" class="form-control voto-input" id="votosNulos" min="0" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tarjetas No Marcadas</label>
+                            <input type="number" class="form-control voto-input" id="tarjetasNoMarcadas" min="0" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Total Tarjetas</label>
+                            <input type="number" class="form-control" id="totalTarjetas" min="0" value="350" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Votantes Habilitados</label>
+                            <input type="number" class="form-control" id="votantesHabilitadosForm" value="350" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Votantes que Sufragaron</label>
+                            <input type="number" class="form-control" id="votantesSufragaron" min="0" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Certificados Electorales</label>
+                            <input type="number" class="form-control" id="certificadosElectorales" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Totales -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="total-box bg-primary">
+                                <small>Total Votos</small>
+                                <div id="totalVotos">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="total-box" id="validacionBox">
+                                <small>Validación</small>
+                                <div id="estadoValidacion">
+                                    <i class="fas fa-clock"></i> Pendiente
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Observaciones (opcional)</label>
-                                <textarea class="form-control" id="observacionVoto" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Información Adicional del Acta -->
+                    <h5 class="mb-3"><i class="fas fa-file-signature me-2"></i>Información del Acta</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Número de Acta E14</label>
+                            <input type="text" class="form-control" id="numeroActa" placeholder="Ej: E14-001-2025">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Jurado Presidente</label>
+                            <input type="text" class="form-control" id="juradoPresidente" placeholder="Nombre del jurado presidente">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Testigos del Acta</label>
+                            <input type="text" class="form-control" id="testigosActa" placeholder="Nombres de los testigos que firmaron el acta">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="actaFirmada">
+                                <label class="form-check-label" for="actaFirmada">
+                                    <strong>Acta firmada por todos los jurados y testigos</strong>
+                                </label>
                             </div>
-                            <button type="submit" class="btn btn-testigo">
-                                <i class="fas fa-save me-2"></i>Registrar Voto
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="procesoNormal">
+                                <label class="form-check-label" for="procesoNormal">
+                                    <strong>El proceso de votación se desarrolló con normalidad</strong>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Observaciones -->
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Observaciones</strong></label>
+                        <textarea class="form-control" id="observaciones" rows="4" placeholder="Registre cualquier observación importante sobre el proceso de votación, irregularidades, incidentes o situaciones especiales..."></textarea>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-secondary w-100" id="btnGuardarTemporal" onclick="guardarTemporal()">
+                                <i class="fas fa-save me-2"></i>Guardar Temporal
                             </button>
-                        </form>
-                    </div>
-
-                    <!-- Tab: Captura E14 -->
-                    <div class="tab-pane fade" id="capturaE14">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Captura E14:</strong> Tome foto del formulario físico y digite los datos
+                            <small class="text-muted d-block mt-1">Guarda la foto sin enviar</small>
                         </div>
-                        
-                        <div class="text-center">
-                            <a href="/testigo/e14" class="btn btn-testigo btn-lg">
-                                <i class="fas fa-camera me-2"></i>Ir a Captura E14
-                            </a>
-                            <p class="text-muted mt-3">
-                                <small>Fotografíe el formulario E14 físico y digite los datos para enviar</small>
-                            </p>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-warning w-100" id="btnValidar" onclick="validarDatos()" disabled>
+                                <i class="fas fa-check-circle me-2"></i>Validar Datos
+                            </button>
+                            <small class="text-muted d-block mt-1">Verifica antes de enviar</small>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-testigo w-100" id="btnEnviar" disabled>
+                                <i class="fas fa-paper-plane me-2"></i>Enviar E14
+                            </button>
+                            <small class="text-muted d-block mt-1">Envía al sistema</small>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PANEL LATERAL: Acciones Rápidas -->
-        <div class="col-md-4">
-            <div class="form-section">
-                <h5 class="mb-3"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
-                <button class="btn btn-testigo w-100 mb-2" onclick="abrirMesa()">
-                    <i class="fas fa-door-open me-2"></i>Abrir Mesa
-                </button>
-                <button class="btn btn-testigo w-100 mb-2" onclick="cerrarMesa()">
-                    <i class="fas fa-door-closed me-2"></i>Cerrar Mesa
-                </button>
-                <button class="btn btn-testigo w-100 mb-2" onclick="verResumen()">
-                    <i class="fas fa-chart-bar me-2"></i>Ver Resumen
-                </button>
-                <button class="btn btn-testigo w-100" onclick="exportarDatos()">
-                    <i class="fas fa-download me-2"></i>Exportar Datos
-                </button>
-            </div>
-
-            <!-- Resumen de Votos -->
-            <div class="form-section mt-3">
-                <h5 class="mb-3"><i class="fas fa-list me-2"></i>Resumen de Votos</h5>
-                <div id="resumenVotos">
-                    <p class="text-muted text-center">No hay votos registrados aún</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN SECUNDARIA: Observaciones e Incidencias -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="secondary-actions">
-                <h4 class="mb-4"><i class="fas fa-eye me-2"></i>Observaciones e Incidencias</h4>
-                <p class="text-muted mb-4">Registra observaciones del proceso electoral e incidencias que requieran atención</p>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <button class="quick-action-btn" onclick="window.location.href='/testigo/observaciones'">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-clipboard-list fa-2x text-primary me-3"></i>
-                                <div class="text-start">
-                                    <h6 class="mb-0">Registrar Observación</h6>
-                                    <small class="text-muted">Observaciones del proceso electoral</small>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <button class="quick-action-btn" onclick="window.location.href='/testigo/incidencias'">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
-                                <div class="text-start">
-                                    <h6 class="mb-0">Reportar Incidencia</h6>
-                                    <small class="text-muted">Incidencias que requieren atención</small>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <button class="quick-action-btn" onclick="window.location.href='/testigo/reportes'">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-file-alt fa-2x text-info me-3"></i>
-                                <div class="text-start">
-                                    <h6 class="mb-0">Ver Reportes</h6>
-                                    <small class="text-muted">Historial de observaciones e incidencias</small>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <button class="quick-action-btn" onclick="window.location.href='/testigo/resultados'">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-chart-pie fa-2x text-success me-3"></i>
-                                <div class="text-start">
-                                    <h6 class="mb-0">Ver Resultados</h6>
-                                    <small class="text-muted">Resultados preliminares de la mesa</small>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                    
+                    <!-- Alertas de Validación -->
+                    <div id="alertasValidacion" class="mt-3" style="display: none;"></div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Cargar datos de la mesa asignada
+let fotoCapturada = false;
+let candidatosCount = 0;
+let datosTemporales = {};
+let validacionAprobada = false;
+let usuarioActual = null;
+
+// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
-    cargarDatosMesa();
+    // Cargar datos del usuario desde localStorage
+    cargarDatosUsuario();
+    // NO cargar candidatos predeterminados - esperar a que capture foto o cambie tipo de elección
+    inicializarEventos();
+    cargarDatosTemporales();
 });
 
-async function cargarDatosMesa() {
+// Cargar datos del usuario desde localStorage
+function cargarDatosUsuario() {
     try {
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Obtener datos del usuario guardados en el login
+        const userStr = localStorage.getItem('user');
         
-        // Cargar datos de la mesa asignada
-        const response = await fetch('/api/testigo/mesa-asignada', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        if (!userStr) {
+            console.error('No hay usuario en sesión');
+            window.location.href = '/login';
+            return;
+        }
         
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                actualizarEstadisticas(data.mesa);
-            }
+        usuarioActual = JSON.parse(userStr);
+        
+        // Si el usuario tiene los datos completos, cargarlos directamente
+        if (usuarioActual.municipio_nombre && usuarioActual.puesto_nombre) {
+            mostrarDatosUsuario(usuarioActual);
+        } else {
+            // Si no tiene todos los datos, hacer llamada a la API
+            cargarDatosDesdeAPI();
         }
     } catch (error) {
-        console.error('Error cargando datos:', error);
+        console.error('Error cargando datos del usuario:', error);
+        cargarDatosDesdeAPI();
     }
 }
 
-function actualizarEstadisticas(mesa) {
-    document.getElementById('votosRegistrados').textContent = mesa.votos_registrados || 0;
-    document.getElementById('votantesHabilitados').textContent = mesa.votantes_habilitados || 350;
+// Mostrar datos del usuario en el formulario
+function mostrarDatosUsuario(user) {
+    // Actualizar campos del formulario
+    document.getElementById('departamento').value = 'Caquetá';
+    document.getElementById('municipioForm').value = user.municipio_nombre || 'N/A';
+    document.getElementById('zona').value = user.zona_nombre || 'N/A';
+    document.getElementById('puestoForm').value = user.puesto_nombre || 'N/A';
     
-    const participacion = mesa.votantes_habilitados > 0 
-        ? Math.round((mesa.votos_registrados / mesa.votantes_habilitados) * 100) 
-        : 0;
+    // Actualizar header
+    document.getElementById('municipio').textContent = user.municipio_nombre || 'N/A';
+    document.getElementById('puestoVotacion').textContent = user.puesto_nombre || 'N/A';
     
-    document.getElementById('participacion').textContent = participacion + '%';
-    document.getElementById('progressVotos').style.width = participacion + '%';
+    if (user.mesa_numero) {
+        document.getElementById('mesaAsignada').textContent = `Mesa ${user.mesa_numero}`;
+    }
+    
+    // Actualizar votantes habilitados
+    if (user.votantes_habilitados) {
+        document.getElementById('votantesHabilitados').textContent = user.votantes_habilitados;
+        document.getElementById('votantesHabilitadosForm').value = user.votantes_habilitados;
+        document.getElementById('totalTarjetas').value = user.votantes_habilitados;
+    }
+    
+    // Actualizar estadísticas
+    if (user.total_capturas !== undefined) {
+        document.getElementById('capturasE14').textContent = user.total_capturas;
+    }
+    
+    // Cargar mesas del puesto
+    if (user.puesto_id) {
+        cargarMesasDelPuesto(user.puesto_id, user.mesa_id);
+    }
 }
 
-// Registro de voto
-document.getElementById('formRegistroVoto').addEventListener('submit', async function(e) {
-    e.preventDefault();
+// Cargar datos desde la API (fallback)
+async function cargarDatosDesdeAPI() {
+    try {
+        const userId = localStorage.getItem('user_id');
+        
+        if (!userId) {
+            console.error('No hay user_id en localStorage');
+            return;
+        }
+        
+        const response = await fetch(`/api/testigo/info/${userId}`);
+        
+        if (!response.ok) {
+            console.error('Error obteniendo datos del usuario');
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.user) {
+            // Guardar datos completos en localStorage
+            localStorage.setItem('user', JSON.stringify(data.user));
+            usuarioActual = data.user;
+            
+            // Mostrar datos
+            mostrarDatosUsuario(data.user);
+        }
+    } catch (error) {
+        console.error('Error en cargarDatosDesdeAPI:', error);
+    }
+}
+
+function cargarCandidatos() {
+    // Esta función ya no carga candidatos predeterminados
+    // Los candidatos se cargarán automáticamente desde:
+    // 1. OCR cuando se capture la foto
+    // 2. Cambio de tipo de elección
+    // 3. Datos temporales guardados
     
-    const voto = {
-        candidato_id: document.getElementById('candidato').value,
-        numero_votos: document.getElementById('numeroVotos').value,
-        observacion: document.getElementById('observacionVoto').value
+    // Mostrar mensaje inicial
+    const container = document.getElementById('candidatos-container');
+    if (container.children.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Capture la foto del formulario E14</strong> para extraer automáticamente los candidatos con OCR,
+                o <strong>cambie el tipo de elección</strong> para cargar candidatos predeterminados.
+            </div>
+        `;
+    }
+}
+
+function agregarCandidato() {
+    agregarCandidatoRow('', '');
+}
+
+function limpiarCandidatos() {
+    if (confirm('¿Está seguro de limpiar todos los candidatos? Esto borrará todos los datos ingresados.')) {
+        document.getElementById('candidatos-container').innerHTML = '';
+        candidatosCount = 0;
+        calcularTotales();
+    }
+}
+
+function agregarCandidatoRow(nombre = '', partido = '') {
+    candidatosCount++;
+    const container = document.getElementById('candidatos-container');
+    const row = document.createElement('div');
+    row.className = 'candidato-row';
+    row.id = `candidato-${candidatosCount}`;
+    row.innerHTML = `
+        <div class="row align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small">Candidato</label>
+                <input type="text" class="form-control form-control-sm" 
+                       placeholder="Nombre del candidato" value="${nombre}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Partido</label>
+                <input type="text" class="form-control form-control-sm" 
+                       placeholder="Partido político" value="${partido}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Votos</label>
+                <input type="number" class="form-control form-control-sm voto-input" 
+                       min="0" value="0" onchange="calcularTotales()">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-sm btn-outline-danger" 
+                        onclick="eliminarCandidato(${candidatosCount})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function eliminarCandidato(id) {
+    const row = document.getElementById(`candidato-${id}`);
+    if (row) {
+        row.remove();
+        calcularTotales();
+    }
+}
+
+function inicializarEventos() {
+    // Evento para captura de foto
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            procesarFoto(e.target.files[0]);
+        }
+    });
+
+    // Eventos para calcular totales
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('voto-input')) {
+            calcularTotales();
+        }
+    });
+
+    // Evento para envío del formulario
+    document.getElementById('formE14').addEventListener('submit', enviarFormulario);
+}
+
+async function procesarFoto(file) {
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+        // Mostrar preview con controles de zoom
+        const previewContainer = document.getElementById('preview-container');
+        previewContainer.innerHTML = `
+            <div class="zoom-controls">
+                <button type="button" class="zoom-btn" onclick="zoomIn()" title="Acercar">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button type="button" class="zoom-btn" onclick="zoomOut()" title="Alejar">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button type="button" class="zoom-btn" onclick="resetZoom()" title="Restablecer">
+                    <i class="fas fa-compress"></i>
+                </button>
+            </div>
+            <img id="preview-image" src="${e.target.result}" class="img-fluid" 
+                 style="max-height: 300px; border-radius: 8px;"
+                 onclick="toggleZoom()">
+            <p class="text-success mt-2 mb-0">
+                <i class="fas fa-check-circle"></i> Foto cargada - Click en la imagen para zoom
+            </p>
+        `;
+        previewContainer.classList.add('has-image');
+        fotoCapturada = true;
+        
+        // Activar OCR automáticamente
+        await procesarOCR(file);
+        
+        validarFormulario();
     };
     
+    reader.readAsDataURL(file);
+}
+
+// Funciones de zoom
+let zoomLevel = 1;
+
+function toggleZoom() {
+    const container = document.getElementById('preview-container');
+    const img = document.getElementById('preview-image');
+    
+    if (container.classList.contains('zoomed')) {
+        resetZoom();
+    } else {
+        zoomLevel = 2;
+        img.style.transform = `scale(${zoomLevel})`;
+        img.style.cursor = 'zoom-out';
+        container.classList.add('zoomed');
+    }
+}
+
+function zoomIn() {
+    const img = document.getElementById('preview-image');
+    const container = document.getElementById('preview-container');
+    
+    zoomLevel = Math.min(zoomLevel + 0.5, 4);
+    img.style.transform = `scale(${zoomLevel})`;
+    img.style.cursor = 'zoom-out';
+    
+    if (zoomLevel > 1) {
+        container.classList.add('zoomed');
+    }
+}
+
+function zoomOut() {
+    const img = document.getElementById('preview-image');
+    const container = document.getElementById('preview-container');
+    
+    zoomLevel = Math.max(zoomLevel - 0.5, 1);
+    img.style.transform = `scale(${zoomLevel})`;
+    
+    if (zoomLevel === 1) {
+        img.style.cursor = 'zoom-in';
+        container.classList.remove('zoomed');
+    }
+}
+
+function resetZoom() {
+    const img = document.getElementById('preview-image');
+    const container = document.getElementById('preview-container');
+    
+    zoomLevel = 1;
+    img.style.transform = 'scale(1)';
+    img.style.cursor = 'zoom-in';
+    container.classList.remove('zoomed');
+}
+
+async function procesarOCR(file) {
+    const ocrStatus = document.getElementById('ocr-status');
+    ocrStatus.style.display = 'block';
+    
     try {
+        // Obtener tipo de elección seleccionado
+        const tipoEleccion = document.getElementById('tipoEleccion').value;
+        
+        // Crear FormData para enviar la imagen
+        const formData = new FormData();
+        formData.append('imagen', file);
+        formData.append('tipo_eleccion', tipoEleccion);
+        
+        // Llamar a la API de OCR
+        const response = await fetch('/api/testigo/procesar-ocr', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error en el servidor OCR');
+        }
+        
+        const resultado = await response.json();
+        
+        if (resultado.success) {
+            console.log('OCR exitoso, resultado completo:', resultado);
+            console.log('Candidatos recibidos:', resultado.candidatos);
+            console.log('Votos especiales:', resultado.votos_especiales);
+            
+            // Llenar formulario con datos del OCR
+            llenarFormularioConOCR(resultado);
+            
+            ocrStatus.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>
+                <span><strong>MODO SIMULACIÓN:</strong> Datos de ejemplo cargados. 
+                ${resultado.candidatos ? resultado.candidatos.length : 0} candidatos. 
+                <strong>Edite manualmente</strong> con los datos reales del E14. 
+                Para OCR real, instalar Tesseract (ver documentación).</span>
+            `;
+            ocrStatus.classList.remove('alert-warning');
+            ocrStatus.classList.add('alert-success');
+            
+            setTimeout(() => {
+                ocrStatus.style.display = 'none';
+            }, 5000);
+        } else {
+            console.error('OCR falló:', resultado.error);
+            throw new Error(resultado.error || 'Error procesando OCR');
+        }
+        
+    } catch (error) {
+        console.error('Error en OCR:', error);
+        ocrStatus.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span>Error en OCR. Por favor ingrese los datos manualmente.</span>
+        `;
+        ocrStatus.classList.remove('alert-warning');
+        ocrStatus.classList.add('alert-danger');
+    }
+}
+
+function llenarFormularioConOCR(datos) {
+    console.log('Llenando formulario con datos del OCR:', datos);
+    
+    // Limpiar candidatos existentes (incluyendo mensaje inicial)
+    const container = document.getElementById('candidatos-container');
+    container.innerHTML = '';
+    candidatosCount = 0;
+    
+    // Agregar candidatos del OCR
+    if (datos.candidatos && datos.candidatos.length > 0) {
+        console.log(`Agregando ${datos.candidatos.length} candidatos del OCR`);
+        
+        datos.candidatos.forEach((candidato, index) => {
+            // Agregar la fila del candidato
+            agregarCandidatoRow(candidato.nombre, candidato.partido);
+            
+            // Obtener la fila recién agregada y establecer el valor de votos inmediatamente
+            const filaRecienAgregada = container.lastElementChild;
+            if (filaRecienAgregada) {
+                const inputVotos = filaRecienAgregada.querySelector('.voto-input');
+                if (inputVotos) {
+                    inputVotos.value = candidato.votos || 0;
+                    console.log(`Voto asignado a ${candidato.nombre}: ${candidato.votos}`);
+                }
+            }
+        });
+    } else {
+        console.warn('No se recibieron candidatos del OCR');
+        container.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No se pudieron extraer candidatos de la imagen. Por favor, agréguelos manualmente.
+            </div>
+        `;
+    }
+    
+    // Llenar votos especiales
+    if (datos.votos_especiales) {
+        document.getElementById('votosBlanco').value = datos.votos_especiales.votos_blanco || 0;
+        document.getElementById('votosNulos').value = datos.votos_especiales.votos_nulos || 0;
+        document.getElementById('tarjetasNoMarcadas').value = datos.votos_especiales.tarjetas_no_marcadas || 0;
+    }
+    
+    // Llenar totales si están disponibles
+    if (datos.totales) {
+        if (datos.totales.votantes_sufragaron) {
+            document.getElementById('votantesSufragaron').value = datos.totales.votantes_sufragaron;
+        }
+        if (datos.totales.certificados_electorales) {
+            document.getElementById('certificadosElectorales').value = datos.totales.certificados_electorales;
+        }
+    }
+    
+    // Llenar información adicional si está disponible
+    if (datos.numero_acta) {
+        document.getElementById('numeroActa').value = datos.numero_acta;
+    }
+    if (datos.jurado_presidente) {
+        document.getElementById('juradoPresidente').value = datos.jurado_presidente;
+    }
+    
+    // Recalcular totales inmediatamente después de cargar los datos
+    calcularTotales();
+}
+
+function calcularTotales() {
+    const inputs = document.querySelectorAll('.voto-input');
+    let total = 0;
+    
+    inputs.forEach(input => {
+        total += parseInt(input.value) || 0;
+    });
+    
+    document.getElementById('totalVotos').textContent = total;
+    document.getElementById('votosRegistrados').textContent = total;
+    
+    // Calcular participación
+    const votantesHabilitados = parseInt(document.getElementById('votantesHabilitados').textContent);
+    const participacion = votantesHabilitados > 0 ? Math.round((total / votantesHabilitados) * 100) : 0;
+    document.getElementById('participacion').textContent = participacion + '%';
+    
+    // Validar
+    const validacionBox = document.getElementById('validacionBox');
+    const estadoValidacion = document.getElementById('estadoValidacion');
+    
+    if (total === votantesHabilitados) {
+        validacionBox.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        estadoValidacion.innerHTML = '<i class="fas fa-check-circle"></i> Correcto';
+    } else if (total > votantesHabilitados) {
+        validacionBox.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        estadoValidacion.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Excede';
+    } else {
+        validacionBox.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+        estadoValidacion.innerHTML = '<i class="fas fa-clock"></i> Incompleto';
+    }
+    
+    validarFormulario();
+}
+
+function validarFormulario() {
+    const btnValidar = document.getElementById('btnValidar');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const total = parseInt(document.getElementById('totalVotos').textContent);
+    const mesaId = document.getElementById('mesaForm').value;
+    
+    // Habilitar botón de validar si hay foto, mesa seleccionada y hay votos
+    if (fotoCapturada && mesaId && total > 0) {
+        btnValidar.disabled = false;
+    } else {
+        btnValidar.disabled = true;
+    }
+    
+    // Botón de enviar solo se habilita después de validar
+    if (validacionAprobada) {
+        btnEnviar.disabled = false;
+    } else {
+        btnEnviar.disabled = true;
+    }
+}
+
+async function enviarFormulario(e) {
+    e.preventDefault();
+    
+    if (!fotoCapturada) {
+        alert('⚠️ Debe capturar la foto del formulario E14 primero');
+        return;
+    }
+    
+    if (!validacionAprobada) {
+        alert('⚠️ Debe validar los datos antes de enviar. Haga clic en "Validar Datos"');
+        return;
+    }
+    
+    const mesaId = document.getElementById('mesaForm').value;
+    const mesaTexto = document.getElementById('mesaForm').options[document.getElementById('mesaForm').selectedIndex].text;
+    const tipoEleccion = document.getElementById('tipoEleccion').options[document.getElementById('tipoEleccion').selectedIndex].text;
+    
+    if (!confirm(`¿Está seguro de enviar el formulario E14?\n\nMesa: ${mesaTexto}\nTipo: ${tipoEleccion}\n\nEsta acción informará al resto del sistema.`)) {
+        return;
+    }
+    
+    const btnEnviar = document.getElementById('btnEnviar');
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+    
+    try {
+        // Recopilar datos del formulario
+        const formData = {
+            foto: document.getElementById('file-input').files[0],
+            // Información de ubicación
+            departamento: document.getElementById('departamento').value,
+            municipio: document.getElementById('municipioForm').value,
+            zona: document.getElementById('zona').value,
+            puesto: document.getElementById('puestoForm').value,
+            mesa: document.getElementById('mesaForm').value,
+            tipoEleccion: document.getElementById('tipoEleccion').value,
+            // Horarios
+            horaApertura: document.getElementById('horaApertura').value,
+            horaCierre: document.getElementById('horaCierre').value,
+            // Candidatos
+            candidatos: [],
+            // Votos especiales
+            votosBlanco: parseInt(document.getElementById('votosBlanco').value) || 0,
+            votosNulos: parseInt(document.getElementById('votosNulos').value) || 0,
+            tarjetasNoMarcadas: parseInt(document.getElementById('tarjetasNoMarcadas').value) || 0,
+            totalTarjetas: parseInt(document.getElementById('totalTarjetas').value) || 0,
+            // Información de votantes
+            votantesHabilitados: parseInt(document.getElementById('votantesHabilitadosForm').value) || 0,
+            votantesSufragaron: parseInt(document.getElementById('votantesSufragaron').value) || 0,
+            certificadosElectorales: parseInt(document.getElementById('certificadosElectorales').value) || 0,
+            // Información del acta
+            numeroActa: document.getElementById('numeroActa').value,
+            juradoPresidente: document.getElementById('juradoPresidente').value,
+            testigosActa: document.getElementById('testigosActa').value,
+            actaFirmada: document.getElementById('actaFirmada').checked,
+            procesoNormal: document.getElementById('procesoNormal').checked,
+            // Observaciones
+            observaciones: document.getElementById('observaciones').value
+        };
+        
+        // Recopilar votos de candidatos
+        const candidatosRows = document.querySelectorAll('.candidato-row');
+        candidatosRows.forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            if (inputs.length >= 3) {
+                formData.candidatos.push({
+                    nombre: inputs[0].value,
+                    partido: inputs[1].value,
+                    votos: parseInt(inputs[2].value) || 0
+                });
+            }
+        });
+        
+        // Enviar a la API
         const token = localStorage.getItem('token');
-        const response = await fetch('/api/testigo/registrar-voto', {
+        const response = await fetch('/api/testigo/enviar-e14', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(voto)
+            body: JSON.stringify(formData)
         });
         
         if (response.ok) {
-            alert('Voto registrado exitosamente');
-            this.reset();
-            cargarDatosMesa();
+            // Limpiar datos temporales
+            const mesaId = document.getElementById('mesaForm').value;
+            const tipoEleccion = document.getElementById('tipoEleccion').value;
+            const clave = `temporal_${mesaId}_${tipoEleccion}`;
+            localStorage.removeItem(clave);
+            
+            alert('✅ Formulario E14 enviado exitosamente al sistema');
+            
+            // Actualizar contador
+            const capturasE14 = document.getElementById('capturasE14');
+            capturasE14.textContent = parseInt(capturasE14.textContent) + 1;
+            
+            // Preguntar si quiere reportar otra mesa
+            if (confirm('¿Desea reportar otra mesa del mismo puesto?')) {
+                // Limpiar formulario pero mantener selección de puesto
+                location.reload();
+            } else {
+                location.reload();
+            }
+        } else {
+            throw new Error('Error al enviar formulario');
         }
+        
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al registrar voto');
-    }
-});
-
-// Funciones de acciones rápidas
-function abrirMesa() {
-    if (confirm('¿Desea abrir la mesa de votación?')) {
-        alert('Mesa abierta exitosamente');
+        alert('❌ Error al enviar el formulario. Por favor intente nuevamente.');
+        btnEnviar.disabled = false;
+        btnEnviar.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Formulario E14';
     }
 }
 
-function cerrarMesa() {
-    if (confirm('¿Desea cerrar la mesa de votación?')) {
-        alert('Mesa cerrada exitosamente');
+// Cargar mesas del puesto
+async function cargarMesasDelPuesto(puestoId, mesaIdAsignada) {
+    try {
+        if (!puestoId) {
+            console.error('No hay puesto_id');
+            return;
+        }
+        
+        const mesasResponse = await fetch(`/api/ubicacion/mesas/${puestoId}`);
+        
+        if (!mesasResponse.ok) {
+            console.error('Error obteniendo mesas del puesto');
+            return;
+        }
+        
+        const mesasData = await mesasResponse.json();
+        
+        const selectMesa = document.getElementById('mesaForm');
+        selectMesa.innerHTML = '<option value="">Seleccione mesa...</option>';
+        
+        if (mesasData.success && mesasData.mesas) {
+            mesasData.mesas.forEach(mesa => {
+                const option = document.createElement('option');
+                option.value = mesa.id;
+                option.textContent = `Mesa ${mesa.numero}`;
+                option.dataset.votantes = mesa.votantes_habilitados;
+                
+                // Seleccionar la mesa asignada al usuario
+                if (mesa.id === mesaIdAsignada) {
+                    option.selected = true;
+                }
+                
+                selectMesa.appendChild(option);
+            });
+            
+            // Actualizar votantes de la mesa seleccionada
+            cambiarMesa();
+        }
+    } catch (error) {
+        console.error('Error cargando mesas:', error);
     }
 }
 
-function verResumen() {
-    window.location.href = '/testigo/resumen';
+function cambiarMesa() {
+    const selectMesa = document.getElementById('mesaForm');
+    const selectedOption = selectMesa.options[selectMesa.selectedIndex];
+    
+    if (selectedOption && selectedOption.dataset.votantes) {
+        const votantes = parseInt(selectedOption.dataset.votantes);
+        document.getElementById('votantesHabilitados').textContent = votantes;
+        document.getElementById('votantesHabilitadosForm').value = votantes;
+        document.getElementById('totalTarjetas').value = votantes;
+        calcularTotales();
+    }
+    
+    validarFormulario();
 }
 
-function exportarDatos() {
-    window.location.href = '/api/testigo/exportar-datos';
+function cambiarTipoEleccion() {
+    const tipoEleccion = document.getElementById('tipoEleccion').value;
+    console.log('Tipo de elección cambiado a:', tipoEleccion);
+    
+    // Solo cargar candidatos predeterminados si NO hay foto capturada
+    // Si hay foto, el OCR ya habrá cargado los candidatos
+    if (!fotoCapturada) {
+        cargarCandidatosPorTipo(tipoEleccion);
+    } else {
+        console.log('Foto ya capturada - manteniendo candidatos del OCR');
+    }
+    
+    validarFormulario();
+}
+
+// Cargar candidatos según el tipo de elección
+function cargarCandidatosPorTipo(tipoEleccion) {
+    // Limpiar candidatos actuales
+    document.getElementById('candidatos-container').innerHTML = '';
+    candidatosCount = 0;
+    
+    // Definir candidatos por tipo de elección
+    const candidatosPorTipo = {
+        'senado': [
+            { nombre: 'Candidato Senado 1', partido: 'Partido Liberal' },
+            { nombre: 'Candidato Senado 2', partido: 'Partido Conservador' },
+            { nombre: 'Candidato Senado 3', partido: 'Partido Verde' },
+            { nombre: 'Candidato Senado 4', partido: 'Polo Democrático' }
+        ],
+        'camara': [
+            { nombre: 'Candidato Cámara 1', partido: 'Partido Liberal' },
+            { nombre: 'Candidato Cámara 2', partido: 'Partido Conservador' },
+            { nombre: 'Candidato Cámara 3', partido: 'Cambio Radical' }
+        ],
+        'concejo': [
+            { nombre: 'Candidato Concejo 1', partido: 'Movimiento Cívico' },
+            { nombre: 'Candidato Concejo 2', partido: 'Partido Liberal' },
+            { nombre: 'Candidato Concejo 3', partido: 'Partido Conservador' },
+            { nombre: 'Candidato Concejo 4', partido: 'Independiente' },
+            { nombre: 'Candidato Concejo 5', partido: 'Partido Verde' }
+        ],
+        'alcaldia': [
+            { nombre: 'Candidato Alcalde 1', partido: 'Partido Liberal' },
+            { nombre: 'Candidato Alcalde 2', partido: 'Partido Conservador' },
+            { nombre: 'Candidato Alcalde 3', partido: 'Movimiento Cívico' }
+        ],
+        'gobernacion': [
+            { nombre: 'Candidato Gobernador 1', partido: 'Partido Liberal' },
+            { nombre: 'Candidato Gobernador 2', partido: 'Partido Conservador' },
+            { nombre: 'Candidato Gobernador 3', partido: 'Cambio Radical' }
+        ],
+        'asamblea': [
+            { nombre: 'Candidato Asamblea 1', partido: 'Partido Liberal' },
+            { nombre: 'Candidato Asamblea 2', partido: 'Partido Conservador' },
+            { nombre: 'Candidato Asamblea 3', partido: 'Partido Verde' },
+            { nombre: 'Candidato Asamblea 4', partido: 'Polo Democrático' }
+        ]
+    };
+    
+    // Obtener candidatos para el tipo seleccionado
+    const candidatos = candidatosPorTipo[tipoEleccion] || candidatosPorTipo['senado'];
+    
+    // Agregar candidatos al formulario
+    candidatos.forEach(candidato => {
+        agregarCandidatoRow(candidato.nombre, candidato.partido);
+    });
+    
+    // Recalcular totales
+    calcularTotales();
+}
+
+// Guardar datos temporalmente
+function guardarTemporal() {
+    if (!fotoCapturada) {
+        alert('⚠️ Debe capturar la foto del formulario E14 primero');
+        return;
+    }
+    
+    const mesaId = document.getElementById('mesaForm').value;
+    const tipoEleccion = document.getElementById('tipoEleccion').value;
+    
+    if (!mesaId) {
+        alert('⚠️ Debe seleccionar una mesa');
+        return;
+    }
+    
+    // Crear clave única para el guardado temporal
+    const clave = `temporal_${mesaId}_${tipoEleccion}`;
+    
+    // Recopilar datos
+    const datos = {
+        mesaId: mesaId,
+        tipoEleccion: tipoEleccion,
+        fotoDataUrl: document.querySelector('#preview-container img')?.src,
+        timestamp: new Date().toISOString(),
+        candidatos: [],
+        votosBlanco: parseInt(document.getElementById('votosBlanco').value) || 0,
+        votosNulos: parseInt(document.getElementById('votosNulos').value) || 0,
+        tarjetasNoMarcadas: parseInt(document.getElementById('tarjetasNoMarcadas').value) || 0,
+        votantesSufragaron: parseInt(document.getElementById('votantesSufragaron').value) || 0,
+        certificadosElectorales: parseInt(document.getElementById('certificadosElectorales').value) || 0,
+        numeroActa: document.getElementById('numeroActa').value,
+        juradoPresidente: document.getElementById('juradoPresidente').value,
+        testigosActa: document.getElementById('testigosActa').value,
+        actaFirmada: document.getElementById('actaFirmada').checked,
+        procesoNormal: document.getElementById('procesoNormal').checked,
+        observaciones: document.getElementById('observaciones').value
+    };
+    
+    // Recopilar candidatos
+    const candidatosRows = document.querySelectorAll('.candidato-row');
+    candidatosRows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs.length >= 3) {
+            datos.candidatos.push({
+                nombre: inputs[0].value,
+                partido: inputs[1].value,
+                votos: parseInt(inputs[2].value) || 0
+            });
+        }
+    });
+    
+    // Guardar en localStorage
+    localStorage.setItem(clave, JSON.stringify(datos));
+    datosTemporales[clave] = datos;
+    
+    // Mostrar confirmación
+    const previewContainer = document.getElementById('preview-container');
+    const badge = document.createElement('span');
+    badge.className = 'badge bg-success badge-guardado';
+    badge.innerHTML = '<i class="fas fa-save me-1"></i>Guardado';
+    
+    // Remover badge anterior si existe
+    const badgeAnterior = previewContainer.querySelector('.badge-guardado');
+    if (badgeAnterior) badgeAnterior.remove();
+    
+    previewContainer.style.position = 'relative';
+    previewContainer.appendChild(badge);
+    
+    alert(`✅ Datos guardados temporalmente para Mesa ${document.getElementById('mesaForm').options[document.getElementById('mesaForm').selectedIndex].text} - ${tipoEleccion}`);
+}
+
+// Cargar datos temporales al iniciar
+function cargarDatosTemporales() {
+    const mesaId = document.getElementById('mesaForm').value;
+    const tipoEleccion = document.getElementById('tipoEleccion').value;
+    
+    if (!mesaId) return;
+    
+    const clave = `temporal_${mesaId}_${tipoEleccion}`;
+    const datosGuardados = localStorage.getItem(clave);
+    
+    if (datosGuardados) {
+        const datos = JSON.parse(datosGuardados);
+        
+        if (confirm('Se encontraron datos guardados temporalmente. ¿Desea cargarlos?')) {
+            // Cargar foto
+            if (datos.fotoDataUrl) {
+                const previewContainer = document.getElementById('preview-container');
+                previewContainer.innerHTML = `
+                    <img src="${datos.fotoDataUrl}" class="img-fluid" style="max-height: 300px; border-radius: 8px;">
+                    <p class="text-success mt-2 mb-0">
+                        <i class="fas fa-check-circle"></i> Foto cargada (temporal)
+                    </p>
+                `;
+                previewContainer.classList.add('has-image');
+                fotoCapturada = true;
+            }
+            
+            // Cargar candidatos
+            document.getElementById('candidatos-container').innerHTML = '';
+            candidatosCount = 0;
+            datos.candidatos.forEach(candidato => {
+                agregarCandidatoRow(candidato.nombre, candidato.partido);
+                const inputs = document.querySelectorAll('#candidatos-container .voto-input');
+                if (inputs[candidatosCount - 1]) {
+                    inputs[candidatosCount - 1].value = candidato.votos;
+                }
+            });
+            
+            // Cargar otros datos
+            document.getElementById('votosBlanco').value = datos.votosBlanco;
+            document.getElementById('votosNulos').value = datos.votosNulos;
+            document.getElementById('tarjetasNoMarcadas').value = datos.tarjetasNoMarcadas;
+            document.getElementById('votantesSufragaron').value = datos.votantesSufragaron;
+            document.getElementById('certificadosElectorales').value = datos.certificadosElectorales;
+            document.getElementById('numeroActa').value = datos.numeroActa;
+            document.getElementById('juradoPresidente').value = datos.juradoPresidente;
+            document.getElementById('testigosActa').value = datos.testigosActa;
+            document.getElementById('actaFirmada').checked = datos.actaFirmada;
+            document.getElementById('procesoNormal').checked = datos.procesoNormal;
+            document.getElementById('observaciones').value = datos.observaciones;
+            
+            calcularTotales();
+        }
+    }
+}
+
+// Validar datos antes de enviar
+function validarDatos() {
+    const alertasDiv = document.getElementById('alertasValidacion');
+    alertasDiv.innerHTML = '';
+    alertasDiv.style.display = 'block';
+    
+    let errores = [];
+    let advertencias = [];
+    let exitos = [];
+    
+    // Validar foto
+    if (!fotoCapturada) {
+        errores.push('Debe capturar la foto del formulario E14');
+    } else {
+        exitos.push('Foto del formulario E14 capturada');
+    }
+    
+    // Validar mesa seleccionada
+    const mesaId = document.getElementById('mesaForm').value;
+    if (!mesaId) {
+        errores.push('Debe seleccionar una mesa');
+    } else {
+        exitos.push('Mesa seleccionada correctamente');
+    }
+    
+    // Validar totales
+    const totalVotos = parseInt(document.getElementById('totalVotos').textContent);
+    const votantesHabilitados = parseInt(document.getElementById('votantesHabilitados').textContent);
+    
+    if (totalVotos === 0) {
+        errores.push('No hay votos registrados');
+    } else if (totalVotos > votantesHabilitados) {
+        errores.push(`Total de votos (${totalVotos}) excede votantes habilitados (${votantesHabilitados})`);
+    } else if (totalVotos < votantesHabilitados) {
+        advertencias.push(`Total de votos (${totalVotos}) es menor que votantes habilitados (${votantesHabilitados})`);
+    } else {
+        exitos.push('Total de votos coincide con votantes habilitados');
+    }
+    
+    // Validar candidatos
+    const candidatosRows = document.querySelectorAll('.candidato-row');
+    let candidatosValidos = 0;
+    candidatosRows.forEach((row, index) => {
+        const inputs = row.querySelectorAll('input');
+        const nombre = inputs[0].value.trim();
+        const partido = inputs[1].value.trim();
+        const votos = parseInt(inputs[2].value) || 0;
+        
+        if (nombre && partido) {
+            candidatosValidos++;
+            inputs[0].classList.remove('campo-invalido');
+            inputs[0].classList.add('campo-valido');
+            inputs[1].classList.remove('campo-invalido');
+            inputs[1].classList.add('campo-valido');
+            
+            if (votos > 0) {
+                inputs[2].classList.remove('campo-invalido', 'campo-advertencia');
+                inputs[2].classList.add('campo-valido');
+            } else {
+                inputs[2].classList.remove('campo-invalido', 'campo-valido');
+                inputs[2].classList.add('campo-advertencia');
+            }
+        } else {
+            if (!nombre) {
+                inputs[0].classList.add('campo-invalido');
+                errores.push(`Candidato ${index + 1}: falta nombre`);
+            }
+            if (!partido) {
+                inputs[1].classList.add('campo-invalido');
+                errores.push(`Candidato ${index + 1}: falta partido`);
+            }
+        }
+    });
+    
+    if (candidatosValidos === 0) {
+        errores.push('Debe registrar al menos un candidato');
+    } else {
+        exitos.push(`${candidatosValidos} candidato(s) registrado(s) correctamente`);
+    }
+    
+    // Validar información del acta
+    const numeroActa = document.getElementById('numeroActa').value.trim();
+    const juradoPresidente = document.getElementById('juradoPresidente').value.trim();
+    
+    if (!numeroActa) {
+        advertencias.push('Número de acta E14 no especificado');
+        document.getElementById('numeroActa').classList.add('campo-advertencia');
+    } else {
+        exitos.push('Número de acta E14 registrado');
+        document.getElementById('numeroActa').classList.remove('campo-advertencia');
+        document.getElementById('numeroActa').classList.add('campo-valido');
+    }
+    
+    if (!juradoPresidente) {
+        advertencias.push('Jurado presidente no especificado');
+        document.getElementById('juradoPresidente').classList.add('campo-advertencia');
+    } else {
+        exitos.push('Jurado presidente registrado');
+        document.getElementById('juradoPresidente').classList.remove('campo-advertencia');
+        document.getElementById('juradoPresidente').classList.add('campo-valido');
+    }
+    
+    // Mostrar resultados
+    if (errores.length > 0) {
+        const alertError = document.createElement('div');
+        alertError.className = 'alert alert-danger';
+        alertError.innerHTML = `
+            <h6><i class="fas fa-times-circle me-2"></i>Errores que deben corregirse:</h6>
+            <ul class="mb-0">
+                ${errores.map(e => `<li>${e}</li>`).join('')}
+            </ul>
+        `;
+        alertasDiv.appendChild(alertError);
+    }
+    
+    if (advertencias.length > 0) {
+        const alertWarning = document.createElement('div');
+        alertWarning.className = 'alert alert-warning';
+        alertWarning.innerHTML = `
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Advertencias:</h6>
+            <ul class="mb-0">
+                ${advertencias.map(a => `<li>${a}</li>`).join('')}
+            </ul>
+        `;
+        alertasDiv.appendChild(alertWarning);
+    }
+    
+    if (exitos.length > 0 && errores.length === 0) {
+        const alertSuccess = document.createElement('div');
+        alertSuccess.className = 'alert alert-success';
+        alertSuccess.innerHTML = `
+            <h6><i class="fas fa-check-circle me-2"></i>Validación exitosa:</h6>
+            <ul class="mb-0">
+                ${exitos.map(e => `<li>${e}</li>`).join('')}
+            </ul>
+            <hr>
+            <p class="mb-0"><strong>✅ Los datos están listos para enviar</strong></p>
+        `;
+        alertasDiv.appendChild(alertSuccess);
+        
+        validacionAprobada = true;
+        document.getElementById('btnEnviar').disabled = false;
+        document.getElementById('btnEnviar').classList.remove('btn-testigo');
+        document.getElementById('btnEnviar').classList.add('btn-success');
+    } else {
+        validacionAprobada = false;
+        document.getElementById('btnEnviar').disabled = true;
+        document.getElementById('btnEnviar').classList.remove('btn-success');
+        document.getElementById('btnEnviar').classList.add('btn-testigo');
+    }
+    
+    // Scroll a las alertas
+    alertasDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 </script>
 {% endblock %}
