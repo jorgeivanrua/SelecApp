@@ -1,77 +1,310 @@
 {% extends "base.html" %}
-{% block title %}Dashboard Testigo de Mesa - Sistema Electoral ERP{% endblock %}
-{% block role_styles %}
-<link href="{{ url_for('static', filename='css/roles/testigo_mesa.css') }}" rel="stylesheet">
-{% endblock %}
-{% block body_class %}role-testigo-mesa{% endblock %}
-{% block navbar_class %}navbar-dark bg-info{% endblock %}
-{% block brand_text %}Sistema Electoral - Testigo de Mesa{% endblock %}
+{% block title %}Dashboard Testigo Electoral - Sistema Electoral Caquetá{% endblock %}
 
-{% block navigation %}
-<li class="nav-item">
-    <a class="nav-link" href="{{ url_for('dashboard_role', role='testigo_mesa') }}">
-        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/testigo/captura">
-        <i class="fas fa-keyboard me-1"></i>Capturar Datos
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/testigo/resultados">
-        <i class="fas fa-chart-bar me-1"></i>Resultados
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/testigo/incidencias">
-        <i class="fas fa-exclamation-triangle me-1"></i>Incidencias
-    </a>
-</li>
+{% block extra_styles %}
+<style>
+    :root {
+        --testigo-primary: #06b6d4;
+        --testigo-secondary: #0891b2;
+        --testigo-accent: #10b981;
+    }
+
+    .navbar-testigo {
+        background: linear-gradient(135deg, var(--testigo-primary) 0%, var(--testigo-secondary) 100%);
+    }
+
+    .card-testigo {
+        border-left: 4px solid var(--testigo-primary);
+        transition: all 0.3s;
+    }
+
+    .card-testigo:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-testigo {
+        background: linear-gradient(135deg, var(--testigo-primary) 0%, var(--testigo-secondary) 100%);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-testigo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(6, 182, 212, 0.4);
+        color: white;
+    }
+
+    .stat-card-testigo {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid var(--testigo-primary);
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .secondary-actions {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .quick-action-btn {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        transition: all 0.3s;
+    }
+
+    .quick-action-btn:hover {
+        border-color: var(--testigo-primary);
+        background: #f0f9ff;
+        transform: translateX(5px);
+    }
+
+    .progress-bar-testigo {
+        background: linear-gradient(135deg, var(--testigo-primary) 0%, var(--testigo-accent) 100%);
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="welcome-banner bg-info text-white rounded p-4 mb-4">
-            <h2><i class="fas fa-eye me-2"></i>Panel de Testigo de Mesa Electoral</h2>
-            <p class="mb-0">Captura y verificación de datos electorales - Mesa asignada: <strong>001-A</strong></p>
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-testigo card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2><i class="fas fa-user-check me-2"></i>Dashboard Testigo Electoral</h2>
+                            <p class="mb-0 text-muted">Mesa Asignada: <strong id="mesaAsignada">001-A</strong> | Puesto: <strong id="puestoVotacion">Colegio Nacional</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-success fs-6">Activo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Información de la mesa asignada -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-info">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-table me-2"></i>
-                    Información de Mesa Asignada
-                </h5>
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card-testigo">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Votos Registrados</small>
+                        <h3 class="mb-0" id="votosRegistrados">0</h3>
+                    </div>
+                    <i class="fas fa-vote-yea fa-2x text-primary"></i>
+                </div>
+                <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar progress-bar-testigo" id="progressVotos" style="width: 0%"></div>
+                </div>
             </div>
-            <div class="card-body">
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card-testigo">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Votantes Habilitados</small>
+                        <h3 class="mb-0" id="votantesHabilitados">350</h3>
+                    </div>
+                    <i class="fas fa-users fa-2x text-info"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card-testigo">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Participación</small>
+                        <h3 class="mb-0" id="participacion">0%</h3>
+                    </div>
+                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card-testigo">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Estado Mesa</small>
+                        <h3 class="mb-0"><span class="badge bg-warning">En Proceso</span></h3>
+                    </div>
+                    <i class="fas fa-clipboard-check fa-2x text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN PRINCIPAL: CAPTURA DE DATOS -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-section">
+                <h4 class="mb-4"><i class="fas fa-edit me-2"></i>Captura de Datos - Registro de Votación</h4>
+                
+                <!-- Tabs para diferentes formularios -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#registroVotos">
+                            <i class="fas fa-vote-yea me-2"></i>Registro de Votos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#capturaE14">
+                            <i class="fas fa-camera me-2"></i>Captura E14
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Tab: Registro de Votos -->
+                    <div class="tab-pane fade show active" id="registroVotos">
+                        <form id="formRegistroVoto">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Candidato</label>
+                                    <select class="form-select" id="candidato" required>
+                                        <option value="">Seleccionar candidato...</option>
+                                        <option value="1">Candidato 1 - Partido A</option>
+                                        <option value="2">Candidato 2 - Partido B</option>
+                                        <option value="3">Candidato 3 - Partido C</option>
+                                        <option value="voto_blanco">Voto en Blanco</option>
+                                        <option value="voto_nulo">Voto Nulo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Número de Votos</label>
+                                    <input type="number" class="form-control" id="numeroVotos" value="1" min="1" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Observaciones (opcional)</label>
+                                <textarea class="form-control" id="observacionVoto" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-testigo">
+                                <i class="fas fa-save me-2"></i>Registrar Voto
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab: Captura E14 -->
+                    <div class="tab-pane fade" id="capturaE14">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Captura E14:</strong> Tome foto del formulario físico y digite los datos
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="/testigo/e14" class="btn btn-testigo btn-lg">
+                                <i class="fas fa-camera me-2"></i>Ir a Captura E14
+                            </a>
+                            <p class="text-muted mt-3">
+                                <small>Fotografíe el formulario E14 físico y digite los datos para enviar</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL LATERAL: Acciones Rápidas -->
+        <div class="col-md-4">
+            <div class="form-section">
+                <h5 class="mb-3"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
+                <button class="btn btn-testigo w-100 mb-2" onclick="abrirMesa()">
+                    <i class="fas fa-door-open me-2"></i>Abrir Mesa
+                </button>
+                <button class="btn btn-testigo w-100 mb-2" onclick="cerrarMesa()">
+                    <i class="fas fa-door-closed me-2"></i>Cerrar Mesa
+                </button>
+                <button class="btn btn-testigo w-100 mb-2" onclick="verResumen()">
+                    <i class="fas fa-chart-bar me-2"></i>Ver Resumen
+                </button>
+                <button class="btn btn-testigo w-100" onclick="exportarDatos()">
+                    <i class="fas fa-download me-2"></i>Exportar Datos
+                </button>
+            </div>
+
+            <!-- Resumen de Votos -->
+            <div class="form-section mt-3">
+                <h5 class="mb-3"><i class="fas fa-list me-2"></i>Resumen de Votos</h5>
+                <div id="resumenVotos">
+                    <p class="text-muted text-center">No hay votos registrados aún</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN SECUNDARIA: Observaciones e Incidencias -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="secondary-actions">
+                <h4 class="mb-4"><i class="fas fa-eye me-2"></i>Observaciones e Incidencias</h4>
+                <p class="text-muted mb-4">Registra observaciones del proceso electoral e incidencias que requieran atención</p>
+                
                 <div class="row">
-                    <div class="col-md-3">
-                        <strong>Mesa:</strong> 001-A<br>
-                        <strong>Municipio:</strong> Florencia<br>
-                        <strong>Puesto:</strong> Escuela Central
+                    <div class="col-md-6 mb-3">
+                        <button class="quick-action-btn" onclick="window.location.href='/testigo/observaciones'">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clipboard-list fa-2x text-primary me-3"></i>
+                                <div class="text-start">
+                                    <h6 class="mb-0">Registrar Observación</h6>
+                                    <small class="text-muted">Observaciones del proceso electoral</small>
+                                </div>
+                            </div>
+                        </button>
                     </div>
-                    <div class="col-md-3">
-                        <strong>Votantes Habilitados:</strong> 350<br>
-                        <strong>Votos Registrados:</strong> <span id="votos-registrados">234</span><br>
-                        <strong>Participación:</strong> <span id="participacion">67%</span>
+                    <div class="col-md-6 mb-3">
+                        <button class="quick-action-btn" onclick="window.location.href='/testigo/incidencias'">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                                <div class="text-start">
+                                    <h6 class="mb-0">Reportar Incidencia</h6>
+                                    <small class="text-muted">Incidencias que requieren atención</small>
+                                </div>
+                            </div>
+                        </button>
                     </div>
-                    <div class="col-md-3">
-                        <strong>Hora Apertura:</strong> 08:00<br>
-                        <strong>Estado:</strong> <span class="badge bg-success">Activa</span><br>
-                        <strong>Jurados:</strong> 3 presentes
+                    <div class="col-md-6 mb-3">
+                        <button class="quick-action-btn" onclick="window.location.href='/testigo/reportes'">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-alt fa-2x text-info me-3"></i>
+                                <div class="text-start">
+                                    <h6 class="mb-0">Ver Reportes</h6>
+                                    <small class="text-muted">Historial de observaciones e incidencias</small>
+                                </div>
+                            </div>
+                        </button>
                     </div>
-                    <div class="col-md-3">
-                        <strong>Última Actualización:</strong><br>
-                        <span id="ultima-actualizacion">15:23</span><br>
-                        <button class="btn btn-sm btn-info mt-2" onclick="actualizarDatos()">
-                            <i class="fas fa-sync me-1"></i>Actualizar
+                    <div class="col-md-6 mb-3">
+                        <button class="quick-action-btn" onclick="window.location.href='/testigo/resultados'">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-chart-pie fa-2x text-success me-3"></i>
+                                <div class="text-start">
+                                    <h6 class="mb-0">Ver Resultados</h6>
+                                    <small class="text-muted">Resultados preliminares de la mesa</small>
+                                </div>
+                            </div>
                         </button>
                     </div>
                 </div>
@@ -80,459 +313,98 @@
     </div>
 </div>
 
-<!-- Captura rápida de datos -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-keyboard me-2"></i>
-                    Captura Rápida de Datos Electorales
-                </h5>
-            </div>
-            <div class="card-body">
-                <form id="capturaRapidaForm">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="candidato" class="form-label">Candidato/Lista</label>
-                                <select class="form-select" id="candidato" required>
-                                    <option value="">Seleccionar candidato</option>
-                                    <option value="1">Juan Pérez - Partido A</option>
-                                    <option value="2">María García - Partido B</option>
-                                    <option value="3">Carlos López - Partido C</option>
-                                    <option value="4">Ana Rodríguez - Partido D</option>
-                                    <option value="votos_blancos">Votos en Blanco</option>
-                                    <option value="votos_nulos">Votos Nulos</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label for="cantidad" class="form-label">Cantidad de Votos</label>
-                                <input type="number" class="form-control" id="cantidad" min="1" required>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label for="hora" class="form-label">Hora</label>
-                                <input type="time" class="form-control" id="hora" required>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="mb-3">
-                                <label class="form-label">&nbsp;</label>
-                                <button type="submit" class="btn btn-info w-100">
-                                    <i class="fas fa-plus me-1"></i>Registrar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Resultados actuales -->
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>
-                    Resultados Actuales - Mesa 001-A
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="tablaResultados">
-                        <thead>
-                            <tr>
-                                <th>Candidato/Lista</th>
-                                <th>Partido</th>
-                                <th>Votos</th>
-                                <th>Porcentaje</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Juan Pérez</strong></td>
-                                <td>Partido A</td>
-                                <td><span class="votos-candidato" data-candidato="1">85</span></td>
-                                <td><span class="porcentaje-candidato">36.3%</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(1)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>María García</strong></td>
-                                <td>Partido B</td>
-                                <td><span class="votos-candidato" data-candidato="2">72</span></td>
-                                <td><span class="porcentaje-candidato">30.8%</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(2)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Carlos López</strong></td>
-                                <td>Partido C</td>
-                                <td><span class="votos-candidato" data-candidato="3">62</span></td>
-                                <td><span class="porcentaje-candidato">26.5%</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(3)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Ana Rodríguez</strong></td>
-                                <td>Partido D</td>
-                                <td><span class="votos-candidato" data-candidato="4">15</span></td>
-                                <td><span class="porcentaje-candidato">6.4%</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editarVotos(4)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="table-secondary">
-                                <td><strong>Votos en Blanco</strong></td>
-                                <td>-</td>
-                                <td><span class="votos-candidato" data-candidato="blancos">8</span></td>
-                                <td><span class="porcentaje-candidato">3.4%</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="editarVotos('blancos')">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="table-warning">
-                                <td><strong>Votos Nulos</strong></td>
-                                <td>-</td>
-                                <td><span class="votos-candidato" data-candidato="nulos">12</span></td>
-                                <td><span class="porcentaje-candidato">5.1%</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-warning" onclick="editarVotos('nulos')">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tfoot class="table-dark">
-                            <tr>
-                                <th colspan="2">TOTAL</th>
-                                <th><span id="total-votos">234</span></th>
-                                <th>100%</th>
-                                <th></th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-                
-                <div class="mt-4">
-                    <button class="btn btn-success me-3" onclick="generarActa()">
-                        <i class="fas fa-file-pdf me-2"></i>Generar Acta
-                    </button>
-                    <button class="btn btn-info me-3" onclick="enviarResultados()">
-                        <i class="fas fa-paper-plane me-2"></i>Enviar Resultados
-                    </button>
-                    <button class="btn btn-warning" onclick="reportarIncidencia()">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Reportar Incidencia
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-doughnut me-2"></i>
-                    Gráfico de Resultados
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="graficoResultados" width="300" height="300"></canvas>
-            </div>
-        </div>
-        
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-clock me-2"></i>
-                    Registro de Actividad
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="timeline" id="timeline-actividad">
-                    <div class="timeline-item">
-                        <small class="text-muted">15:23</small>
-                        <p class="mb-0">Registrados 5 votos para Juan Pérez</p>
-                    </div>
-                    <div class="timeline-item">
-                        <small class="text-muted">15:18</small>
-                        <p class="mb-0">Registrados 3 votos para María García</p>
-                    </div>
-                    <div class="timeline-item">
-                        <small class="text-muted">15:12</small>
-                        <p class="mb-0">Reportada incidencia menor</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para editar votos -->
-<div class="modal fade" id="modalEditarVotos" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Votos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formEditarVotos">
-                    <div class="mb-3">
-                        <label for="candidatoEditar" class="form-label">Candidato</label>
-                        <input type="text" class="form-control" id="candidatoEditar" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="votosActuales" class="form-label">Votos Actuales</label>
-                        <input type="number" class="form-control" id="votosActuales" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="observaciones" class="form-label">Observaciones</label>
-                        <textarea class="form-control" id="observaciones" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-info" onclick="guardarEdicion()">Guardar Cambios</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block role_scripts %}
 <script>
-// Variables globales
-let candidatoEditando = null;
-let datosVotos = {
-    1: 85, 2: 72, 3: 62, 4: 15,
-    'blancos': 8, 'nulos': 12
-};
-
-// Inicializar dashboard
+// Cargar datos de la mesa asignada
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard Testigo de Mesa cargado');
-    inicializarGrafico();
-    actualizarHora();
-    
-    // Configurar formulario de captura rápida
-    document.getElementById('capturaRapidaForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        capturarVoto();
-    });
+    cargarDatosMesa();
 });
 
-// Capturar voto rápido
-function capturarVoto() {
-    const candidato = document.getElementById('candidato').value;
-    const cantidad = parseInt(document.getElementById('cantidad').value);
-    const hora = document.getElementById('hora').value;
-    
-    if (!candidato || !cantidad || !hora) {
-        alert('Por favor complete todos los campos');
-        return;
-    }
-    
-    // Actualizar datos
-    if (candidato === 'votos_blancos') {
-        datosVotos['blancos'] += cantidad;
-    } else if (candidato === 'votos_nulos') {
-        datosVotos['nulos'] += cantidad;
-    } else {
-        datosVotos[candidato] += cantidad;
-    }
-    
-    // Actualizar interfaz
-    actualizarTablaResultados();
-    actualizarGrafico();
-    agregarActividad(`Registrados ${cantidad} votos - ${hora}`);
-    
-    // Limpiar formulario
-    document.getElementById('capturaRapidaForm').reset();
-    
-    // Mostrar confirmación
-    mostrarNotificacion('Votos registrados exitosamente', 'success');
-}
-
-// Actualizar tabla de resultados
-function actualizarTablaResultados() {
-    const total = Object.values(datosVotos).reduce((a, b) => a + b, 0);
-    
-    Object.keys(datosVotos).forEach(candidato => {
-        const elemento = document.querySelector(`[data-candidato="${candidato}"]`);
-        if (elemento) {
-            elemento.textContent = datosVotos[candidato];
-            const porcentaje = ((datosVotos[candidato] / total) * 100).toFixed(1);
-            elemento.parentElement.nextElementSibling.querySelector('.porcentaje-candidato').textContent = porcentaje + '%';
-        }
-    });
-    
-    document.getElementById('total-votos').textContent = total;
-    document.getElementById('votos-registrados').textContent = total;
-    document.getElementById('participacion').textContent = Math.round((total / 350) * 100) + '%';
-}
-
-// Inicializar gráfico
-function inicializarGrafico() {
-    const ctx = document.getElementById('graficoResultados').getContext('2d');
-    window.graficoResultados = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Juan Pérez', 'María García', 'Carlos López', 'Ana Rodríguez', 'Blancos', 'Nulos'],
-            datasets: [{
-                data: [85, 72, 62, 15, 8, 12],
-                backgroundColor: [
-                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        fontSize: 10
-                    }
-                }
+async function cargarDatosMesa() {
+    try {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        // Cargar datos de la mesa asignada
+        const response = await fetch('/api/testigo/mesa-asignada', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                actualizarEstadisticas(data.mesa);
             }
         }
-    });
-}
-
-// Actualizar gráfico
-function actualizarGrafico() {
-    if (window.graficoResultados) {
-        window.graficoResultados.data.datasets[0].data = [
-            datosVotos[1], datosVotos[2], datosVotos[3], datosVotos[4],
-            datosVotos['blancos'], datosVotos['nulos']
-        ];
-        window.graficoResultados.update();
+    } catch (error) {
+        console.error('Error cargando datos:', error);
     }
 }
 
-// Editar votos
-function editarVotos(candidato) {
-    candidatoEditando = candidato;
-    const nombres = {
-        1: 'Juan Pérez', 2: 'María García', 3: 'Carlos López', 4: 'Ana Rodríguez',
-        'blancos': 'Votos en Blanco', 'nulos': 'Votos Nulos'
+function actualizarEstadisticas(mesa) {
+    document.getElementById('votosRegistrados').textContent = mesa.votos_registrados || 0;
+    document.getElementById('votantesHabilitados').textContent = mesa.votantes_habilitados || 350;
+    
+    const participacion = mesa.votantes_habilitados > 0 
+        ? Math.round((mesa.votos_registrados / mesa.votantes_habilitados) * 100) 
+        : 0;
+    
+    document.getElementById('participacion').textContent = participacion + '%';
+    document.getElementById('progressVotos').style.width = participacion + '%';
+}
+
+// Registro de voto
+document.getElementById('formRegistroVoto').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const voto = {
+        candidato_id: document.getElementById('candidato').value,
+        numero_votos: document.getElementById('numeroVotos').value,
+        observacion: document.getElementById('observacionVoto').value
     };
     
-    document.getElementById('candidatoEditar').value = nombres[candidato];
-    document.getElementById('votosActuales').value = datosVotos[candidato];
-    
-    new bootstrap.Modal(document.getElementById('modalEditarVotos')).show();
-}
-
-// Guardar edición
-function guardarEdicion() {
-    const nuevosVotos = parseInt(document.getElementById('votosActuales').value);
-    const observaciones = document.getElementById('observaciones').value;
-    
-    datosVotos[candidatoEditando] = nuevosVotos;
-    
-    actualizarTablaResultados();
-    actualizarGrafico();
-    
-    if (observaciones) {
-        agregarActividad(`Editados votos: ${observaciones}`);
-    }
-    
-    bootstrap.Modal.getInstance(document.getElementById('modalEditarVotos')).hide();
-    mostrarNotificacion('Votos actualizados correctamente', 'success');
-}
-
-// Funciones adicionales
-function actualizarDatos() {
-    mostrarNotificacion('Datos actualizados', 'info');
-    document.getElementById('ultima-actualizacion').textContent = new Date().toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
-}
-
-function generarActa() {
-    mostrarNotificacion('Generando acta electoral...', 'info');
-    // Aquí se implementaría la generación del PDF
-}
-
-function enviarResultados() {
-    mostrarNotificacion('Enviando resultados al sistema central...', 'info');
-    // Aquí se implementaría el envío de datos
-}
-
-function reportarIncidencia() {
-    window.location.href = '/testigo/incidencias';
-}
-
-function agregarActividad(mensaje) {
-    const timeline = document.getElementById('timeline-actividad');
-    const hora = new Date().toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
-    
-    const item = document.createElement('div');
-    item.className = 'timeline-item';
-    item.innerHTML = `
-        <small class="text-muted">${hora}</small>
-        <p class="mb-0">${mensaje}</p>
-    `;
-    
-    timeline.insertBefore(item, timeline.firstChild);
-    
-    // Mantener solo los últimos 5 elementos
-    while (timeline.children.length > 5) {
-        timeline.removeChild(timeline.lastChild);
-    }
-}
-
-function mostrarNotificacion(mensaje, tipo) {
-    const colores = {
-        'success': 'bg-success',
-        'info': 'bg-info',
-        'warning': 'bg-warning',
-        'error': 'bg-danger'
-    };
-    
-    const notificacion = document.createElement('div');
-    notificacion.className = `alert ${colores[tipo]} alert-dismissible fade show position-fixed`;
-    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
-    notificacion.innerHTML = `
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notificacion);
-    
-    setTimeout(() => {
-        if (notificacion.parentNode) {
-            notificacion.parentNode.removeChild(notificacion);
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/testigo/registrar-voto', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(voto)
+        });
+        
+        if (response.ok) {
+            alert('Voto registrado exitosamente');
+            this.reset();
+            cargarDatosMesa();
         }
-    }, 5000);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al registrar voto');
+    }
+});
+
+// Funciones de acciones rápidas
+function abrirMesa() {
+    if (confirm('¿Desea abrir la mesa de votación?')) {
+        alert('Mesa abierta exitosamente');
+    }
 }
 
-function actualizarHora() {
-    const ahora = new Date();
-    document.getElementById('hora').value = ahora.toTimeString().slice(0, 5);
+function cerrarMesa() {
+    if (confirm('¿Desea cerrar la mesa de votación?')) {
+        alert('Mesa cerrada exitosamente');
+    }
+}
+
+function verResumen() {
+    window.location.href = '/testigo/resumen';
+}
+
+function exportarDatos() {
+    window.location.href = '/api/testigo/exportar-datos';
 }
 </script>
 {% endblock %}

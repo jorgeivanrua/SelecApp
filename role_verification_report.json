@@ -1,0 +1,108 @@
+{
+  "timestamp": "2025-11-07T01:26:33.622535",
+  "base_url": "http://localhost:5000",
+  "health_check": {
+    "success": false,
+    "data": null
+  },
+  "roles": [
+    {
+      "role": "super_admin",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "admin_departamental",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "admin_municipal",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "coordinador_electoral",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "coordinador_departamental",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "coordinador_municipal",
+      "status_code": 200,
+      "success": true,
+      "content_length": 20689,
+      "has_html": true
+    },
+    {
+      "role": "coordinador_puesto",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "testigo_mesa",
+      "status_code": 200,
+      "success": true,
+      "content_length": 22292,
+      "has_html": true
+    },
+    {
+      "role": "auditor_electoral",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    },
+    {
+      "role": "observador_internacional",
+      "status_code": 200,
+      "success": true,
+      "content_length": 15986,
+      "has_html": true
+    }
+  ],
+  "aliases": [
+    {
+      "alias": "testigo",
+      "expected_role": "testigo_mesa",
+      "status_code": 200,
+      "success": true
+    },
+    {
+      "alias": "auditor",
+      "expected_role": "auditor_electoral",
+      "status_code": 200,
+      "success": true
+    },
+    {
+      "alias": "observador",
+      "expected_role": "observador_internacional",
+      "status_code": 200,
+      "success": true
+    }
+  ],
+  "summary": {
+    "total_roles": 10,
+    "successful_roles": 10,
+    "success_rate": 100.0,
+    "total_aliases": 3,
+    "successful_aliases": 3,
+    "alias_success_rate": 100.0
+  }
+}

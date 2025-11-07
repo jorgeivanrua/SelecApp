@@ -14,7 +14,10 @@
   - Generar reporte de configuración inicial con totales por nivel y visualización geográfica
   - _Requerimientos: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9_
 
-- [ ] 2. Gestión de candidatos, partidos políticos y coaliciones
+- [-] 2. Gestión de candidatos, partidos políticos y coaliciones
+
+
+
 - [ ] 2.1 Crear modelos de datos para candidatos y partidos
   - Implementar modelo PoliticalParty con información completa (nombre, siglas, color, logo)
   - Crear modelo Coalition para coaliciones entre partidos
@@ -23,6 +26,8 @@
   - Crear modelo CandidateList para listas organizadas por partido/coalición
   - Establecer relaciones entre candidatos, partidos, coaliciones y tipos de elecciones
   - Definir enumeraciones CargoElectoral, TipoCircunscripcion, EstadoCandidato
+
+
   - _Requerimientos: 16.1, 16.2, 16.3, 16.4, 16.13_
 
 - [ ] 2.2 Implementar CandidateManagementService
@@ -32,6 +37,8 @@
   - Implementar asociación de candidatos con partidos o coaliciones
   - Crear carga masiva de candidatos desde archivos CSV con validación
   - Desarrollar generación automática de listas de candidatos por circunscripción
+
+
   - Implementar búsqueda y filtrado avanzado de candidatos
   - Crear validación de consistencia con tarjetones electorales oficiales
   - _Requerimientos: 16.1, 16.2, 16.5, 16.6, 16.9, 16.14_
@@ -42,6 +49,8 @@
   - Desarrollar POST /api/candidates para crear candidatos individuales
   - Implementar POST /api/candidates/upload-csv para carga masiva
   - Crear GET /api/candidates/search para búsqueda avanzada
+
+
   - Desarrollar GET /api/candidates/by-party/{party_id} para candidatos por partido
   - Implementar GET /api/candidates/by-coalition/{coalition_id} para candidatos por coalición
   - Crear POST /api/candidates/validate-ballot para validar con tarjetón oficial
@@ -51,6 +60,7 @@
 - [ ] 2.4 Implementar CandidateReportingService
   - Crear función para calcular resultados por candidato individual
   - Implementar cálculo automático de totales por partido político
+
   - Desarrollar cálculo automático de totales por coalición
   - Crear generación de rankings de candidatos por votación
   - Implementar generación de rankings de partidos por votación total
@@ -59,13 +69,18 @@
   - Implementar análisis de distribución geográfica de votos por candidato
   - _Requerimientos: 16.10, 16.11, 16.12, 16.15, 16.17_
 
-- [ ] 2.5 Crear modelos de resultados y reportes
+- [x] 2.5 Crear modelos de resultados y reportes
+
+
   - Implementar modelo CandidateResults para resultados por candidato
   - Crear modelo PartyResults para resultados agregados por partido
   - Desarrollar modelo CoalitionResults para resultados por coalición
   - Implementar modelo CandidateRanking para rankings de candidatos
   - Crear modelo DetailedCandidateReport para reportes detallados
   - Desarrollar modelo GeographicDistributionReport para análisis geográfico
+
+
+
   - Implementar modelo DashboardData para dashboards visuales
   - _Requerimientos: 16.15, 16.17, 16.18_
 
@@ -540,7 +555,12 @@
   - Probar sistema de alertas automáticas
   - _Requerimientos: 8.1, 8.2, 8.3_
 
-- [ ] 15. Panel de administración integral con gestión de testigos
+- [-] 15. Panel de administración integral con gestión de testigos
+
+
+
+
+
 - [ ] 15.1 Implementar AdminPanelService extendido con gestión de candidatos
   - Crear servicio para configuración de jornadas electorales con múltiples elecciones
   - Implementar carga y gestión de plantillas E-14 por tipo de elección
@@ -561,6 +581,8 @@
   - Desarrollar activación automática de suplentes cuando titular no se presenta
   - Implementar validación de cobertura completa de mesas
   - Desarrollar generación de reportes de asignación por ubicación
+
+
   - Crear sistema de búsqueda avanzada con múltiples filtros
   - Implementar histórico completo de asignaciones y cambios
   - _Requerimientos: 12.5, 12.6, 12.8, 12.9, 12.10, 12.20, 12.21, 12.22, 12.23_

@@ -1,0 +1,889 @@
+{% extends "base.html" %}
+{% block title %}Configuración de Prioridades - Administrador{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/super_admin.css') }}" rel="stylesheet">
+<style>
+.priority-card {
+    border-left: 4px solid #17a2b8;
+    transition: all 0.3s ease;
+}
+.priority-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.priority-high { border-left-color: #dc3545; }
+.priority-medium { border-left-color: #ffc107; }
+.priority-low { border-left-color: #28a745; }
+.priority-badge-high { background-color: #dc3545; }
+.priority-badge-medium { background-color: #ffc107; color: #000; }
+.priority-badge-low { background-color: #28a745; }
+.config-active {
+    border: 2px solid #28a745;
+    background: #f8fff8;
+}
+.priority-selector {
+    min-width: 120px;
+}
+.entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+</style>
+{% endblock %}
+{% block body_class %}role-super-admin{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Administración - Configuración de Prioridades{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="/dashboard/super_admin">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/candidatos">
+        <i class="fas fa-users me-2"></i>Candidatos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/partidos">
+        <i class="fas fa-flag me-2"></i>Partidos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/admin/prioridades">
+        <i class="fas fa-star me-2"></i>Prioridades
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-star me-2"></i>Configuración de Prioridades</h2>
+                    <p class="text-muted">Gestionar prioridades para la recolección de datos electorales</p>
+                </div>
+                <button class="btn btn-primary btn-lg" onclick="nuevaConfiguracion()">
+                    <i class="fas fa-plus me-2"></i>Nueva Configuración
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuraciones existentes -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs me-2"></i>Configuraciones de Prioridades</h5>
+                </div>
+                <div class="card-body">
+                    <div id="configuraciones-list">
+                        <!-- Se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs de gestión -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="priority-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="partidos-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#partidos" type="button" role="tab">
+                                <i class="fas fa-flag me-2"></i>Partidos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="candidatos-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#candidatos" type="button" role="tab">
+                                <i class="fas fa-users me-2"></i>Candidatos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="procesos-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#procesos" type="button" role="tab">
+                                <i class="fas fa-vote-yea me-2"></i>Procesos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="resumen-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#resumen" type="button" role="tab">
+                                <i class="fas fa-chart-pie me-2"></i>Resumen
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="priority-tab-content">
+                        <!-- Tab Partidos -->
+                        <div class="tab-pane fade show active" id="partidos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6>Prioridades de Partidos Políticos</h6>
+                                <button class="btn btn-success btn-sm" onclick="guardarPrioridadesPartidos()">
+                                    <i class="fas fa-save me-1"></i>Guardar Cambios
+                                </button>
+                            </div>
+                            <div id="partidos-grid" class="entity-grid">
+                                <!-- Se cargarán dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Tab Candidatos -->
+                        <div class="tab-pane fade" id="candidatos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6>Prioridades de Candidatos</h6>
+                                <div>
+                                    <select class="form-select form-select-sm d-inline-block me-2" 
+                                            id="filtro-partido-candidatos" style="width: auto;" 
+                                            onchange="filtrarCandidatos()">
+                                        <option value="">Todos los partidos</option>
+                                    </select>
+                                    <button class="btn btn-success btn-sm" onclick="guardarPrioridadesCandidatos()">
+                                        <i class="fas fa-save me-1"></i>Guardar Cambios
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="candidatos-grid" class="entity-grid">
+                                <!-- Se cargarán dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Tab Procesos -->
+                        <div class="tab-pane fade" id="procesos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6>Prioridades de Procesos Electorales</h6>
+                                <button class="btn btn-success btn-sm" onclick="guardarPrioridadesProcesos()">
+                                    <i class="fas fa-save me-1"></i>Guardar Cambios
+                                </button>
+                            </div>
+                            <div id="procesos-grid" class="entity-grid">
+                                <!-- Se cargarán dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Tab Resumen -->
+                        <div class="tab-pane fade" id="resumen" role="tabpanel">
+                            <h6>Resumen de Prioridades</h6>
+                            <div id="resumen-content">
+                                <!-- Se cargará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nueva configuración -->
+<div class="modal fade" id="configModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Configuración de Prioridades</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="config-form">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="config-nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" id="config-descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Inicio</label>
+                                <input type="date" class="form-control" id="config-fecha-inicio">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Fin</label>
+                                <input type="date" class="form-control" id="config-fecha-fin">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="config-activa">
+                        <label class="form-check-label" for="config-activa">
+                            Activar inmediatamente
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="crearConfiguracion()">Crear Configuración</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{
+% block role_scripts %}
+<script>
+let configuracionActiva = null;
+let partidos = [];
+let candidatos = [];
+let procesos = [];
+let prioridadesPartidos = [];
+let prioridadesCandidatos = [];
+let prioridadesProcesos = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de prioridades cargada');
+    cargarDatosIniciales();
+});
+
+function cargarDatosIniciales() {
+    Promise.all([
+        fetch('/api/admin/prioridades/configuraciones').then(r => r.json()),
+        fetch('/api/admin/partidos').then(r => r.json()),
+        fetch('/api/admin/candidatos').then(r => r.json()),
+        fetch('/api/admin/prioridades/configuracion-activa').then(r => r.json())
+    ]).then(([configsData, partidosData, candidatosData, activeConfigData]) => {
+        // Cargar configuraciones
+        mostrarConfiguraciones(configsData.data || []);
+        
+        // Cargar datos maestros
+        partidos = partidosData.data || [];
+        candidatos = candidatosData.data || [];
+        
+        // Configuración activa
+        configuracionActiva = activeConfigData.data;
+        
+        if (configuracionActiva) {
+            cargarPrioridades();
+        } else {
+            mostrarMensajeNoConfiguracion();
+        }
+        
+    }).catch(error => {
+        console.error('Error cargando datos:', error);
+        mostrarNotificacion('Error cargando datos iniciales', 'error');
+    });
+}
+
+function mostrarConfiguraciones(configuraciones) {
+    const container = document.getElementById('configuraciones-list');
+    
+    if (configuraciones.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-cogs fa-3x text-muted mb-3"></i>
+                <h5>No hay configuraciones</h5>
+                <p class="text-muted">Crea la primera configuración de prioridades</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = configuraciones.map(config => `
+        <div class="card mb-3 ${config.activa ? 'config-active' : ''}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="card-title">
+                            ${config.nombre}
+                            ${config.activa ? '<span class="badge bg-success ms-2">ACTIVA</span>' : ''}
+                        </h6>
+                        <p class="card-text text-muted">${config.descripcion || 'Sin descripción'}</p>
+                        <small class="text-muted">
+                            Creada: ${new Date(config.created_at).toLocaleDateString()}
+                            ${config.fecha_inicio ? ` | Vigencia: ${config.fecha_inicio} - ${config.fecha_fin || 'Sin límite'}` : ''}
+                        </small>
+                    </div>
+                    <div class="d-flex flex-column align-items-end">
+                        <div class="mb-2">
+                            <span class="badge bg-primary me-1">${config.total_partidos} Partidos</span>
+                            <span class="badge bg-info me-1">${config.total_candidatos} Candidatos</span>
+                            <span class="badge bg-warning">${config.total_procesos} Procesos</span>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            ${!config.activa ? `
+                                <button class="btn btn-outline-success" onclick="activarConfiguracion(${config.id})" title="Activar">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-outline-primary" onclick="editarConfiguracion(${config.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function cargarPrioridades() {
+    if (!configuracionActiva) return;
+    
+    Promise.all([
+        fetch(`/api/admin/prioridades/partidos?config_id=${configuracionActiva.id}`).then(r => r.json()),
+        fetch(`/api/admin/prioridades/candidatos?config_id=${configuracionActiva.id}`).then(r => r.json()),
+        fetch(`/api/admin/prioridades/procesos?config_id=${configuracionActiva.id}`).then(r => r.json())
+    ]).then(([partidosData, candidatosData, procesosData]) => {
+        prioridadesPartidos = partidosData.data || [];
+        prioridadesCandidatos = candidatosData.data || [];
+        prioridadesProcesos = procesosData.data || [];
+        
+        mostrarPrioridadesPartidos();
+        mostrarPrioridadesCandidatos();
+        mostrarPrioridadesProcesos();
+        cargarResumen();
+        
+    }).catch(error => {
+        console.error('Error cargando prioridades:', error);
+        mostrarNotificacion('Error cargando prioridades', 'error');
+    });
+}
+
+function mostrarPrioridadesPartidos() {
+    const container = document.getElementById('partidos-grid');
+    
+    // Crear mapa de prioridades existentes
+    const prioridadesMap = {};
+    prioridadesPartidos.forEach(p => {
+        prioridadesMap[p.partido_id] = p.prioridad;
+    });
+    
+    container.innerHTML = partidos.map(partido => {
+        const prioridadActual = prioridadesMap[partido.id] || 2; // Default: Media
+        
+        return `
+            <div class="card priority-card priority-${getPriorityClass(prioridadActual)}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="card-title">${partido.nombre}</h6>
+                            <span class="badge" style="background-color: ${partido.color_principal}">${partido.sigla}</span>
+                        </div>
+                        <select class="form-select form-select-sm priority-selector" 
+                                data-partido-id="${partido.id}" 
+                                onchange="cambiarPrioridadPartido(${partido.id}, this.value)">
+                            <option value="1" ${prioridadActual === 1 ? 'selected' : ''}>Alta</option>
+                            <option value="2" ${prioridadActual === 2 ? 'selected' : ''}>Media</option>
+                            <option value="3" ${prioridadActual === 3 ? 'selected' : ''}>Baja</option>
+                        </select>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-users me-1"></i>
+                        ${candidatos.filter(c => c.partido_id === partido.id).length} candidatos
+                    </small>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function mostrarPrioridadesCandidatos() {
+    const container = document.getElementById('candidatos-grid');
+    
+    // Crear mapa de prioridades existentes
+    const prioridadesMap = {};
+    prioridadesCandidatos.forEach(p => {
+        prioridadesMap[p.candidato_id] = p.prioridad;
+    });
+    
+    // Cargar filtro de partidos
+    const filtroPartido = document.getElementById('filtro-partido-candidatos');
+    filtroPartido.innerHTML = '<option value="">Todos los partidos</option>' + 
+        partidos.map(p => `<option value="${p.id}">${p.nombre} (${p.sigla})</option>`).join('');
+    
+    container.innerHTML = candidatos.map(candidato => {
+        const prioridadActual = prioridadesMap[candidato.id] || 2; // Default: Media
+        
+        return `
+            <div class="card priority-card priority-${getPriorityClass(prioridadActual)}" 
+                 data-partido-id="${candidato.partido_id || ''}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="card-title">${candidato.nombre_completo}</h6>
+                            <div>
+                                <span class="badge bg-secondary">${candidato.partido_sigla || 'Sin partido'}</span>
+                                <span class="badge bg-info">${candidato.cargo_nombre || 'Sin cargo'}</span>
+                            </div>
+                        </div>
+                        <select class="form-select form-select-sm priority-selector" 
+                                data-candidato-id="${candidato.id}" 
+                                onchange="cambiarPrioridadCandidato(${candidato.id}, this.value)">
+                            <option value="1" ${prioridadActual === 1 ? 'selected' : ''}>Alta</option>
+                            <option value="2" ${prioridadActual === 2 ? 'selected' : ''}>Media</option>
+                            <option value="3" ${prioridadActual === 3 ? 'selected' : ''}>Baja</option>
+                        </select>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-id-card me-1"></i>CC: ${candidato.cedula}
+                        ${candidato.municipio_nombre ? ` | ${candidato.municipio_nombre}` : ''}
+                    </small>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function mostrarPrioridadesProcesos() {
+    // Obtener procesos electorales
+    fetch('/api/admin/prioridades/procesos').then(r => r.json()).then(data => {
+        procesos = data.data || [];
+        
+        const container = document.getElementById('procesos-grid');
+        
+        // Crear mapa de prioridades existentes
+        const prioridadesMap = {};
+        prioridadesProcesos.forEach(p => {
+            prioridadesMap[p.proceso_id] = p.prioridad;
+        });
+        
+        container.innerHTML = procesos.map(proceso => {
+            const prioridadActual = prioridadesMap[proceso.proceso_id] || 1; // Default: Alta para procesos
+            
+            return `
+                <div class="card priority-card priority-${getPriorityClass(prioridadActual)}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="card-title">${proceso.proceso_nombre}</h6>
+                                <div>
+                                    <span class="badge bg-primary">${proceso.proceso_tipo}</span>
+                                    <span class="badge bg-success">${proceso.proceso_estado}</span>
+                                </div>
+                            </div>
+                            <select class="form-select form-select-sm priority-selector" 
+                                    data-proceso-id="${proceso.proceso_id}" 
+                                    onchange="cambiarPrioridadProceso(${proceso.proceso_id}, this.value)">
+                                <option value="1" ${prioridadActual === 1 ? 'selected' : ''}>Alta</option>
+                                <option value="2" ${prioridadActual === 2 ? 'selected' : ''}>Media</option>
+                                <option value="3" ${prioridadActual === 3 ? 'selected' : ''}>Baja</option>
+                            </select>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            ${proceso.fecha_eleccion ? new Date(proceso.fecha_eleccion).toLocaleDateString() : 'Sin fecha'}
+                        </small>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    });
+}
+
+function cargarResumen() {
+    if (!configuracionActiva) return;
+    
+    fetch(`/api/admin/prioridades/resumen?config_id=${configuracionActiva.id}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                mostrarResumen(data.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error cargando resumen:', error);
+        });
+}
+
+function mostrarResumen(resumen) {
+    const container = document.getElementById('resumen-content');
+    
+    container.innerHTML = `
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Partidos</h5>
+                        <div class="mb-2">
+                            <span class="badge priority-badge-high me-1">${resumen.partidos.alta} Alta</span>
+                            <span class="badge priority-badge-medium me-1">${resumen.partidos.media} Media</span>
+                            <span class="badge priority-badge-low">${resumen.partidos.baja} Baja</span>
+                        </div>
+                        <h4 class="text-primary">${resumen.partidos.total}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Candidatos</h5>
+                        <div class="mb-2">
+                            <span class="badge priority-badge-high me-1">${resumen.candidatos.alta} Alta</span>
+                            <span class="badge priority-badge-medium me-1">${resumen.candidatos.media} Media</span>
+                            <span class="badge priority-badge-low">${resumen.candidatos.baja} Baja</span>
+                        </div>
+                        <h4 class="text-info">${resumen.candidatos.total}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Procesos</h5>
+                        <div class="mb-2">
+                            <span class="badge priority-badge-high me-1">${resumen.procesos.alta} Alta</span>
+                            <span class="badge priority-badge-medium me-1">${resumen.procesos.media} Media</span>
+                            <span class="badge priority-badge-low">${resumen.procesos.baja} Baja</span>
+                        </div>
+                        <h4 class="text-warning">${resumen.procesos.total}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Configuración</h5>
+                        <p class="card-text">${configuracionActiva.nombre}</p>
+                        <span class="badge bg-success">ACTIVA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Entidades de Alta Prioridad</h6>
+                    </div>
+                    <div class="card-body" id="alta-prioridad-content">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Cargar entidades de alta prioridad
+    fetch(`/api/admin/prioridades/alta-prioridad?config_id=${configuracionActiva.id}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                mostrarAltaPrioridad(data.data);
+            }
+        });
+}
+
+function mostrarAltaPrioridad(altaPrioridad) {
+    const container = document.getElementById('alta-prioridad-content');
+    
+    let html = '<div class="row">';
+    
+    // Partidos de alta prioridad
+    if (altaPrioridad.partidos.length > 0) {
+        html += `
+            <div class="col-md-4">
+                <h6 class="text-danger">Partidos Prioritarios</h6>
+                <ul class="list-group list-group-flush">
+                    ${altaPrioridad.partidos.map(p => `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${p.nombre}
+                            <span class="badge" style="background-color: ${p.color_principal}">${p.sigla}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Candidatos de alta prioridad
+    if (altaPrioridad.candidatos.length > 0) {
+        html += `
+            <div class="col-md-4">
+                <h6 class="text-danger">Candidatos Prioritarios</h6>
+                <ul class="list-group list-group-flush">
+                    ${altaPrioridad.candidatos.slice(0, 5).map(c => `
+                        <li class="list-group-item">
+                            <div class="fw-bold">${c.nombre_completo}</div>
+                            <small class="text-muted">${c.partido_sigla} - ${c.cargo_nombre}</small>
+                        </li>
+                    `).join('')}
+                    ${altaPrioridad.candidatos.length > 5 ? `
+                        <li class="list-group-item text-center text-muted">
+                            ... y ${altaPrioridad.candidatos.length - 5} más
+                        </li>
+                    ` : ''}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Procesos de alta prioridad
+    if (altaPrioridad.procesos.length > 0) {
+        html += `
+            <div class="col-md-4">
+                <h6 class="text-danger">Procesos Prioritarios</h6>
+                <ul class="list-group list-group-flush">
+                    ${altaPrioridad.procesos.map(p => `
+                        <li class="list-group-item">
+                            <div class="fw-bold">${p.nombre}</div>
+                            <small class="text-muted">${p.tipo} - ${new Date(p.fecha_eleccion).toLocaleDateString()}</small>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    
+    if (altaPrioridad.partidos.length === 0 && altaPrioridad.candidatos.length === 0 && altaPrioridad.procesos.length === 0) {
+        html = '<div class="text-center text-muted">No hay entidades configuradas con alta prioridad</div>';
+    }
+    
+    container.innerHTML = html;
+}
+
+// Funciones de cambio de prioridad
+function cambiarPrioridadPartido(partidoId, prioridad) {
+    // Actualizar visualmente
+    const card = document.querySelector(`[data-partido-id="${partidoId}"]`).closest('.priority-card');
+    card.className = card.className.replace(/priority-(high|medium|low)/, `priority-${getPriorityClass(parseInt(prioridad))}`);
+}
+
+function cambiarPrioridadCandidato(candidatoId, prioridad) {
+    // Actualizar visualmente
+    const card = document.querySelector(`[data-candidato-id="${candidatoId}"]`).closest('.priority-card');
+    card.className = card.className.replace(/priority-(high|medium|low)/, `priority-${getPriorityClass(parseInt(prioridad))}`);
+}
+
+function cambiarPrioridadProceso(procesoId, prioridad) {
+    // Actualizar visualmente
+    const card = document.querySelector(`[data-proceso-id="${procesoId}"]`).closest('.priority-card');
+    card.className = card.className.replace(/priority-(high|medium|low)/, `priority-${getPriorityClass(parseInt(prioridad))}`);
+}
+
+// Funciones de guardado
+function guardarPrioridadesPartidos() {
+    if (!configuracionActiva) {
+        mostrarNotificacion('No hay configuración activa', 'error');
+        return;
+    }
+    
+    const priorities = [];
+    document.querySelectorAll('[data-partido-id]').forEach(select => {
+        priorities.push({
+            partido_id: parseInt(select.dataset.partidoId),
+            prioridad: parseInt(select.value)
+        });
+    });
+    
+    fetch('/api/admin/prioridades/partidos/masivo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            config_id: configuracionActiva.id,
+            priorities: priorities
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            mostrarNotificacion('Prioridades de partidos guardadas exitosamente', 'success');
+            cargarResumen();
+        } else {
+            mostrarNotificacion('Error guardando prioridades: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error guardando prioridades', 'error');
+    });
+}
+
+function guardarPrioridadesCandidatos() {
+    if (!configuracionActiva) {
+        mostrarNotificacion('No hay configuración activa', 'error');
+        return;
+    }
+    
+    const priorities = [];
+    document.querySelectorAll('[data-candidato-id]').forEach(select => {
+        priorities.push({
+            config_id: configuracionActiva.id,
+            candidato_id: parseInt(select.dataset.candidatoId),
+            prioridad: parseInt(select.value)
+        });
+    });
+    
+    // Guardar uno por uno (simplificado para demo)
+    Promise.all(priorities.map(priority => 
+        fetch('/api/admin/prioridades/candidatos/establecer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(priority)
+        })
+    ))
+    .then(() => {
+        mostrarNotificacion('Prioridades de candidatos guardadas exitosamente', 'success');
+        cargarResumen();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error guardando prioridades', 'error');
+    });
+}
+
+function guardarPrioridadesProcesos() {
+    if (!configuracionActiva) {
+        mostrarNotificacion('No hay configuración activa', 'error');
+        return;
+    }
+    
+    const priorities = [];
+    document.querySelectorAll('[data-proceso-id]').forEach(select => {
+        priorities.push({
+            config_id: configuracionActiva.id,
+            proceso_id: parseInt(select.dataset.procesoId),
+            prioridad: parseInt(select.value)
+        });
+    });
+    
+    // Guardar uno por uno (simplificado para demo)
+    Promise.all(priorities.map(priority => 
+        fetch('/api/admin/prioridades/procesos/establecer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(priority)
+        })
+    ))
+    .then(() => {
+        mostrarNotificacion('Prioridades de procesos guardadas exitosamente', 'success');
+        cargarResumen();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error guardando prioridades', 'error');
+    });
+}
+
+// Funciones auxiliares
+function getPriorityClass(prioridad) {
+    return {1: 'high', 2: 'medium', 3: 'low'}[prioridad] || 'medium';
+}
+
+function filtrarCandidatos() {
+    const partidoId = document.getElementById('filtro-partido-candidatos').value;
+    const cards = document.querySelectorAll('#candidatos-grid .priority-card');
+    
+    cards.forEach(card => {
+        if (!partidoId || card.dataset.partidoId === partidoId) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function nuevaConfiguracion() {
+    document.getElementById('config-form').reset();
+    const modal = new bootstrap.Modal(document.getElementById('configModal'));
+    modal.show();
+}
+
+function crearConfiguracion() {
+    const formData = {
+        nombre: document.getElementById('config-nombre').value,
+        descripcion: document.getElementById('config-descripcion').value,
+        fecha_inicio: document.getElementById('config-fecha-inicio').value,
+        fecha_fin: document.getElementById('config-fecha-fin').value,
+        activa: document.getElementById('config-activa').checked
+    };
+    
+    if (!formData.nombre) {
+        mostrarNotificacion('El nombre es requerido', 'error');
+        return;
+    }
+    
+    fetch('/api/admin/prioridades/configuraciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            mostrarNotificacion('Configuración creada exitosamente', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('configModal')).hide();
+            cargarDatosIniciales();
+        } else {
+            mostrarNotificacion('Error: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error creando configuración', 'error');
+    });
+}
+
+function activarConfiguracion(configId) {
+    fetch(`/api/admin/prioridades/configuraciones/${configId}/activar`, {
+        method: 'POST'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            mostrarNotificacion('Configuración activada exitosamente', 'success');
+            cargarDatosIniciales();
+        } else {
+            mostrarNotificacion('Error: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error activando configuración', 'error');
+    });
+}
+
+function mostrarMensajeNoConfiguracion() {
+    document.getElementById('partidos-grid').innerHTML = `
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h5>No hay configuración activa</h5>
+            <p class="text-muted">Crea o activa una configuración de prioridades para comenzar</p>
+        </div>
+    `;
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

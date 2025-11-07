@@ -1,19 +1,32 @@
 """
-Módulo Dashboard - Servicios
-Lógica de negocio para dashboard y widgets
+Servicio Principal de Dashboard
+Sistema de Recolección Inicial de Votaciones - Caquetá
 """
 
+import sqlite3
 import logging
-from datetime import datetime, timedelta
 import json
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
 
-logger = logging.getLogger(__name__)
+from ..models import (
+    DashboardOverview, QuickStats, SystemStatus, RecentActivity,
+    DashboardConfig, SystemAlert
+)
 
 class DashboardService:
-    """Servicio para dashboard y widgets"""
+    """Servicio principal para dashboard y widgets"""
     
-    def __init__(self, db_manager):
-        self.db = db_manager
+    def __init__(self, db_path: str = 'electoral_system.db'):
+        self.db_path = db_path
+        self.logger = logging.getLogger(__name__)
+        
+    def get_connection(self) -> sqlite3.Connection:
+        """Obtener conexión a la base de datos"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        return conn
     
     def get_dashboard_overview(self, user_id):
         """Obtener vista general del dashboard"""

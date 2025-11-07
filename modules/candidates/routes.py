@@ -1,274 +1,305 @@
 """
-Módulo Candidatos - Rutas y Endpoints
-Gestión de candidatos, partidos políticos y coaliciones
+Rutas del módulo de candidatos
+Sistema de Recolección Inicial de Votaciones - Caquetá
 """
 
-from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from .services import CandidateService
-from core.permissions import Permission
+from flask import Blueprint, request, jsonify
+from werkzeug.utils import secure_filename
+import os
+import json
+import logging
+from datetime import datetime
 
-candidates_bp = Blueprint('candidates', __name__)
+from .services import CandidateManagementService, CandidateReportingService, E14CandidateIntegrationService
+from .models import PoliticalPartyData, CoalitionData, CandidateData
 
-@candidates_bp.route('/candidates', methods=['GET'])
-@jwt_required()
-def get_candidates():
-    """Obtener candidatos"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = CandidateService(current_app.db_manager)
-        
-        # Parámetros de consulta
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
-        search = request.args.get('search', '')
-        election_type_id = request.args.get('election_type_id', type=int)
-        party_id = request.args.get('party_id', type=int)
-        cargo = request.args.get('cargo', '')
-        
-        result = service.get_candidates(page, per_page, search, election_type_id, party_id, cargo)
-        return jsonify(result)
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-@candidates_bp.route('/candidates', methods=['POST'])
-@jwt_required()
-def create_candidate():
-    """Crear nuevo candidato"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_REGISTER.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-        
-        service = CandidateService(current_app.db_manager)
-        candidate_id = service.create_candidate(data, user_id)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Candidate created successfully',
-            'candidate_id': candidate_id
-        }), 201
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+# Crear blueprint
+candidate_bp = Blueprint('candidates', __name__, url_prefix='/api/candidates')
 
-@candidates_bp.route('/candidates/<int:candidate_id>', methods=['GET'])
-@jwt_required()
-def get_candidate(candidate_id):
-    """Obtener candidato específico"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = CandidateService(current_app.db_manager)
-        candidate = service.get_candidate_by_id(candidate_id)
-        
-        if not candidate:
-            return jsonify({'error': 'Candidate not found'}), 404
-        
-        return jsonify({'success': True, 'data': candidate})
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+# Instancias de servicios
+candidate_service = CandidateManagementService()
+reporting_service = CandidateReportingService()
+e14_service = E14CandidateIntegrationService()
 
-@candidates_bp.route('/candidates/<int:candidate_id>', methods=['PUT'])
-@jwt_required()
-def update_candidate(candidate_id):
-    """Actualizar candidato"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_MANAGE.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-        
-        service = CandidateService(current_app.db_manager)
-        updated = service.update_candidate(candidate_id, data, user_id)
-        
-        if not updated:
-            return jsonify({'error': 'Candidate not found'}), 404
-        
-        return jsonify({
-            'success': True,
-            'message': 'Candidate updated successfully'
-        })
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+# ==================== ENDPOINTS DE PARTIDOS POLÍTICOS ====================
 
-@candidates_bp.route('/parties', methods=['GET'])
-@jwt_required()
+@candidate_bp.route('/parties', methods=['GET'])
 def get_political_parties():
-    """Obtener partidos políticos"""
+    """Obtener lista de partidos políticos"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = CandidateService(current_app.db_manager)
-        parties = service.get_political_parties()
-        
-        return jsonify({'success': True, 'data': parties})
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
-
-@candidates_bp.route('/parties', methods=['POST'])
-@jwt_required()
-def create_political_party():
-    """Crear nuevo partido político"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_MANAGE.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-        
-        service = CandidateService(current_app.db_manager)
-        party_id = service.create_political_party(data, user_id)
+        active_only = request.args.get('active_only', 'true').lower() == 'true'
+        parties = candidate_service.get_political_parties(active_only=active_only)
         
         return jsonify({
             'success': True,
-            'message': 'Political party created successfully',
-            'party_id': party_id
-        }), 201
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
-
-@candidates_bp.route('/coalitions', methods=['GET'])
-@jwt_required()
-def get_coalitions():
-    """Obtener coaliciones"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = CandidateService(current_app.db_manager)
-        coalitions = service.get_coalitions()
-        
-        return jsonify({'success': True, 'data': coalitions})
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
-
-@candidates_bp.route('/coalitions', methods=['POST'])
-@jwt_required()
-def create_coalition():
-    """Crear nueva coalición"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_MANAGE.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-        
-        service = CandidateService(current_app.db_manager)
-        coalition_id = service.create_coalition(data, user_id)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Coalition created successfully',
-            'coalition_id': coalition_id
-        }), 201
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
-
-@candidates_bp.route('/results', methods=['GET'])
-@jwt_required()
-def get_candidate_results():
-    """Obtener resultados de candidatos"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = CandidateService(current_app.db_manager)
-        
-        election_type_id = request.args.get('election_type_id', type=int)
-        candidate_id = request.args.get('candidate_id', type=int)
-        party_id = request.args.get('party_id', type=int)
-        
-        results = service.get_candidate_results(election_type_id, candidate_id, party_id)
-        return jsonify({'success': True, 'data': results})
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
-
-@candidates_bp.route('/results/calculate', methods=['POST'])
-@jwt_required()
-def calculate_results():
-    """Calcular resultados de candidatos"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_MANAGE.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        data = request.get_json()
-        election_type_id = data.get('election_type_id') if data else None
-        
-        service = CandidateService(current_app.db_manager)
-        success = service.calculate_candidate_results(election_type_id, user_id)
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Results calculated successfully'
-            })
-        else:
-            return jsonify({'error': 'Failed to calculate results'}), 400
-        
-    except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
-
-@candidates_bp.route('/validate', methods=['POST'])
-@jwt_required()
-def validate_candidate_data():
-    """Validar datos de candidato"""
-    try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.CANDIDATES_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-        
-        service = CandidateService(current_app.db_manager)
-        validation_result = service.validate_candidate_data(data)
-        
-        return jsonify({
-            'success': True,
-            'validation': validation_result
+            'data': parties,
+            'total': len(parties)
         })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo partidos políticos: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+@candidate_bp.route('/parties', methods=['POST'])
+def create_political_party():
+    """Crear un nuevo partido político"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Datos JSON requeridos'
+            }), 400
+        
+        # Validar campos requeridos
+        required_fields = ['nombre_oficial', 'siglas']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo requerido: {field}'
+                }), 400
+        
+        # Crear objeto de datos del partido
+        party_data = PoliticalPartyData(
+            nombre_oficial=data['nombre_oficial'],
+            siglas=data['siglas'].upper(),
+            color_representativo=data.get('color_representativo'),
+            logo_url=data.get('logo_url'),
+            descripcion=data.get('descripcion'),
+            fundacion_year=data.get('fundacion_year'),
+            ideologia=data.get('ideologia'),
+            activo=data.get('activo', True),
+            reconocido_oficialmente=data.get('reconocido_oficialmente', True)
+        )
+        
+        # Obtener usuario actual (simulado por ahora)
+        created_by = data.get('created_by', 1)  # TODO: Obtener del token de sesión
+        
+        result = candidate_service.create_political_party(party_data, created_by)
+        
+        if result['success']:
+            return jsonify(result), 201
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        logger.error(f"Error creando partido político: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINTS DE CANDIDATOS ====================
+
+@candidate_bp.route('/', methods=['GET'])
+def get_candidates():
+    """Obtener lista de candidatos con filtros opcionales"""
+    try:
+        # Obtener parámetros de filtro
+        election_type_id = request.args.get('election_type_id', type=int)
+        party_id = request.args.get('party_id', type=int)
+        coalition_id = request.args.get('coalition_id', type=int)
+        active_only = request.args.get('active_only', 'true').lower() == 'true'
+        
+        candidates = candidate_service.get_candidates(
+            election_type_id=election_type_id,
+            party_id=party_id,
+            coalition_id=coalition_id,
+            active_only=active_only
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': candidates,
+            'total': len(candidates)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo candidatos: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+@candidate_bp.route('/', methods=['POST'])
+def create_candidate():
+    """Crear un nuevo candidato"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Datos JSON requeridos'
+            }), 400
+        
+        # Validar campos requeridos
+        required_fields = ['nombre_completo', 'cedula', 'numero_tarjeton', 
+                          'cargo_aspirado', 'election_type_id', 'circunscripcion']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo requerido: {field}'
+                }), 400
+        
+        # Crear objeto de datos del candidato
+        candidate_data = CandidateData(
+            nombre_completo=data['nombre_completo'],
+            cedula=data['cedula'],
+            numero_tarjeton=int(data['numero_tarjeton']),
+            cargo_aspirado=data['cargo_aspirado'],
+            election_type_id=int(data['election_type_id']),
+            circunscripcion=data['circunscripcion'],
+            party_id=data.get('party_id'),
+            coalition_id=data.get('coalition_id'),
+            es_independiente=data.get('es_independiente', False),
+            foto_url=data.get('foto_url'),
+            biografia=data.get('biografia'),
+            propuestas=data.get('propuestas'),
+            experiencia=data.get('experiencia'),
+            activo=data.get('activo', True),
+            habilitado_oficialmente=data.get('habilitado_oficialmente', True)
+        )
+        
+        # Obtener usuario actual (simulado por ahora)
+        created_by = data.get('created_by', 1)  # TODO: Obtener del token de sesión
+        
+        result = candidate_service.create_candidate(candidate_data, created_by)
+        
+        if result['success']:
+            return jsonify(result), 201
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        logger.error(f"Error creando candidato: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINTS DE BÚSQUEDA Y REPORTES ====================
+
+@candidate_bp.route('/search', methods=['GET'])
+def search_candidates():
+    """Búsqueda avanzada de candidatos"""
+    try:
+        search_params = {
+            'nombre': request.args.get('nombre'),
+            'cedula': request.args.get('cedula'),
+            'cargo': request.args.get('cargo'),
+            'election_type_id': request.args.get('election_type_id', type=int),
+            'party_id': request.args.get('party_id', type=int),
+            'coalition_id': request.args.get('coalition_id', type=int),
+            'independientes_only': request.args.get('independientes_only', 'false').lower() == 'true',
+            'circunscripcion': request.args.get('circunscripcion'),
+            'habilitado': request.args.get('habilitado', type=bool),
+            'limit': request.args.get('limit', type=int)
+        }
+        
+        # Filtrar parámetros None
+        search_params = {k: v for k, v in search_params.items() if v is not None}
+        
+        candidates = candidate_service.search_candidates(search_params)
+        
+        return jsonify({
+            'success': True,
+            'data': candidates,
+            'total': len(candidates),
+            'search_params': search_params
+        })
+        
+    except Exception as e:
+        logger.error(f"Error en búsqueda de candidatos: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+@candidate_bp.route('/stats', methods=['GET'])
+def get_candidate_stats():
+    """Obtener estadísticas generales de candidatos"""
+    try:
+        # Obtener todos los candidatos activos
+        all_candidates = candidate_service.get_candidates(active_only=True)
+        
+        # Calcular estadísticas
+        stats = {
+            'total_candidates': len(all_candidates),
+            'by_election_type': {},
+            'by_party': {},
+            'by_coalition': {},
+            'independents': 0,
+            'enabled': 0,
+            'disabled': 0
+        }
+        
+        for candidate in all_candidates:
+            # Por tipo de elección
+            election_type = candidate.get('election_type_name', 'Sin tipo')
+            stats['by_election_type'][election_type] = stats['by_election_type'].get(election_type, 0) + 1
+            
+            # Por partido
+            if candidate.get('party_name'):
+                party_name = candidate['party_name']
+                stats['by_party'][party_name] = stats['by_party'].get(party_name, 0) + 1
+            
+            # Por coalición
+            if candidate.get('coalition_name'):
+                coalition_name = candidate['coalition_name']
+                stats['by_coalition'][coalition_name] = stats['by_coalition'].get(coalition_name, 0) + 1
+            
+            # Independientes
+            if candidate.get('es_independiente'):
+                stats['independents'] += 1
+            
+            # Habilitados/Deshabilitados
+            if candidate.get('habilitado_oficialmente'):
+                stats['enabled'] += 1
+            else:
+                stats['disabled'] += 1
+        
+        return jsonify({
+            'success': True,
+            'data': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo estadísticas: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== MANEJO DE ERRORES ====================
+
+@candidate_bp.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'success': False,
+        'error': 'Endpoint no encontrado'
+    }), 404
+
+@candidate_bp.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({
+        'success': False,
+        'error': 'Método no permitido'
+    }), 405
+
+@candidate_bp.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        'success': False,
+        'error': 'Error interno del servidor'
+    }), 500

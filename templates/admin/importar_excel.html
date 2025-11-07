@@ -1,0 +1,668 @@
+{% extends "base.html" %}
+{% block title %}Importar desde Excel - Administrador{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/super_admin.css') }}" rel="stylesheet">
+<style>
+.import-card {
+    border-left: 4px solid #28a745;
+    transition: all 0.3s ease;
+}
+.import-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+.step {
+    flex: 1;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0 0.5rem;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+}
+.step.active {
+    background: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+}
+.step.completed {
+    background: #e8f5e8;
+    border-color: #4caf50;
+    color: #2e7d32;
+}
+.validation-result {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.validation-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+.validation-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+.import-results {
+    margin-top: 2rem;
+}
+.result-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+.progress-container {
+    margin: 1rem 0;
+}
+.file-drop-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.file-drop-zone:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+}
+.file-drop-zone.dragover {
+    border-color: #28a745;
+    background: #e8f5e8;
+}
+</style>
+{% endblock %}
+{% block body_class %}role-super-admin{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Administración - Importar Excel{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="/dashboard/super_admin">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/candidatos">
+        <i class="fas fa-users me-2"></i>Candidatos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/partidos">
+        <i class="fas fa-flag me-2"></i>Partidos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/admin/importar-excel">
+        <i class="fas fa-file-excel me-2"></i>Importar Excel
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-file-excel me-2"></i>Importar Datos desde Excel</h2>
+                    <p class="text-muted">Carga masiva de partidos, candidatos, coaliciones y tipos de elección</p>
+                </div>
+                <a href="/plantilla_datos_electorales.xlsx" class="btn btn-success btn-lg" download>
+                    <i class="fas fa-download me-2"></i>Descargar Plantilla
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de pasos -->
+    <div class="step-indicator">
+        <div class="step active" id="step-1">
+            <i class="fas fa-file-upload fa-2x mb-2"></i>
+            <h6>1. Seleccionar Archivo</h6>
+            <small>Subir archivo Excel</small>
+        </div>
+        <div class="step" id="step-2">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <h6>2. Validar Estructura</h6>
+            <small>Verificar formato</small>
+        </div>
+        <div class="step" id="step-3">
+            <i class="fas fa-cogs fa-2x mb-2"></i>
+            <h6>3. Importar Datos</h6>
+            <small>Procesar información</small>
+        </div>
+        <div class="step" id="step-4">
+            <i class="fas fa-chart-bar fa-2x mb-2"></i>
+            <h6>4. Resultados</h6>
+            <small>Ver resumen</small>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card import-card">
+                <div class="card-body">
+                    <!-- Paso 1: Selección de archivo -->
+                    <div id="file-selection-section">
+                        <h5 class="card-title">
+                            <i class="fas fa-file-upload me-2"></i>Seleccionar Archivo Excel
+                        </h5>
+                        
+                        <div class="file-drop-zone" id="file-drop-zone" onclick="document.getElementById('excel-file').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <h5>Arrastra tu archivo Excel aquí</h5>
+                            <p class="text-muted">o haz clic para seleccionar</p>
+                            <small class="text-muted">Formatos soportados: .xlsx, .xls</small>
+                        </div>
+                        
+                        <input type="file" id="excel-file" accept=".xlsx,.xls" style="display: none;">
+                        
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Instrucciones:</h6>
+                                <ul class="mb-0">
+                                    <li>Descarga la plantilla Excel usando el botón superior</li>
+                                    <li>Completa los datos en las hojas correspondientes</li>
+                                    <li>Mantén la estructura de columnas tal como está en la plantilla</li>
+                                    <li>El sistema importará en orden: Partidos → Tipos de Elección → Coaliciones → Candidatos</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Validación -->
+                    <div id="validation-section" style="display: none;">
+                        <h5 class="card-title">
+                            <i class="fas fa-check-circle me-2"></i>Validación de Estructura
+                        </h5>
+                        
+                        <div id="validation-results"></div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-primary" id="proceed-import-btn" onclick="proceedToImport()" disabled>
+                                <i class="fas fa-arrow-right me-2"></i>Proceder con Importación
+                            </button>
+                            <button class="btn btn-secondary ms-2" onclick="resetProcess()">
+                                <i class="fas fa-undo me-2"></i>Seleccionar Otro Archivo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Paso 3: Importación -->
+                    <div id="import-section" style="display: none;">
+                        <h5 class="card-title">
+                            <i class="fas fa-cogs me-2"></i>Importando Datos
+                        </h5>
+                        
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="import-progress" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <span id="import-status">Iniciando importación...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 4: Resultados -->
+                    <div id="results-section" style="display: none;">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-bar me-2"></i>Resultados de Importación
+                        </h5>
+                        
+                        <div id="import-results"></div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-success" onclick="goToCandidates()">
+                                <i class="fas fa-users me-2"></i>Ver Candidatos
+                            </button>
+                            <button class="btn btn-primary ms-2" onclick="resetProcess()">
+                                <i class="fas fa-plus me-2"></i>Importar Otro Archivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+let selectedFile = null;
+let validationResults = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de importación Excel cargada');
+    setupFileHandlers();
+});
+
+function setupFileHandlers() {
+    const fileInput = document.getElementById('excel-file');
+    const dropZone = document.getElementById('file-drop-zone');
+    
+    // Manejar selección de archivo
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileSelection(e.target.files[0]);
+        }
+    });
+    
+    // Manejar drag & drop
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length > 0) {
+            handleFileSelection(e.dataTransfer.files[0]);
+        }
+    });
+}
+
+function handleFileSelection(file) {
+    // Validar tipo de archivo
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        mostrarNotificacion('Por favor selecciona un archivo Excel (.xlsx o .xls)', 'error');
+        return;
+    }
+    
+    selectedFile = file;
+    
+    // Actualizar UI
+    const dropZone = document.getElementById('file-drop-zone');
+    dropZone.innerHTML = `
+        <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+        <h5 class="text-success">Archivo seleccionado</h5>
+        <p class="text-muted">${file.name}</p>
+        <small class="text-muted">Tamaño: ${formatFileSize(file.size)}</small>
+    `;
+    
+    // Proceder a validación automáticamente
+    setTimeout(() => {
+        validateFile();
+    }, 1000);
+}
+
+function validateFile() {
+    if (!selectedFile) {
+        mostrarNotificacion('No hay archivo seleccionado', 'error');
+        return;
+    }
+    
+    // Cambiar a paso 2
+    setActiveStep(2);
+    showSection('validation-section');
+    
+    // Mostrar loading
+    document.getElementById('validation-results').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Validando...</span>
+            </div>
+            <p class="mt-2">Validando estructura del archivo...</p>
+        </div>
+    `;
+    
+    // Crear FormData
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    
+    // Enviar para validación
+    fetch('/api/admin/import/excel/validate', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            validationResults = result.validation;
+            displayValidationResults(result.validation);
+        } else {
+            displayValidationError(result.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        displayValidationError('Error validando archivo: ' + error.message);
+    });
+}
+
+function displayValidationResults(validation) {
+    const container = document.getElementById('validation-results');
+    
+    if (validation.valid) {
+        container.innerHTML = `
+            <div class="validation-result validation-success">
+                <h6><i class="fas fa-check-circle me-2"></i>Validación Exitosa</h6>
+                <p>El archivo tiene la estructura correcta y puede ser importado.</p>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>Hojas encontradas:</h6>
+                        <ul>
+                            ${validation.sheets_found.map(sheet => `<li><i class="fas fa-check text-success me-1"></i>${sheet}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Validación de columnas:</h6>
+                        ${Object.entries(validation.column_validation).map(([sheet, info]) => `
+                            <div class="mb-2">
+                                <strong>${sheet}:</strong>
+                                ${info.valid ? 
+                                    '<span class="badge bg-success ms-1">✓ Válido</span>' : 
+                                    '<span class="badge bg-danger ms-1">✗ Error</span>'
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('proceed-import-btn').disabled = false;
+    } else {
+        container.innerHTML = `
+            <div class="validation-result validation-error">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Errores de Validación</h6>
+                <p>El archivo tiene errores que deben corregirse antes de importar:</p>
+                
+                <ul>
+                    ${validation.errors.map(error => `<li>${error}</li>`).join('')}
+                </ul>
+                
+                ${validation.sheets_missing.length > 0 ? `
+                    <div class="mt-3">
+                        <h6>Hojas faltantes:</h6>
+                        <ul>
+                            ${validation.sheets_missing.map(sheet => `<li>${sheet}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        document.getElementById('proceed-import-btn').disabled = true;
+    }
+}
+
+function displayValidationError(error) {
+    document.getElementById('validation-results').innerHTML = `
+        <div class="validation-result validation-error">
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Error de Validación</h6>
+            <p>${error}</p>
+        </div>
+    `;
+    
+    document.getElementById('proceed-import-btn').disabled = true;
+}
+
+function proceedToImport() {
+    if (!selectedFile || !validationResults || !validationResults.valid) {
+        mostrarNotificacion('No se puede proceder con la importación', 'error');
+        return;
+    }
+    
+    // Cambiar a paso 3
+    setActiveStep(3);
+    showSection('import-section');
+    
+    // Iniciar importación
+    startImport();
+}
+
+function startImport() {
+    const progressBar = document.getElementById('import-progress');
+    const statusText = document.getElementById('import-status');
+    
+    // Simular progreso
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        
+        progressBar.style.width = progress + '%';
+        
+        if (progress < 25) {
+            statusText.textContent = 'Importando partidos políticos...';
+        } else if (progress < 50) {
+            statusText.textContent = 'Importando tipos de elección...';
+        } else if (progress < 75) {
+            statusText.textContent = 'Importando coaliciones...';
+        } else {
+            statusText.textContent = 'Importando candidatos...';
+        }
+    }, 500);
+    
+    // Crear FormData
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    
+    // Enviar para importación
+    fetch('/api/admin/import/excel/complete', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        statusText.textContent = 'Importación completada';
+        
+        setTimeout(() => {
+            if (result.success) {
+                displayImportResults(result.results);
+            } else {
+                displayImportError(result.error);
+            }
+        }, 1000);
+    })
+    .catch(error => {
+        clearInterval(progressInterval);
+        console.error('Error:', error);
+        displayImportError('Error durante la importación: ' + error.message);
+    });
+}
+
+function displayImportResults(results) {
+    setActiveStep(4);
+    showSection('results-section');
+    
+    const container = document.getElementById('import-results');
+    
+    let html = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="result-section">
+                    <h6><i class="fas fa-chart-pie me-2"></i>Resumen General</h6>
+                    <p><strong>Total procesado:</strong> ${results.total_processed} registros</p>
+                    <p><strong>Total errores:</strong> ${results.total_errors} errores</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="result-section">
+                    <h6><i class="fas fa-clock me-2"></i>Estado</h6>
+                    <span class="badge bg-success fs-6">Importación Completada</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Resultados por categoría
+    if (results.parties) {
+        html += createResultSection('Partidos Políticos', 'flag', results.parties);
+    }
+    
+    if (results.election_types) {
+        html += createResultSection('Tipos de Elección', 'vote-yea', results.election_types);
+    }
+    
+    if (results.coalitions) {
+        html += createResultSection('Coaliciones', 'handshake', results.coalitions);
+    }
+    
+    if (results.candidates) {
+        html += createResultSection('Candidatos', 'users', results.candidates);
+    }
+    
+    container.innerHTML = html;
+}
+
+function createResultSection(title, icon, data) {
+    return `
+        <div class="result-section">
+            <h6><i class="fas fa-${icon} me-2"></i>${title}</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <small class="text-muted">Procesados</small>
+                    <div class="fs-4 text-success">${data.processed}</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">Errores</small>
+                    <div class="fs-4 text-danger">${data.errors.length}</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">Advertencias</small>
+                    <div class="fs-4 text-warning">${data.warnings.length}</div>
+                </div>
+            </div>
+            
+            ${data.errors.length > 0 ? `
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-danger" onclick="toggleErrors('${title.replace(/\s+/g, '')}')">
+                        Ver Errores (${data.errors.length})
+                    </button>
+                    <div id="errors-${title.replace(/\s+/g, '')}" style="display: none;" class="mt-2">
+                        <ul class="small text-danger">
+                            ${data.errors.map(error => `<li>${error}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function displayImportError(error) {
+    setActiveStep(4);
+    showSection('results-section');
+    
+    document.getElementById('import-results').innerHTML = `
+        <div class="result-section">
+            <div class="alert alert-danger">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Error en Importación</h6>
+                <p>${error}</p>
+            </div>
+        </div>
+    `;
+}
+
+function setActiveStep(stepNumber) {
+    // Remover clases activas
+    document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active', 'completed');
+    });
+    
+    // Marcar pasos completados
+    for (let i = 1; i < stepNumber; i++) {
+        document.getElementById(`step-${i}`).classList.add('completed');
+    }
+    
+    // Marcar paso activo
+    document.getElementById(`step-${stepNumber}`).classList.add('active');
+}
+
+function showSection(sectionId) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('[id$="-section"]').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Mostrar sección específica
+    document.getElementById(sectionId).style.display = 'block';
+}
+
+function resetProcess() {
+    selectedFile = null;
+    validationResults = null;
+    
+    setActiveStep(1);
+    showSection('file-selection-section');
+    
+    // Resetear zona de archivos
+    const dropZone = document.getElementById('file-drop-zone');
+    dropZone.innerHTML = `
+        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+        <h5>Arrastra tu archivo Excel aquí</h5>
+        <p class="text-muted">o haz clic para seleccionar</p>
+        <small class="text-muted">Formatos soportados: .xlsx, .xls</small>
+    `;
+    
+    // Resetear input
+    document.getElementById('excel-file').value = '';
+}
+
+function toggleErrors(section) {
+    const errorsDiv = document.getElementById(`errors-${section}`);
+    errorsDiv.style.display = errorsDiv.style.display === 'none' ? 'block' : 'none';
+}
+
+function goToCandidates() {
+    window.location.href = '/admin/candidatos';
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

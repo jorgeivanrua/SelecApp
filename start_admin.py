@@ -24,7 +24,7 @@ def check_server():
     """Verificar que el servidor esté ejecutándose"""
     print("🔍 Verificando servidor...")
     try:
-        response = requests.get("http://localhost:5000/api/health", timeout=5)
+        response = requests.get("http://localhost:5000/health", timeout=5)
         if response.status_code == 200:
             print("✅ Servidor disponible en http://localhost:5000")
             return True
@@ -57,8 +57,8 @@ def show_admin_urls():
         'Procesos Electorales': 'http://localhost:5000/electoral',
         'Reportes del Sistema': 'http://localhost:5000/reports',
         'Configuración': 'http://localhost:5000/settings',
-        'API Health Check': 'http://localhost:5000/api/health',
-        'Información del Sistema': 'http://localhost:5000/api/system/info'
+        'API Health Check': 'http://localhost:5000/health',
+        'Información del Sistema': 'http://localhost:5000/api/info'
     }
     
     for name, url in admin_urls.items():
@@ -119,13 +119,13 @@ def show_admin_menu():
             print("✅ Configuración abierta")
         elif choice == '6':
             try:
-                response = requests.get("http://localhost:5000/api/health")
+                response = requests.get("http://localhost:5000/health")
                 print(f"✅ Health Check: {response.json()}")
             except Exception as e:
                 print(f"❌ Error en Health Check: {e}")
         elif choice == '7':
             try:
-                response = requests.get("http://localhost:5000/api/system/info")
+                response = requests.get("http://localhost:5000/api/info")
                 info = response.json()
                 print("📋 INFORMACIÓN DEL SISTEMA:")
                 for key, value in info.items():

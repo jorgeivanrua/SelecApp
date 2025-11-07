@@ -1,0 +1,19 @@
+# Requerimientos para Sistema OCR - Dashboard Testigo Electoral
+
+# OCR y Procesamiento de Imágenes
+pytesseract==0.3.10
+opencv-python==4.8.1.78
+Pillow==10.1.0
+numpy==1.24.3
+
+# Procesamiento de Imágenes Adicional
+pdf2image==1.16.3
+scikit-image==0.22.0
+
+# Utilidades
+python-magic==0.4.27
+
+# Ya instalados (verificar)
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+requests>=2.31.0

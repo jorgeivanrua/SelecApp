@@ -1,640 +1,411 @@
-{% extends "base.html" %}
-{% block title %}Dashboard Coordinador Municipal - Sistema Electoral ERP{% endblock %}
-{% block role_styles %}
-<link href="{{ url_for('static', filename='css/roles/coordinador_municipal.css') }}" rel="stylesheet">
-{% endblock %}
-{% block body_class %}role-coordinador-municipal{% endblock %}
-{% block navbar_class %}navbar-dark bg-info{% endblock %}
-{% block brand_text %}Sistema Electoral - Coordinador Municipal{% endblock %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Coordinador Municipal | Sistema Electoral Caquetá</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/roles/coordinador_municipal.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-vote-yea me-2"></i>
+                Sistema Electoral Caquetá
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testigos">
+                            <i class="fas fa-users me-1"></i>Testigos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#mesas">
+                            <i class="fas fa-table me-1"></i>Mesas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#asignaciones">
+                            <i class="fas fa-user-check me-1"></i>Asignaciones
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reportes">
+                            <i class="fas fa-chart-bar me-1"></i>Reportes
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge bg-danger" id="notificationCount">0</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" id="notificationsList">
+                            <li><h6 class="dropdown-header">Notificaciones</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-muted" href="#">No hay notificaciones</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="coordinatorName">Coordinador</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#perfil"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                            <li><a class="dropdown-item" href="#configuracion"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-{% block navigation %}
-<li class="nav-item">
-    <a class="nav-link" href="{{ url_for('dashboard_role', role='coordinador_municipal') }}">
-        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/municipal/puestos">
-        <i class="fas fa-map-marker-alt me-1"></i>Puestos
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/municipal/coordinacion">
-        <i class="fas fa-tasks me-1"></i>Coordinación
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/municipal/reportes">
-        <i class="fas fa-chart-bar me-1"></i>Reportes
-    </a>
-</li>
-{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="welcome-banner bg-info text-white rounded p-4 mb-4">
-            <h2><i class="fas fa-city me-2"></i>Coordinación Municipal Electoral</h2>
-            <p class="mb-0">Gestión integral del municipio - <strong>{{ stats.municipio or 'Florencia' }}</strong></p>
-        </div>
-    </div>
-</div>
-
-<!-- Métricas municipales -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="card-title">Puestos de Votación</h6>
-                        <h3 class="mb-0">{{ stats.puestos or 12 }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-map-marker-alt fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="card-title">Mesas Totales</h6>
-                        <h3 class="mb-0">{{ stats.mesas or 45 }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-table fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="card-title">Personal Total</h6>
-                        <h3 class="mb-0">{{ stats.personal or 180 }}</h3>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-users fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-dark">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="card-title">Avance General</h6>
-                        <h3 class="mb-0">{{ stats.avance or 85 }}%</h3>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-chart-line fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Herramientas de coordinación municipal -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-tools me-2"></i>
-                    Herramientas de Coordinación Municipal
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <button class="btn btn-info btn-lg w-100 mb-2" onclick="coordinarPuestos()">
-                            <i class="fas fa-map-marker-alt me-2"></i>
-                            Coordinar Puestos
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary btn-lg w-100 mb-2" onclick="gestionarPersonal()">
-                            <i class="fas fa-users me-2"></i>
-                            Gestionar Personal
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-success btn-lg w-100 mb-2" onclick="supervisarProcesos()">
-                            <i class="fas fa-eye me-2"></i>
-                            Supervisar Procesos
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-warning btn-lg w-100 mb-2" onclick="generarReportes()">
-                            <i class="fas fa-chart-bar me-2"></i>
-                            Generar Reportes
-                        </button>
-                    </div>
-                </div>
-                <!-- Segunda fila -->
-                <div class="row mt-3">
-                    <div class="col-md-3">
-                        <button class="btn btn-outline-info btn-lg w-100 mb-2" onclick="planificarLogistica()">
-                            <i class="fas fa-boxes me-2"></i>
-                            Planificar Logística
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-outline-primary btn-lg w-100 mb-2" onclick="comunicarDepartamental()">
-                            <i class="fas fa-phone me-2"></i>
-                            Comunicar Depto.
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-outline-success btn-lg w-100 mb-2" onclick="monitorearTiempoReal()">
-                            <i class="fas fa-broadcast-tower me-2"></i>
-                            Monitoreo Real
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-outline-warning btn-lg w-100 mb-2" onclick="gestionarIncidencias()">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Gestionar Incidencias
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Estado de puestos y coordinación -->
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-map-marker-alt me-2"></i>
-                    Estado de Puestos de Votación
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Puesto</th>
-                                <th>Mesas</th>
-                                <th>Personal</th>
-                                <th>Coordinador</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Escuela Central</strong></td>
-                                <td>8</td>
-                                <td>24/24</td>
-                                <td>Carlos Mendoza</td>
-                                <td><span class="badge bg-success">Operativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="verPuesto('escuela_central')">Ver</button>
-                                    <button class="btn btn-sm btn-primary" onclick="coordinarPuesto('escuela_central')">Coordinar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Colegio San José</strong></td>
-                                <td>6</td>
-                                <td>18/18</td>
-                                <td>Ana Patricia Ruiz</td>
-                                <td><span class="badge bg-success">Operativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="verPuesto('colegio_san_jose')">Ver</button>
-                                    <button class="btn btn-sm btn-primary" onclick="coordinarPuesto('colegio_san_jose')">Coordinar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Universidad Amazonia</strong></td>
-                                <td>10</td>
-                                <td>28/30</td>
-                                <td>Miguel Torres</td>
-                                <td><span class="badge bg-warning">Incompleto</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning" onclick="resolverPuesto('universidad')">Resolver</button>
-                                    <button class="btn btn-sm btn-danger" onclick="apoyarPuesto('universidad')">Apoyar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Centro Comercial</strong></td>
-                                <td>4</td>
-                                <td>12/12</td>
-                                <td>Laura González</td>
-                                <td><span class="badge bg-success">Operativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="verPuesto('centro_comercial')">Ver</button>
-                                    <button class="btn btn-sm btn-primary" onclick="coordinarPuesto('centro_comercial')">Coordinar</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-tasks me-2"></i>
-                    Panel de Control
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <h6>Estado General del Municipio</h6>
-                    <div class="progress mb-2">
-                        <div class="progress-bar bg-success" style="width: 85%">85%</div>
-                    </div>
-                    <small class="text-muted">Preparación electoral completa</small>
-                </div>
-                
-                <div class="mb-3">
-                    <h6>Alertas Activas</h6>
-                    <div class="alert alert-warning alert-sm">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Universidad requiere 2 jurados adicionales
-                    </div>
-                    <div class="alert alert-info alert-sm">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Materiales en tránsito a 3 puestos
-                    </div>
-                </div>
-                
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary btn-sm" onclick="centroComando()">
-                        <i class="fas fa-headset me-2"></i>Centro de Comando
-                    </button>
-                    <button class="btn btn-success btn-sm" onclick="estadoGeneral()">
-                        <i class="fas fa-chart-pie me-2"></i>Estado General
-                    </button>
-                    <button class="btn btn-warning btn-sm" onclick="alertasUrgentes()">
-                        <i class="fas fa-bell me-2"></i>Alertas Urgentes
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>
-                    Estadísticas Municipales
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="municipalChart" width="300" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block role_scripts %}
-<script>
-// Scripts específicos para coordinador municipal
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard Coordinador Municipal cargado');
-    inicializarGrafico();
-    actualizarEstadoMunicipal();
-    
-    // Actualizar cada 90 segundos
-    setInterval(actualizarEstadoMunicipal, 90000);
-});
-
-function inicializarGrafico() {
-    const ctx = document.getElementById('municipalChart').getContext('2d');
-    window.municipalChart = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: ['Puestos', 'Personal', 'Materiales', 'Comunicaciones', 'Seguridad'],
-            datasets: [{
-                label: 'Estado Municipal',
-                data: [95, 85, 90, 88, 92],
-                backgroundColor: 'rgba(23, 162, 184, 0.2)',
-                borderColor: '#17a2b8',
-                pointBackgroundColor: '#17a2b8'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    max: 100
-                }
-            }
-        }
-    });
-}
-
-function coordinarPuestos() {
-    mostrarModalMunicipal('Coordinación de Puestos de Votación', `
-        <div class="row">
-            <div class="col-md-8">
-                <h6>Mapa de Coordinación</h6>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-success">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0">Zona Norte</h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled">
-                                    <li>• Escuela Central (8 mesas)</li>
-                                    <li>• Colegio Norte (6 mesas)</li>
-                                    <li>• Centro Cívico (4 mesas)</li>
-                                </ul>
-                                <span class="badge bg-success">18 mesas - OK</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-warning">
-                            <div class="card-header bg-warning text-dark">
-                                <h6 class="mb-0">Zona Sur</h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled">
-                                    <li>• Universidad (10 mesas)</li>
-                                    <li>• Colegio Sur (8 mesas)</li>
-                                    <li>• Polideportivo (5 mesas)</li>
-                                </ul>
-                                <span class="badge bg-warning">23 mesas - Atención</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <h6>Acciones de Coordinación</h6>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="redistribuirRecursos()">
-                        <i class="fas fa-exchange-alt me-2"></i>Redistribuir Recursos
-                    </button>
-                    <button class="btn btn-success" onclick="verificarTodosPuestos()">
-                        <i class="fas fa-check-double me-2"></i>Verificar Todos
-                    </button>
-                    <button class="btn btn-info" onclick="comunicarCoordinadores()">
-                        <i class="fas fa-comments me-2"></i>Comunicar Coordinadores
-                    </button>
-                    <button class="btn btn-warning" onclick="activarContingencia()">
-                        <i class="fas fa-shield-alt me-2"></i>Plan Contingencia
-                    </button>
-                </div>
-            </div>
-        </div>
-    `);
-}
-
-function gestionarPersonal() {
-    mostrarModalMunicipal('Gestión de Personal Municipal', `
-        <div class="row">
-            <div class="col-md-6">
-                <h6>Resumen de Personal</h6>
-                <div class="mb-3">
-                    <strong>Jurados:</strong> 135 de 135
-                    <div class="progress">
-                        <div class="progress-bar bg-success" style="width: 100%">100%</div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <strong>Testigos:</strong> 108 de 135
-                    <div class="progress">
-                        <div class="progress-bar bg-warning" style="width: 80%">80%</div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <strong>Coordinadores:</strong> 12 de 12
-                    <div class="progress">
-                        <div class="progress-bar bg-success" style="width: 100%">100%</div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <strong>Personal de Apoyo:</strong> 25 de 30
-                    <div class="progress">
-                        <div class="progress-bar bg-info" style="width: 83%">83%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <h6>Gestión de Personal</h6>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="asignarPersonalFaltante()">
-                        <i class="fas fa-user-plus me-2"></i>Asignar Faltante
-                    </button>
-                    <button class="btn btn-info" onclick="verificarAsistenciaGeneral()">
-                        <i class="fas fa-clipboard-check me-2"></i>Verificar Asistencia
-                    </button>
-                    <button class="btn btn-success" onclick="capacitarPersonal()">
-                        <i class="fas fa-graduation-cap me-2"></i>Capacitar Personal
-                    </button>
-                    <button class="btn btn-warning" onclick="gestionarSuplentes()">
-                        <i class="fas fa-users me-2"></i>Gestionar Suplentes
-                    </button>
-                </div>
-                
-                <h6 class="mt-3">Personal Crítico</h6>
-                <div class="alert alert-warning">
-                    <small><strong>Universidad:</strong> Faltan 2 jurados</small>
-                </div>
-                <div class="alert alert-info">
-                    <small><strong>Centro Sur:</strong> Falta 1 coordinador</small>
-                </div>
-            </div>
-        </div>
-    `);
-}
-
-function supervisarProcesos() {
-    mostrarModalMunicipal('Supervisión de Procesos Municipales', `
-        <div class="row">
+    <!-- Contenido Principal -->
+    <div class="container-fluid mt-4">
+        <!-- Información del Coordinador -->
+        <div class="row mb-4">
             <div class="col-12">
-                <h6>Dashboard de Supervisión en Tiempo Real</h6>
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <div class="card text-center bg-success text-white">
-                            <div class="card-body">
-                                <h4>9</h4>
-                                <small>Puestos Operativos</small>
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-tie me-2"></i>
+                            Información del Coordinador Municipal
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Coordinador:</strong> <span id="coordinatorFullName">-</span></p>
+                                <p><strong>Municipio:</strong> <span id="municipioName">-</span></p>
+                                <p><strong>Cédula:</strong> <span id="coordinatorCedula">-</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Teléfono:</strong> <span id="coordinatorTelefono">-</span></p>
+                                <p><strong>Email:</strong> <span id="coordinatorEmail">-</span></p>
+                                <p><strong>Fecha Asignación:</strong> <span id="fechaAsignacion">-</span></p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center bg-warning text-dark">
-                            <div class="card-body">
-                                <h4>3</h4>
-                                <small>Requieren Atención</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center bg-info text-white">
-                            <div class="card-body">
-                                <h4>42</h4>
-                                <small>Mesas Activas</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center bg-primary text-white">
-                            <div class="card-body">
-                                <h4>85%</h4>
-                                <small>Avance General</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <h6>Procesos Críticos</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Proceso</th>
-                                <th>Puesto</th>
-                                <th>Estado</th>
-                                <th>Prioridad</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Falta personal</td>
-                                <td>Universidad</td>
-                                <td><span class="badge bg-warning">Atención</span></td>
-                                <td><span class="badge bg-danger">Alta</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning" onclick="resolverCritico('universidad_personal')">Resolver</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Materiales pendientes</td>
-                                <td>Centro Sur</td>
-                                <td><span class="badge bg-info">En tránsito</span></td>
-                                <td><span class="badge bg-warning">Media</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="seguirMateriales('centro_sur')">Seguir</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="mt-3">
-                    <button class="btn btn-success" onclick="actualizarSupervision()">
-                        <i class="fas fa-sync me-2"></i>Actualizar Estado
-                    </button>
-                    <button class="btn btn-primary" onclick="alertarDepartamental()">
-                        <i class="fas fa-bell me-2"></i>Alertar Departamental
-                    </button>
-                </div>
-            </div>
-        </div>
-    `);
-}
-
-// Funciones auxiliares
-function mostrarModalMunicipal(titulo, contenido) {
-    const modalHtml = `
-        <div class="modal fade" id="municipalModal" tabindex="-1">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title">${titulo}</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${contenido}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
-    `;
-    
-    const existingModal = document.getElementById('municipalModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const modal = new bootstrap.Modal(document.getElementById('municipalModal'));
-    modal.show();
-}
 
-function actualizarEstadoMunicipal() {
-    console.log('Actualizando estado municipal...');
-}
+        <!-- Estadísticas Principales -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0" id="totalTestigos">0</h4>
+                                <p class="mb-0">Total Testigos</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0" id="testigosAsignados">0</h4>
+                                <p class="mb-0">Testigos Asignados</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-user-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0" id="mesasCubiertas">0</h4>
+                                <p class="mb-0">Mesas Cubiertas</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-table fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="mb-0" id="porcentajeCobertura">0%</h4>
+                                <p class="mb-0">Cobertura Total</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-pie fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-function mostrarNotificacionMunicipal(mensaje, tipo = 'info') {
-    const alertClass = {
-        'success': 'alert-success',
-        'warning': 'alert-warning',
-        'error': 'alert-danger',
-        'info': 'alert-info'
-    }[tipo];
-    
-    const notification = document.createElement('div');
-    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
-    notification.innerHTML = `
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 5000);
-}
+        <!-- Gráfico de Cobertura y Tareas Pendientes -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Cobertura por Puesto de Votación
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="coverageTable">
+                                <thead>
+                                    <tr>
+                                        <th>Puesto de Votación</th>
+                                        <th>Total Mesas</th>
+                                        <th>Mesas Cubiertas</th>
+                                        <th>% Cobertura</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Datos cargados dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tasks me-2"></i>
+                            Tareas Pendientes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="pendingTasksList">
+                            <!-- Tareas cargadas dinámicamente -->
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#tareas" class="btn btn-outline-primary btn-sm">
+                                Ver Todas las Tareas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-// Implementar funciones específicas
-function generarReportes() { mostrarNotificacionMunicipal('Generando reportes municipales...', 'info'); }
-function planificarLogistica() { mostrarNotificacionMunicipal('Planificando logística municipal...', 'info'); }
-function comunicarDepartamental() { mostrarNotificacionMunicipal('Comunicando con coordinación departamental...', 'info'); }
-function monitorearTiempoReal() { mostrarNotificacionMunicipal('Activando monitoreo en tiempo real...', 'info'); }
-function gestionarIncidencias() { mostrarNotificacionMunicipal('Gestionando incidencias municipales...', 'warning'); }
-function verPuesto(puesto) { mostrarNotificacionMunicipal(`Mostrando detalles del puesto ${puesto}...`, 'info'); }
-function coordinarPuesto(puesto) { mostrarNotificacionMunicipal(`Coordinando puesto ${puesto}...`, 'info'); }
-function resolverPuesto(puesto) { mostrarNotificacionMunicipal(`Resolviendo problemas en ${puesto}...`, 'warning'); }
-function apoyarPuesto(puesto) { mostrarNotificacionMunicipal(`Enviando apoyo a ${puesto}...`, 'error'); }
-function centroComando() { mostrarNotificacionMunicipal('Activando centro de comando...', 'info'); }
-function estadoGeneral() { mostrarNotificacionMunicipal('Generando reporte de estado general...', 'info'); }
-function alertasUrgentes() { mostrarNotificacionMunicipal('Revisando alertas urgentes...', 'warning'); }
-function redistribuirRecursos() { mostrarNotificacionMunicipal('Redistribuyendo recursos municipales...', 'info'); }
-function verificarTodosPuestos() { mostrarNotificacionMunicipal('Verificando todos los puestos...', 'info'); }
-function comunicarCoordinadores() { mostrarNotificacionMunicipal('Comunicando con coordinadores de puesto...', 'info'); }
-function activarContingencia() { mostrarNotificacionMunicipal('Activando plan de contingencia...', 'error'); }
-function asignarPersonalFaltante() { mostrarNotificacionMunicipal('Asignando personal faltante...', 'info'); }
-function verificarAsistenciaGeneral() { mostrarNotificacionMunicipal('Verificando asistencia general...', 'info'); }
-function capacitarPersonal() { mostrarNotificacionMunicipal('Iniciando capacitación de personal...', 'info'); }
-function gestionarSuplentes() { mostrarNotificacionMunicipal('Gestionando personal suplente...', 'info'); }
-function resolverCritico(proceso) { mostrarNotificacionMunicipal(`Resolviendo proceso crítico: ${proceso}...`, 'error'); }
-function seguirMateriales(puesto) { mostrarNotificacionMunicipal(`Siguiendo materiales para ${puesto}...`, 'info'); }
-function actualizarSupervision() { mostrarNotificacionMunicipal('Actualizando estado de supervisión...', 'info'); }
-function alertarDepartamental() { mostrarNotificacionMunicipal('Enviando alerta a coordinación departamental...', 'warning'); }
-</script>
-{% endblock %}
+        <!-- Acciones Rápidas -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Acciones Rápidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-primary w-100" onclick="showCreateWitnessModal()">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Registrar Testigo
+                                </button>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-success w-100" onclick="showAssignWitnessModal()">
+                                    <i class="fas fa-user-check me-2"></i>
+                                    Asignar Testigo
+                                </button>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-info w-100" onclick="generateCoverageReport()">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    Generar Reporte
+                                </button>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-warning w-100" onclick="showUncoveredTables()">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Mesas Sin Cobertura
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas y Notificaciones -->
+        <div class="row mb-4" id="alertsSection" style="display: none;">
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Alertas y Notificaciones
+                        </h5>
+                    </div>
+                    <div class="card-body" id="alertsContent">
+                        <!-- Alertas cargadas dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Registrar Testigo -->
+    <div class="modal fade" id="createWitnessModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Registrar Nuevo Testigo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createWitnessForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="witnessName" class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-control" id="witnessName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="witnessCedula" class="form-label">Cédula *</label>
+                                <input type="text" class="form-control" id="witnessCedula" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="witnessPhone" class="form-label">Teléfono *</label>
+                                <input type="tel" class="form-control" id="witnessPhone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="witnessEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="witnessEmail">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="witnessParty" class="form-label">Partido Político</label>
+                                <select class="form-select" id="witnessParty">
+                                    <option value="">Seleccionar partido...</option>
+                                    <!-- Opciones cargadas dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="witnessType" class="form-label">Tipo de Testigo</label>
+                                <select class="form-select" id="witnessType">
+                                    <option value="principal">Principal</option>
+                                    <option value="suplente">Suplente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="witnessAddress" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="witnessAddress">
+                        </div>
+                        <div class="mb-3">
+                            <label for="witnessObservations" class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="witnessObservations" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="createWitness()">
+                        <i class="fas fa-save me-1"></i>Registrar Testigo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Asignar Testigo -->
+    <div class="modal fade" id="assignWitnessModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-check me-2"></i>
+                        Asignar Testigo a Mesa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignWitnessForm">
+                        <div class="mb-3">
+                            <label for="assignWitnessSelect" class="form-label">Testigo *</label>
+                            <select class="form-select" id="assignWitnessSelect" required>
+                                <option value="">Seleccionar testigo...</option>
+                                <!-- Opciones cargadas dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="assignTableSelect" class="form-label">Mesa de Votación *</label>
+                            <select class="form-select" id="assignTableSelect" required>
+                                <option value="">Seleccionar mesa...</option>
+                                <!-- Opciones cargadas dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="assignStartTime" class="form-label">Hora Inicio</label>
+                                <input type="time" class="form-control" id="assignStartTime" value="06:00">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="assignEndTime" class="form-label">Hora Fin</label>
+                                <input type="time" class="form-control" id="assignEndTime" value="18:00">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="assignObservations" class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="assignObservations" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="assignWitness()">
+                        <i class="fas fa-check me-1"></i>Asignar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/coordination-dashboard.js') }}"></script>
+</body>
+</html>

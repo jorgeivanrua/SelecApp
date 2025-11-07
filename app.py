@@ -55,9 +55,7 @@ def create_app():
             'coordinador_departamental': 'Coordinador Departamental',
             'coordinador_municipal': 'Coordinador Municipal',
             'coordinador_puesto': 'Coordinador de Puesto',
-            'testigo_electoral': 'Testigo Electoral',
-            'jurado_votacion': 'Jurado de Votación',
-            'testigo_mesa': 'Testigo de Mesa',
+            'testigo_mesa': 'Testigo Electoral',
             'auditor_electoral': 'Auditor Electoral',
             'observador_internacional': 'Observador Internacional'
         }
@@ -132,21 +130,6 @@ def create_app():
                     {'name': 'Cronograma Electoral', 'url': '/schedule', 'icon': 'fas fa-calendar'},
                     {'name': 'Supervisar Avance', 'url': '/progress', 'icon': 'fas fa-chart-line'},
                     {'name': 'Generar Reportes', 'url': '/reports/coordination', 'icon': 'fas fa-file-alt'}
-                ]
-            })
-        elif role == 'jurado_votacion':
-            base_data.update({
-                'stats': {
-                    'assigned_table': '001-A',
-                    'registered_votes': 234,
-                    'eligible_voters': 350,
-                    'participation': 67
-                },
-                'quick_actions': [
-                    {'name': 'Registrar Voto', 'url': '/voting/register', 'icon': 'fas fa-plus'},
-                    {'name': 'Ver Resultados', 'url': '/voting/results', 'icon': 'fas fa-chart-pie'},
-                    {'name': 'Generar Acta', 'url': '/voting/certificate', 'icon': 'fas fa-file-pdf'},
-                    {'name': 'Reportar Incidencia', 'url': '/incidents/report', 'icon': 'fas fa-exclamation-triangle'}
                 ]
             })
         elif role == 'testigo_mesa':
@@ -267,8 +250,6 @@ def create_app():
             'coordinador_departamental': 'coordinador_departamental',
             'coordinador_municipal': 'coordinador_municipal',
             'coordinador_puesto': 'coordinador_puesto',
-            'testigo_electoral': 'testigo_electoral',
-            'jurado_votacion': 'jurado_votacion',
             'testigo_mesa': 'testigo_mesa',
             'testigo': 'testigo_mesa',  # Alias para testigo
             'auditor': 'auditor_electoral',
@@ -306,16 +287,33 @@ def create_app():
         """Página de prueba de login"""
         return render_template('test_login.html')
     
-    # Rutas adicionales para funcionalidades de los dashboards
-    @app.route('/audit/start')
-    def audit_start():
-        """Formulario para iniciar nueva auditoría"""
-        return render_template('forms/audit_form.html')
+    # Rutas específicas para testigo (rol unificado testigo_mesa)
+    @app.route('/testigo/resultados')
+    def testigo_resultados():
+        """Página de captura de resultados E14 para testigo"""
+        return render_template('roles/testigo_mesa/resultados.html')
     
-    @app.route('/observation/new')
-    def observation_new():
-        """Formulario para nueva observación internacional"""
-        return render_template('forms/observation_form.html')
+    @app.route('/testigo/observacion')
+    def testigo_observacion():
+        """Página de observaciones para testigo"""
+        return render_template('roles/testigo_mesa/observaciones.html')
+    
+    @app.route('/testigo/reportes')
+    def testigo_reportes():
+        """Página de reportes para testigo"""
+        return render_template('roles/testigo_mesa/reportes.html')
+    
+    @app.route('/testigo/incidencias')
+    def testigo_incidencias():
+        """Página de incidencias para testigo"""
+        return render_template('roles/testigo_mesa/incidencias.html')
+    
+    @app.route('/testigo/e14')
+    def testigo_e14():
+        """Página de captura de E14 para testigo (foto + digitación)"""
+        return render_template('roles/testigo_mesa/e14.html')
+    
+    # ==================== RUTAS PARA SUPER ADMIN ====================
     
     @app.route('/users')
     def users_management():
@@ -330,6 +328,55 @@ def create_app():
                                  {'name': 'Usuarios Inactivos', 'url': '/users/inactive', 'icon': 'fas fa-user-slash'}
                              ])
     
+    @app.route('/users/new')
+    def create_user():
+        """Formulario para crear nuevo usuario"""
+        return render_template('forms/user_form.html',
+                             user_role='super_admin',
+                             role_name='Crear Usuario',
+                             form_title='Nuevo Usuario del Sistema')
+    
+    @app.route('/users/roles')
+    def manage_roles():
+        """Gestión de roles y permisos"""
+        return render_template('dashboard_generic.html',
+                             user_role='super_admin',
+                             role_name='Gestión de Roles',
+                             stats={'total_roles': 12, 'active_permissions': 45, 'custom_roles': 3},
+                             quick_actions=[
+                                 {'name': 'Nuevo Rol', 'url': '/roles/new', 'icon': 'fas fa-plus'},
+                                 {'name': 'Permisos', 'url': '/permissions', 'icon': 'fas fa-key'},
+                                 {'name': 'Asignaciones', 'url': '/role-assignments', 'icon': 'fas fa-users-cog'}
+                             ])
+    
+    @app.route('/electoral')
+    def electoral_processes():
+        """Gestión de procesos electorales"""
+        return render_template('dashboard_generic.html',
+                             user_role='super_admin',
+                             role_name='Procesos Electorales',
+                             stats={'active_processes': 3, 'total_processes': 15, 'completion': 85},
+                             quick_actions=[
+                                 {'name': 'Nuevo Proceso', 'url': '/electoral/new', 'icon': 'fas fa-plus'},
+                                 {'name': 'Configurar', 'url': '/electoral/config', 'icon': 'fas fa-cogs'},
+                                 {'name': 'Monitorear', 'url': '/electoral/monitor', 'icon': 'fas fa-eye'}
+                             ])
+    
+    @app.route('/reports')
+    def system_reports():
+        """Reportes del sistema"""
+        return render_template('dashboard_generic.html',
+                             user_role='super_admin',
+                             role_name='Reportes del Sistema',
+                             stats={'generated_reports': 25, 'scheduled': 8, 'pending': 3},
+                             quick_actions=[
+                                 {'name': 'Nuevo Reporte', 'url': '/reports/new', 'icon': 'fas fa-plus'},
+                                 {'name': 'Programar', 'url': '/reports/schedule', 'icon': 'fas fa-clock'},
+                                 {'name': 'Exportar', 'url': '/reports/export', 'icon': 'fas fa-download'}
+                             ])
+    
+    # ==================== RUTAS PARA ADMIN DEPARTAMENTAL ====================
+    
     @app.route('/municipalities')
     def municipalities_management():
         """Gestión de municipios (placeholder)"""
@@ -343,36 +390,154 @@ def create_app():
                                  {'name': 'Estadísticas', 'url': '/municipalities/stats', 'icon': 'fas fa-chart-bar'}
                              ])
     
-    # Rutas específicas para testigo electoral
-    @app.route('/testigo/resultados')
-    def testigo_resultados():
-        """Página de captura de resultados E14 para testigo electoral"""
-        return render_template('roles/testigo_electoral/resultados.html')
+    @app.route('/reports/departmental')
+    def departmental_reports():
+        """Reportes departamentales"""
+        return render_template('dashboard_generic.html',
+                             user_role='admin_departamental',
+                             role_name='Reportes Departamentales',
+                             stats={'municipalities_reported': 14, 'pending_reports': 2, 'completion': 87},
+                             quick_actions=[
+                                 {'name': 'Consolidado', 'url': '/reports/consolidated', 'icon': 'fas fa-chart-line'},
+                                 {'name': 'Por Municipio', 'url': '/reports/by-municipality', 'icon': 'fas fa-city'},
+                                 {'name': 'Exportar', 'url': '/reports/export-dept', 'icon': 'fas fa-download'}
+                             ])
     
-    @app.route('/testigo/observacion')
-    def testigo_observacion():
-        """Página de observaciones para testigo electoral"""
-        return render_template('roles/testigo_electoral/observaciones.html')
+    # ==================== RUTAS PARA ADMIN MUNICIPAL ====================
     
-    @app.route('/testigo/reportes')
-    def testigo_reportes():
-        """Página de reportes para testigo electoral"""
-        return render_template('roles/testigo_electoral/reportes.html')
+    @app.route('/tables')
+    def tables_management():
+        """Gestión de mesas de votación (placeholder)"""
+        return render_template('dashboard_generic.html',
+                             user_role='admin_municipal',
+                             role_name='Gestión de Mesas',
+                             stats={'total_tables': 28, 'configured_tables': 25, 'pending_setup': 3},
+                             quick_actions=[
+                                 {'name': 'Nueva Mesa', 'url': '/tables/new', 'icon': 'fas fa-plus'},
+                                 {'name': 'Configurar Mesa', 'url': '/tables/configure', 'icon': 'fas fa-cogs'},
+                                 {'name': 'Asignar Jurados', 'url': '/tables/assign', 'icon': 'fas fa-users'}
+                             ])
     
-    @app.route('/testigo/incidencias')
-    def testigo_incidencias():
-        """Página de incidencias para testigo electoral"""
-        return render_template('roles/testigo_electoral/incidencias.html')
+    @app.route('/candidates/local')
+    def local_candidates():
+        """Gestión de candidatos locales"""
+        return render_template('dashboard_generic.html',
+                             user_role='admin_municipal',
+                             role_name='Candidatos Locales',
+                             stats={'total_candidates': 12, 'approved': 9, 'pending': 3},
+                             quick_actions=[
+                                 {'name': 'Registrar Candidato', 'url': '/candidates/new', 'icon': 'fas fa-user-plus'},
+                                 {'name': 'Aprobar Pendientes', 'url': '/candidates/approve', 'icon': 'fas fa-check'},
+                                 {'name': 'Exportar Lista', 'url': '/candidates/export', 'icon': 'fas fa-download'}
+                             ])
     
-    @app.route('/testigo/e14')
-    def testigo_e14():
-        """Página de captura de E14 para testigo electoral"""
-        return render_template('roles/testigo_electoral/e14.html')
+    @app.route('/reports/municipal')
+    def municipal_reports():
+        """Reportes municipales"""
+        return render_template('dashboard_generic.html',
+                             user_role='admin_municipal',
+                             role_name='Reportes Municipales',
+                             stats={'tables_reported': 25, 'candidates_processed': 12, 'participation': 67},
+                             quick_actions=[
+                                 {'name': 'Reporte de Mesas', 'url': '/reports/tables', 'icon': 'fas fa-table'},
+                                 {'name': 'Reporte de Candidatos', 'url': '/reports/candidates', 'icon': 'fas fa-users'},
+                                 {'name': 'Participación', 'url': '/reports/participation', 'icon': 'fas fa-chart-pie'}
+                             ])
     
-    @app.route('/testigo/e24')
-    def testigo_e24():
-        """Página de captura de E24 para testigo electoral"""
-        return render_template('roles/testigo_electoral/e24.html')
+    # ==================== RUTAS PARA COORDINADOR ELECTORAL ====================
+    
+    @app.route('/coordination')
+    def coordination():
+        """Coordinación de procesos electorales"""
+        return render_template('dashboard_generic.html',
+                             user_role='coordinador_electoral',
+                             role_name='Coordinación de Procesos',
+                             stats={'active_processes': 2, 'pending_tasks': 5, 'completion': 78},
+                             quick_actions=[
+                                 {'name': 'Nuevo Proceso', 'url': '/electoral/new', 'icon': 'fas fa-plus'},
+                                 {'name': 'Cronograma', 'url': '/schedule', 'icon': 'fas fa-calendar'},
+                                 {'name': 'Monitorear', 'url': '/monitor', 'icon': 'fas fa-eye'}
+                             ])
+    
+    @app.route('/schedule')
+    def schedule():
+        """Cronograma electoral"""
+        return render_template('dashboard_generic.html',
+                             user_role='coordinador_electoral',
+                             role_name='Cronograma Electoral',
+                             stats={'scheduled_events': 12, 'completed': 8, 'pending': 4},
+                             quick_actions=[
+                                 {'name': 'Nuevo Evento', 'url': '/schedule/new', 'icon': 'fas fa-plus'},
+                                 {'name': 'Calendario', 'url': '/calendar', 'icon': 'fas fa-calendar-alt'},
+                                 {'name': 'Recordatorios', 'url': '/reminders', 'icon': 'fas fa-bell'}
+                             ])
+    
+    # ==================== RUTAS PARA JURADO DE VOTACIÓN ====================
+    
+
+    
+    # ==================== RUTAS PARA TESTIGO DE MESA ====================
+    
+    @app.route('/observations/new')
+    def observations_new():
+        """Nueva observación de testigo (placeholder)"""
+        return render_template('dashboard_generic.html',
+                             user_role='testigo_mesa',
+                             role_name='Nueva Observación',
+                             stats={'observations': 5, 'incidents': 1, 'verification_progress': 85},
+                             quick_actions=[
+                                 {'name': 'Registrar Observación', 'url': '/observations/register', 'icon': 'fas fa-eye'},
+                                 {'name': 'Reportar Incidente', 'url': '/incidents/new', 'icon': 'fas fa-exclamation'},
+                                 {'name': 'Lista Verificación', 'url': '/checklist', 'icon': 'fas fa-check-square'}
+                             ])
+    
+    @app.route('/incidents/new')
+    def incidents_new():
+        """Reportar nuevo incidente"""
+        return render_template('forms/incident_form.html',
+                             user_role='testigo_mesa',
+                             role_name='Reportar Incidente',
+                             form_title='Nuevo Reporte de Incidente')
+    
+    # ==================== RUTAS PARA AUDITOR ELECTORAL ====================
+    
+    @app.route('/audit/start')
+    def audit_start():
+        """Formulario para iniciar nueva auditoría"""
+        return render_template('forms/audit_form.html')
+    
+    @app.route('/audit/irregularities')
+    def audit_irregularities():
+        """Revisar irregularidades detectadas"""
+        return render_template('dashboard_generic.html',
+                             user_role='auditor_electoral',
+                             role_name='Irregularidades Detectadas',
+                             stats={'total_irregularities': 5, 'resolved': 3, 'pending': 2},
+                             quick_actions=[
+                                 {'name': 'Nueva Revisión', 'url': '/audit/review', 'icon': 'fas fa-search'},
+                                 {'name': 'Generar Reporte', 'url': '/audit/report', 'icon': 'fas fa-file-alt'},
+                                 {'name': 'Exportar', 'url': '/audit/export', 'icon': 'fas fa-download'}
+                             ])
+    
+    # ==================== RUTAS PARA OBSERVADOR INTERNACIONAL ====================
+    
+    @app.route('/observation/new')
+    def observation_new():
+        """Formulario para nueva observación internacional"""
+        return render_template('forms/observation_form.html')
+    
+    @app.route('/observation/standards')
+    def observation_standards():
+        """Evaluar estándares internacionales"""
+        return render_template('dashboard_generic.html',
+                             user_role='observador_internacional',
+                             role_name='Evaluación de Estándares',
+                             stats={'standards_evaluated': 15, 'compliance_rate': 92, 'recommendations': 8},
+                             quick_actions=[
+                                 {'name': 'Nueva Evaluación', 'url': '/observation/evaluate', 'icon': 'fas fa-check-double'},
+                                 {'name': 'Reporte Internacional', 'url': '/observation/report', 'icon': 'fas fa-globe'},
+                                 {'name': 'Enviar Organización', 'url': '/observation/send', 'icon': 'fas fa-paper-plane'}
+                             ])
     
     @app.route('/api/user/location/<int:user_id>')
     def get_user_location(user_id):
@@ -554,129 +719,8 @@ def create_app():
             
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
-
-    @app.route('/tables')
-    def tables_management():
-        """Gestión de mesas de votación (placeholder)"""
-        return render_template('dashboard_generic.html',
-                             user_role='admin_municipal',
-                             role_name='Gestión de Mesas',
-                             stats={'total_tables': 28, 'configured_tables': 25, 'pending_setup': 3},
-                             quick_actions=[
-                                 {'name': 'Nueva Mesa', 'url': '/tables/new', 'icon': 'fas fa-plus'},
-                                 {'name': 'Configurar Mesa', 'url': '/tables/configure', 'icon': 'fas fa-cogs'},
-                                 {'name': 'Asignar Jurados', 'url': '/tables/assign', 'icon': 'fas fa-users'}
-                             ])
     
-    @app.route('/voting/register')
-    def voting_register():
-        """Registro de votos (placeholder)"""
-        return render_template('dashboard_generic.html',
-                             user_role='jurado_votacion',
-                             role_name='Registro de Votos',
-                             stats={'votes_registered': 234, 'eligible_voters': 350, 'participation': 67},
-                             quick_actions=[
-                                 {'name': 'Registrar Voto', 'url': '/voting/new', 'icon': 'fas fa-vote-yea'},
-                                 {'name': 'Ver Resultados', 'url': '/voting/results', 'icon': 'fas fa-chart-pie'},
-                                 {'name': 'Generar Acta', 'url': '/voting/certificate', 'icon': 'fas fa-file-pdf'}
-                             ])
-    
-    @app.route('/observations/new')
-    def observations_new():
-        """Nueva observación de testigo (placeholder)"""
-        return render_template('dashboard_generic.html',
-                             user_role='testigo_mesa',
-                             role_name='Nueva Observación',
-                             stats={'observations': 5, 'incidents': 1, 'verification_progress': 85},
-                             quick_actions=[
-                                 {'name': 'Registrar Observación', 'url': '/observations/register', 'icon': 'fas fa-eye'},
-                                 {'name': 'Reportar Incidente', 'url': '/incidents/new', 'icon': 'fas fa-exclamation'},
-                                 {'name': 'Lista Verificación', 'url': '/checklist', 'icon': 'fas fa-check-square'}
-                             ])
-    
-    @app.route('/profile')
-    def profile():
-        """Perfil de usuario (placeholder)"""
-        return render_template('dashboard_generic.html',
-                             user_role='user',
-                             role_name='Mi Perfil',
-                             stats={'profile_completion': 85, 'last_login': '2024-11-05', 'sessions': 24},
-                             quick_actions=[
-                                 {'name': 'Editar Información', 'url': '/profile/edit', 'icon': 'fas fa-edit'},
-                                 {'name': 'Cambiar Contraseña', 'url': '/profile/password', 'icon': 'fas fa-key'},
-                                 {'name': 'Configuración', 'url': '/settings', 'icon': 'fas fa-cogs'}
-                             ])
-    
-    @app.route('/settings')
-    def settings():
-        """Configuración del sistema (placeholder)"""
-        return render_template('dashboard_generic.html',
-                             user_role='admin',
-                             role_name='Configuración del Sistema',
-                             stats={'active_settings': 12, 'pending_updates': 3, 'system_health': 98},
-                             quick_actions=[
-                                 {'name': 'Configuración General', 'url': '/settings/general', 'icon': 'fas fa-cogs'},
-                                 {'name': 'Seguridad', 'url': '/settings/security', 'icon': 'fas fa-shield-alt'},
-                                 {'name': 'Notificaciones', 'url': '/settings/notifications', 'icon': 'fas fa-bell'}
-                             ])
-    
-    
-    # Rutas adicionales para dashboards específicos
-    @app.route('/coordination')
-    def coordination():
-        """Coordinación de procesos electorales"""
-        return render_template('dashboard_generic.html',
-                             user_role='coordinador_electoral',
-                             role_name='Coordinación de Procesos',
-                             stats={'active_processes': 2, 'pending_tasks': 5, 'completion': 78},
-                             quick_actions=[
-                                 {'name': 'Nuevo Proceso', 'url': '/electoral/new', 'icon': 'fas fa-plus'},
-                                 {'name': 'Cronograma', 'url': '/schedule', 'icon': 'fas fa-calendar'},
-                                 {'name': 'Monitorear', 'url': '/monitor', 'icon': 'fas fa-eye'}
-                             ])
-    
-    @app.route('/schedule')
-    def schedule():
-        """Cronograma electoral"""
-        return render_template('dashboard_generic.html',
-                             user_role='coordinador_electoral',
-                             role_name='Cronograma Electoral',
-                             stats={'scheduled_events': 12, 'completed': 8, 'pending': 4},
-                             quick_actions=[
-                                 {'name': 'Nuevo Evento', 'url': '/schedule/new', 'icon': 'fas fa-plus'},
-                                 {'name': 'Ver Calendario', 'url': '/calendar', 'icon': 'fas fa-calendar-alt'},
-                                 {'name': 'Recordatorios', 'url': '/reminders', 'icon': 'fas fa-bell'}
-                             ])
-    
-    @app.route('/progress')
-    def progress():
-        """Supervisar avance"""
-        return render_template('dashboard_generic.html',
-                             user_role='coordinador_electoral',
-                             role_name='Supervisión de Avance',
-                             stats={'overall_progress': 78, 'on_track': 85, 'delayed': 15},
-                             quick_actions=[
-                                 {'name': 'Ver Detalles', 'url': '/progress/details', 'icon': 'fas fa-chart-line'},
-                                 {'name': 'Generar Reporte', 'url': '/reports/progress', 'icon': 'fas fa-file-alt'},
-                                 {'name': 'Alertas', 'url': '/alerts', 'icon': 'fas fa-exclamation-triangle'}
-                             ])
-    
-    @app.route('/electoral')
-    def electoral():
-        """Procesos electorales"""
-        return render_template('dashboard_generic.html',
-                             user_role='admin',
-                             role_name='Procesos Electorales',
-                             stats={'active_processes': 3, 'total_processes': 15, 'completion': 85},
-                             quick_actions=[
-                                 {'name': 'Nuevo Proceso', 'url': '/electoral/new', 'icon': 'fas fa-plus'},
-                                 {'name': 'Ver Todos', 'url': '/electoral/list', 'icon': 'fas fa-list'},
-                                 {'name': 'Configurar', 'url': '/electoral/config', 'icon': 'fas fa-cogs'}
-                             ])
-    
-    @app.route('/candidates')
-    def candidates():
-        """Gestión de candidatos"""
+    # Rutas adicionales para dashboards específicos (ya definidas arriba, eliminando duplicados)
         return render_template('dashboard_generic.html',
                              user_role='admin',
                              role_name='Gestión de Candidatos',
@@ -685,19 +729,6 @@ def create_app():
                                  {'name': 'Nuevo Candidato', 'url': '/candidates/new', 'icon': 'fas fa-user-plus'},
                                  {'name': 'Aprobar Pendientes', 'url': '/candidates/approve', 'icon': 'fas fa-check'},
                                  {'name': 'Ver Lista', 'url': '/candidates/list', 'icon': 'fas fa-list'}
-                             ])
-    
-    @app.route('/reports')
-    def reports():
-        """Reportes del sistema"""
-        return render_template('dashboard_generic.html',
-                             user_role='admin',
-                             role_name='Reportes del Sistema',
-                             stats={'generated_reports': 25, 'scheduled': 8, 'pending': 3},
-                             quick_actions=[
-                                 {'name': 'Nuevo Reporte', 'url': '/reports/new', 'icon': 'fas fa-plus'},
-                                 {'name': 'Programar', 'url': '/reports/schedule', 'icon': 'fas fa-clock'},
-                                 {'name': 'Exportar', 'url': '/reports/export', 'icon': 'fas fa-download'}
                              ])
 
     @app.route('/logout')
@@ -918,6 +949,205 @@ def create_app():
         def invalid_token_callback(error):
             return jsonify({'error': 'Invalid token'}), 401
     
+    # APIs Administrativas
+    @app.route('/api/admin/candidatos', methods=['GET'])
+    def get_candidatos():
+        """Obtener todos los candidatos"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect('caqueta_electoral.db')
+            cursor = conn.cursor()
+            
+            query = """
+                SELECT c.*, p.nombre as partido_nombre, p.sigla as partido_sigla,
+                       car.nombre as cargo_nombre, m.nombre as municipio_nombre
+                FROM candidatos c
+                LEFT JOIN partidos_politicos p ON c.partido_id = p.id
+                LEFT JOIN cargos_electorales car ON c.cargo_id = car.id
+                LEFT JOIN municipios m ON c.municipio_id = m.id
+                WHERE c.activo = 1
+                ORDER BY c.nombre_completo
+            """
+            
+            cursor.execute(query)
+            results = cursor.fetchall()
+            conn.close()
+            
+            candidatos = []
+            for row in results:
+                columns = [description[0] for description in cursor.description]
+                candidato = dict(zip(columns, row))
+                candidatos.append(candidato)
+            
+            return jsonify({'success': True, 'data': candidatos})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/candidatos', methods=['POST'])
+    def create_candidato():
+        """Crear nuevo candidato"""
+        try:
+            data = request.get_json()
+            import sqlite3
+            conn = sqlite3.connect('caqueta_electoral.db')
+            cursor = conn.cursor()
+            
+            query = """
+                INSERT INTO candidatos 
+                (cedula, nombre_completo, fecha_nacimiento, lugar_nacimiento, profesion,
+                 telefono, email, direccion, partido_id, cargo_id, municipio_id,
+                 numero_lista, estado, observaciones)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            
+            cursor.execute(query, (
+                data.get('cedula'),
+                data.get('nombre_completo'),
+                data.get('fecha_nacimiento'),
+                data.get('lugar_nacimiento'),
+                data.get('profesion'),
+                data.get('telefono'),
+                data.get('email'),
+                data.get('direccion'),
+                data.get('partido_id'),
+                data.get('cargo_id'),
+                data.get('municipio_id'),
+                data.get('numero_lista'),
+                data.get('estado', 'inscrito'),
+                data.get('observaciones')
+            ))
+            
+            candidato_id = cursor.lastrowid
+            conn.commit()
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Candidato creado exitosamente',
+                'candidato_id': candidato_id
+            })
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/partidos', methods=['GET'])
+    def get_partidos():
+        """Obtener todos los partidos"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect('caqueta_electoral.db')
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT * FROM partidos_politicos WHERE activo = 1 ORDER BY nombre")
+            results = cursor.fetchall()
+            conn.close()
+            
+            partidos = []
+            for row in results:
+                columns = [description[0] for description in cursor.description]
+                partido = dict(zip(columns, row))
+                partidos.append(partido)
+            
+            return jsonify({'success': True, 'data': partidos})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/cargos', methods=['GET'])
+    def get_cargos():
+        """Obtener todos los cargos electorales"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect('caqueta_electoral.db')
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT * FROM cargos_electorales WHERE activo = 1 ORDER BY nivel, nombre")
+            results = cursor.fetchall()
+            conn.close()
+            
+            cargos = []
+            for row in results:
+                columns = [description[0] for description in cursor.description]
+                cargo = dict(zip(columns, row))
+                cargos.append(cargo)
+            
+            return jsonify({'success': True, 'data': cargos})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/municipios', methods=['GET'])
+    def get_municipios():
+        """Obtener todos los municipios"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect('caqueta_electoral.db')
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT * FROM municipios WHERE activo = 1 ORDER BY nombre")
+            results = cursor.fetchall()
+            conn.close()
+            
+            municipios = []
+            for row in results:
+                columns = [description[0] for description in cursor.description]
+                municipio = dict(zip(columns, row))
+                municipios.append(municipio)
+            
+            return jsonify({'success': True, 'data': municipios})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    # Rutas administrativas adicionales
+    @app.route('/admin/candidatos')
+    def admin_candidatos():
+        """Página de gestión de candidatos"""
+        return render_template('admin/candidatos.html')
+    
+    @app.route('/admin/partidos')
+    def admin_partidos():
+        """Página de gestión de partidos políticos"""
+        return render_template('admin/partidos.html')
+    
+    @app.route('/admin/usuarios')
+    def admin_usuarios():
+        """Página de gestión de usuarios"""
+        return render_template('admin/usuarios.html')
+    
+    @app.route('/admin/configuracion')
+    def admin_configuracion():
+        """Página de configuración del sistema"""
+        return render_template('admin/configuracion.html')
+    
+    @app.route('/admin/reportes')
+    def admin_reportes():
+        """Página de reportes administrativos"""
+        return render_template('admin/reportes.html')
+    
+    @app.route('/admin/importar-excel')
+    def admin_importar_excel():
+        """Página de importación desde Excel"""
+        return render_template('admin/importar_excel.html')
+    
+    @app.route('/admin/prioridades')
+    def admin_prioridades():
+        """Página de configuración de prioridades"""
+        return render_template('admin/prioridades.html')
+    
+    @app.route('/plantilla_datos_electorales.xlsx')
+    def download_excel_template():
+        """Descargar plantilla de Excel"""
+        from flask import send_file
+        import os
+        
+        template_path = 'plantilla_datos_electorales.xlsx'
+        if os.path.exists(template_path):
+            return send_file(template_path, as_attachment=True)
+        else:
+            return jsonify({'error': 'Plantilla no encontrada'}), 404
+    
     # Registrar APIs RESTful
     try:
         from api_endpoints import register_api_routes
@@ -925,6 +1155,38 @@ def create_app():
         print("✅ APIs RESTful registradas exitosamente")
     except ImportError as e:
         print(f"⚠️  No se pudieron cargar las APIs: {e}")
+    
+    # Registrar APIs administrativas extendidas
+    try:
+        from api.admin_api import admin_api
+        app.register_blueprint(admin_api, url_prefix='/api/admin')
+        print("✅ APIs administrativas extendidas registradas exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudieron cargar las APIs administrativas: {e}")
+    
+    # Registrar APIs de coordinación municipal
+    try:
+        from api.municipal_coordination_api import municipal_api
+        app.register_blueprint(municipal_api, url_prefix='/api/municipal')
+        print("✅ APIs de coordinación municipal registradas exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudieron cargar las APIs municipales: {e}")
+    
+    # Registrar APIs de coordinación (nueva implementación)
+    try:
+        from api.coordination_api import coordination_bp
+        app.register_blueprint(coordination_bp)
+        print("✅ APIs de coordinación registradas exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudieron cargar las APIs de coordinación: {e}")
+    
+    # Registrar APIs de gestión de candidatos
+    try:
+        from api.candidate_api import candidate_api
+        app.register_blueprint(candidate_api)
+        print("✅ APIs de gestión de candidatos registradas exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudieron cargar las APIs de gestión de candidatos: {e}")
     
     return app
 

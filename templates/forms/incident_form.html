@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} - Sistema Electoral ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ form_title }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Importante:</strong> Reporte cualquier irregularidad o incidente observado durante el proceso electoral.
+                    </div>
+                    
+                    <form id="incidentForm" method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="tipo_incidente" class="form-label">Tipo de Incidente *</label>
+                                    <select class="form-select" id="tipo_incidente" name="tipo_incidente" required>
+                                        <option value="">Seleccionar tipo...</option>
+                                        <option value="irregularidad_votacion">Irregularidad en Votación</option>
+                                        <option value="problema_tecnico">Problema Técnico</option>
+                                        <option value="alteracion_orden">Alteración del Orden</option>
+                                        <option value="falta_material">Falta de Material Electoral</option>
+                                        <option value="ausencia_funcionario">Ausencia de Funcionario</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="gravedad" class="form-label">Nivel de Gravedad *</label>
+                                    <select class="form-select" id="gravedad" name="gravedad" required>
+                                        <option value="">Seleccionar gravedad...</option>
+                                        <option value="baja">Baja - No afecta el proceso</option>
+                                        <option value="media">Media - Afecta parcialmente</option>
+                                        <option value="alta">Alta - Afecta significativamente</option>
+                                        <option value="critica">Crítica - Detiene el proceso</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fecha_incidente" class="form-label">Fecha del Incidente *</label>
+                                    <input type="datetime-local" class="form-control" id="fecha_incidente" name="fecha_incidente" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ubicacion" class="form-label">Ubicación Específica</label>
+                                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" placeholder="Ej: Mesa 001-A, Puesto Central">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="descripcion" class="form-label">Descripción Detallada del Incidente *</label>
+                                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required 
+                                              placeholder="Describa detalladamente lo ocurrido, incluyendo personas involucradas, hora exacta y circunstancias..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="testigos_presentes" class="form-label">Testigos Presentes</label>
+                                    <textarea class="form-control" id="testigos_presentes" name="testigos_presentes" rows="2" 
+                                              placeholder="Nombres y cédulas de personas que presenciaron el incidente..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="acciones_tomadas" class="form-label">Acciones Tomadas</label>
+                                    <textarea class="form-control" id="acciones_tomadas" name="acciones_tomadas" rows="2" 
+                                              placeholder="Describa las acciones inmediatas que se tomaron..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requiere_seguimiento" name="requiere_seguimiento">
+                                        <label class="form-check-label" for="requiere_seguimiento">
+                                            Requiere seguimiento inmediato
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notificar_autoridades" name="notificar_autoridades">
+                                        <label class="form-check-label" for="notificar_autoridades">
+                                            Notificar a autoridades competentes
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="evidencia" class="form-label">Evidencia Fotográfica</label>
+                                    <input type="file" class="form-control" id="evidencia" name="evidencia" accept="image/*" multiple>
+                                    <div class="form-text">Puede adjuntar fotografías como evidencia del incidente.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Declaración:</strong> Declaro que la información proporcionada es veraz y corresponde a los hechos observados.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-warning me-2">
+                                    <i class="fas fa-paper-plane me-1"></i>Reportar Incidente
+                                </button>
+                                <button type="button" class="btn btn-secondary me-2" onclick="limpiarFormulario()">
+                                    <i class="fas fa-eraser me-1"></i>Limpiar
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                    <i class="fas fa-arrow-left me-1"></i>Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+// Establecer fecha actual por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('fecha_incidente').value = localDateTime;
+});
+
+document.getElementById('incidentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validar campos requeridos
+    const tipoIncidente = document.getElementById('tipo_incidente').value;
+    const gravedad = document.getElementById('gravedad').value;
+    const descripcion = document.getElementById('descripcion').value;
+    
+    if (!tipoIncidente || !gravedad || !descripcion.trim()) {
+        alert('Por favor complete todos los campos requeridos.');
+        return;
+    }
+    
+    // Simular envío del reporte
+    const formData = new FormData(this);
+    const incidentData = Object.fromEntries(formData);
+    
+    console.log('Reportando incidente:', incidentData);
+    
+    // Mostrar confirmación
+    const confirmacion = confirm('¿Está seguro de que desea reportar este incidente? Una vez enviado no podrá ser modificado.');
+    
+    if (confirmacion) {
+        // Simular envío exitoso
+        alert('Incidente reportado exitosamente. Se ha generado el reporte #INC-' + Date.now());
+        
+        // Redirigir al dashboard
+        window.location.href = '/dashboard/testigo_mesa';
+    }
+});
+
+function limpiarFormulario() {
+    if (confirm('¿Está seguro de que desea limpiar el formulario? Se perderá toda la información ingresada.')) {
+        document.getElementById('incidentForm').reset();
+        
+        // Restablecer fecha actual
+        const now = new Date();
+        const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        document.getElementById('fecha_incidente').value = localDateTime;
+    }
+}
+
+// Validación en tiempo real del tipo de incidente
+document.getElementById('tipo_incidente').addEventListener('change', function() {
+    const otroTipo = this.value === 'otro';
+    
+    if (otroTipo) {
+        // Si selecciona "Otro", agregar campo de texto
+        if (!document.getElementById('otro_tipo_texto')) {
+            const div = document.createElement('div');
+            div.className = 'mb-3';
+            div.innerHTML = `
+                <label for="otro_tipo_texto" class="form-label">Especifique el tipo de incidente *</label>
+                <input type="text" class="form-control" id="otro_tipo_texto" name="otro_tipo_texto" required>
+            `;
+            this.closest('.col-md-6').appendChild(div);
+        }
+    } else {
+        // Remover campo si existe
+        const otroTipoDiv = document.getElementById('otro_tipo_texto')?.closest('.mb-3');
+        if (otroTipoDiv) {
+            otroTipoDiv.remove();
+        }
+    }
+});
+</script>
+{% endblock %}

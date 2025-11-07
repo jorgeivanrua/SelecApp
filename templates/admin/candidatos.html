@@ -1,0 +1,629 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Candidatos - Administrador{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/super_admin.css') }}" rel="stylesheet">
+<style>
+.candidate-card {
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+.candidate-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.party-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+}
+</style>
+{% endblock %}
+{% block body_class %}role-super-admin{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Administración - Candidatos{% endblock %}
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="/dashboard/super_admin">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/admin/candidatos">
+        <i class="fas fa-users me-2"></i>Candidatos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/partidos">
+        <i class="fas fa-flag me-2"></i>Partidos
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/usuarios">
+        <i class="fas fa-user-cog me-2"></i>Usuarios
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-users me-2"></i>Gestión de Candidatos</h2>
+                    <p class="text-muted">Administrar candidatos para los procesos electorales</p>
+                </div>
+                <button class="btn btn-primary btn-lg" onclick="nuevoCandidato()">
+                    <i class="fas fa-plus me-2"></i>Nuevo Candidato
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Filtrar por Partido</label>
+                            <select class="form-select" id="filtro-partido" onchange="filtrarCandidatos()">
+                                <option value="">Todos los partidos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Filtrar por Cargo</label>
+                            <select class="form-select" id="filtro-cargo" onchange="filtrarCandidatos()">
+                                <option value="">Todos los cargos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Filtrar por Estado</label>
+                            <select class="form-select" id="filtro-estado" onchange="filtrarCandidatos()">
+                                <option value="">Todos los estados</option>
+                                <option value="inscrito">Inscrito</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="rechazado">Rechazado</option>
+                                <option value="retirado">Retirado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-control" id="buscar-candidato" placeholder="Nombre o cédula..." onkeyup="filtrarCandidatos()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Candidatos -->
+    <div class="row" id="lista-candidatos">
+        <!-- Los candidatos se cargarán dinámicamente -->
+    </div>
+</div>
+
+<!-- Modal para Nuevo/Editar Candidato -->
+<div class="modal fade" id="candidatoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="candidatoModalTitle">Nuevo Candidato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="candidato-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Cédula *</label>
+                                <input type="text" class="form-control" id="cedula" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-control" id="nombre_completo" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fecha de Nacimiento</label>
+                                <input type="date" class="form-control" id="fecha_nacimiento">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Lugar de Nacimiento</label>
+                                <input type="text" class="form-control" id="lugar_nacimiento">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Profesión</label>
+                                <input type="text" class="form-control" id="profesion">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Partido Político *</label>
+                                <select class="form-select" id="partido_id" required>
+                                    <option value="">Seleccione partido...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Cargo Electoral *</label>
+                                <select class="form-select" id="cargo_id" required>
+                                    <option value="">Seleccione cargo...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Municipio</label>
+                                <select class="form-select" id="municipio_id">
+                                    <option value="">Seleccione municipio...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Número en Lista</label>
+                                <input type="number" class="form-control" id="numero_lista" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" id="estado">
+                                    <option value="inscrito">Inscrito</option>
+                                    <option value="aprobado">Aprobado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                    <option value="retirado">Retirado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dirección</label>
+                        <textarea class="form-control" id="direccion" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCandidato()">Guardar Candidato</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block role_scripts %}
+<script>
+let candidatos = [];
+let partidos = [];
+let cargos = [];
+let municipios = [];
+let editandoCandidato = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de candidatos cargada');
+    cargarDatosIniciales();
+});
+
+function cargarDatosIniciales() {
+    Promise.all([
+        fetch('/api/admin/candidatos').then(r => r.json()),
+        fetch('/api/admin/partidos').then(r => r.json()),
+        fetch('/api/admin/cargos').then(r => r.json()),
+        fetch('/api/admin/municipios').then(r => r.json())
+    ]).then(([candidatosData, partidosData, cargosData, municipiosData]) => {
+        candidatos = candidatosData.data || [];
+        partidos = partidosData.data || [];
+        cargos = cargosData.data || [];
+        municipios = municipiosData.data || [];
+        
+        cargarFiltros();
+        mostrarCandidatos();
+    }).catch(error => {
+        console.error('Error cargando datos:', error);
+        mostrarNotificacion('Error cargando datos iniciales', 'error');
+    });
+}
+
+function cargarFiltros() {
+    // Cargar partidos en filtro
+    const filtroPartido = document.getElementById('filtro-partido');
+    partidos.forEach(partido => {
+        const option = document.createElement('option');
+        option.value = partido.id;
+        option.textContent = `${partido.nombre} (${partido.sigla})`;
+        filtroPartido.appendChild(option);
+    });
+    
+    // Cargar cargos en filtro
+    const filtroCargo = document.getElementById('filtro-cargo');
+    cargos.forEach(cargo => {
+        const option = document.createElement('option');
+        option.value = cargo.id;
+        option.textContent = cargo.nombre;
+        filtroCargo.appendChild(option);
+    });
+    
+    // Cargar en modal también
+    cargarOpcionesModal();
+}
+
+function cargarOpcionesModal() {
+    // Partidos en modal
+    const partidoSelect = document.getElementById('partido_id');
+    partidoSelect.innerHTML = '<option value="">Seleccione partido...</option>';
+    partidos.forEach(partido => {
+        const option = document.createElement('option');
+        option.value = partido.id;
+        option.textContent = `${partido.nombre} (${partido.sigla})`;
+        partidoSelect.appendChild(option);
+    });
+    
+    // Cargos en modal
+    const cargoSelect = document.getElementById('cargo_id');
+    cargoSelect.innerHTML = '<option value="">Seleccione cargo...</option>';
+    cargos.forEach(cargo => {
+        const option = document.createElement('option');
+        option.value = cargo.id;
+        option.textContent = cargo.nombre;
+        cargoSelect.appendChild(option);
+    });
+    
+    // Municipios en modal
+    const municipioSelect = document.getElementById('municipio_id');
+    municipioSelect.innerHTML = '<option value="">Seleccione municipio...</option>';
+    municipios.forEach(municipio => {
+        const option = document.createElement('option');
+        option.value = municipio.id;
+        option.textContent = municipio.nombre;
+        municipioSelect.appendChild(option);
+    });
+}
+
+function mostrarCandidatos() {
+    const container = document.getElementById('lista-candidatos');
+    
+    if (candidatos.length === 0) {
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h4>No hay candidatos registrados</h4>
+                    <p class="text-muted">Comience agregando el primer candidato</p>
+                    <button class="btn btn-primary" onclick="nuevoCandidato()">
+                        <i class="fas fa-plus me-2"></i>Agregar Candidato
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = candidatos.map(candidato => {
+        const partido = partidos.find(p => p.id === candidato.partido_id);
+        const cargo = cargos.find(c => c.id === candidato.cargo_id);
+        const municipio = municipios.find(m => m.id === candidato.municipio_id);
+        
+        return `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card candidate-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-title mb-0">${candidato.nombre_completo}</h6>
+                            <span class="badge status-badge bg-${getEstadoColor(candidato.estado)}">${candidato.estado}</span>
+                        </div>
+                        <p class="text-muted small mb-2">CC: ${candidato.cedula}</p>
+                        <p class="card-text small mb-2">
+                            <strong>Cargo:</strong> ${cargo ? cargo.nombre : 'N/A'}<br>
+                            <strong>Municipio:</strong> ${municipio ? municipio.nombre : 'N/A'}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge party-badge" style="background-color: ${partido ? partido.color_principal : '#6c757d'}">
+                                ${partido ? partido.sigla : 'Sin partido'}
+                            </span>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="editarCandidato(${candidato.id})" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-info" onclick="verCandidato(${candidato.id})" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="eliminarCandidato(${candidato.id})" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getEstadoColor(estado) {
+    const colores = {
+        'inscrito': 'primary',
+        'aprobado': 'success',
+        'rechazado': 'danger',
+        'retirado': 'secondary'
+    };
+    return colores[estado] || 'secondary';
+}
+
+function filtrarCandidatos() {
+    const partidoFiltro = document.getElementById('filtro-partido').value;
+    const cargoFiltro = document.getElementById('filtro-cargo').value;
+    const estadoFiltro = document.getElementById('filtro-estado').value;
+    const busqueda = document.getElementById('buscar-candidato').value.toLowerCase();
+    
+    const candidatosFiltrados = candidatos.filter(candidato => {
+        const cumplePartido = !partidoFiltro || candidato.partido_id == partidoFiltro;
+        const cumpleCargo = !cargoFiltro || candidato.cargo_id == cargoFiltro;
+        const cumpleEstado = !estadoFiltro || candidato.estado === estadoFiltro;
+        const cumpleBusqueda = !busqueda || 
+            candidato.nombre_completo.toLowerCase().includes(busqueda) ||
+            candidato.cedula.includes(busqueda);
+        
+        return cumplePartido && cumpleCargo && cumpleEstado && cumpleBusqueda;
+    });
+    
+    // Temporalmente mostrar filtrados
+    const candidatosOriginales = candidatos;
+    candidatos = candidatosFiltrados;
+    mostrarCandidatos();
+    candidatos = candidatosOriginales;
+}
+
+function nuevoCandidato() {
+    editandoCandidato = null;
+    document.getElementById('candidatoModalTitle').textContent = 'Nuevo Candidato';
+    document.getElementById('candidato-form').reset();
+    const modal = new bootstrap.Modal(document.getElementById('candidatoModal'));
+    modal.show();
+}
+
+function editarCandidato(id) {
+    const candidato = candidatos.find(c => c.id === id);
+    if (!candidato) return;
+    
+    editandoCandidato = candidato;
+    document.getElementById('candidatoModalTitle').textContent = 'Editar Candidato';
+    
+    // Llenar formulario
+    document.getElementById('cedula').value = candidato.cedula || '';
+    document.getElementById('nombre_completo').value = candidato.nombre_completo || '';
+    document.getElementById('fecha_nacimiento').value = candidato.fecha_nacimiento || '';
+    document.getElementById('lugar_nacimiento').value = candidato.lugar_nacimiento || '';
+    document.getElementById('profesion').value = candidato.profesion || '';
+    document.getElementById('telefono').value = candidato.telefono || '';
+    document.getElementById('email').value = candidato.email || '';
+    document.getElementById('partido_id').value = candidato.partido_id || '';
+    document.getElementById('cargo_id').value = candidato.cargo_id || '';
+    document.getElementById('municipio_id').value = candidato.municipio_id || '';
+    document.getElementById('numero_lista').value = candidato.numero_lista || '';
+    document.getElementById('estado').value = candidato.estado || 'inscrito';
+    document.getElementById('direccion').value = candidato.direccion || '';
+    document.getElementById('observaciones').value = candidato.observaciones || '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('candidatoModal'));
+    modal.show();
+}
+
+function guardarCandidato() {
+    const formData = {
+        cedula: document.getElementById('cedula').value,
+        nombre_completo: document.getElementById('nombre_completo').value,
+        fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+        lugar_nacimiento: document.getElementById('lugar_nacimiento').value,
+        profesion: document.getElementById('profesion').value,
+        telefono: document.getElementById('telefono').value,
+        email: document.getElementById('email').value,
+        partido_id: parseInt(document.getElementById('partido_id').value),
+        cargo_id: parseInt(document.getElementById('cargo_id').value),
+        municipio_id: parseInt(document.getElementById('municipio_id').value) || null,
+        numero_lista: parseInt(document.getElementById('numero_lista').value) || null,
+        estado: document.getElementById('estado').value,
+        direccion: document.getElementById('direccion').value,
+        observaciones: document.getElementById('observaciones').value
+    };
+    
+    const url = editandoCandidato ? `/api/admin/candidatos/${editandoCandidato.id}` : '/api/admin/candidatos';
+    const method = editandoCandidato ? 'PUT' : 'POST';
+    
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            mostrarNotificacion(
+                editandoCandidato ? 'Candidato actualizado exitosamente' : 'Candidato creado exitosamente',
+                'success'
+            );
+            bootstrap.Modal.getInstance(document.getElementById('candidatoModal')).hide();
+            cargarDatosIniciales(); // Recargar datos
+        } else {
+            mostrarNotificacion('Error: ' + result.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error guardando candidato', 'error');
+    });
+}
+
+function verCandidato(id) {
+    const candidato = candidatos.find(c => c.id === id);
+    if (!candidato) return;
+    
+    const partido = partidos.find(p => p.id === candidato.partido_id);
+    const cargo = cargos.find(c => c.id === candidato.cargo_id);
+    const municipio = municipios.find(m => m.id === candidato.municipio_id);
+    
+    const contenido = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Información Personal</h6>
+                <p><strong>Nombre:</strong> ${candidato.nombre_completo}</p>
+                <p><strong>Cédula:</strong> ${candidato.cedula}</p>
+                <p><strong>Fecha de Nacimiento:</strong> ${candidato.fecha_nacimiento || 'N/A'}</p>
+                <p><strong>Lugar de Nacimiento:</strong> ${candidato.lugar_nacimiento || 'N/A'}</p>
+                <p><strong>Profesión:</strong> ${candidato.profesion || 'N/A'}</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Información Electoral</h6>
+                <p><strong>Partido:</strong> ${partido ? partido.nombre : 'N/A'}</p>
+                <p><strong>Cargo:</strong> ${cargo ? cargo.nombre : 'N/A'}</p>
+                <p><strong>Municipio:</strong> ${municipio ? municipio.nombre : 'N/A'}</p>
+                <p><strong>Número en Lista:</strong> ${candidato.numero_lista || 'N/A'}</p>
+                <p><strong>Estado:</strong> <span class="badge bg-${getEstadoColor(candidato.estado)}">${candidato.estado}</span></p>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>Contacto</h6>
+                <p><strong>Teléfono:</strong> ${candidato.telefono || 'N/A'}</p>
+                <p><strong>Email:</strong> ${candidato.email || 'N/A'}</p>
+                <p><strong>Dirección:</strong> ${candidato.direccion || 'N/A'}</p>
+            </div>
+        </div>
+        ${candidato.observaciones ? `
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>Observaciones</h6>
+                <p>${candidato.observaciones}</p>
+            </div>
+        </div>
+        ` : ''}
+    `;
+    
+    mostrarModal(`Detalles de ${candidato.nombre_completo}`, contenido);
+}
+
+function eliminarCandidato(id) {
+    const candidato = candidatos.find(c => c.id === id);
+    if (!candidato) return;
+    
+    if (confirm(`¿Está seguro de que desea eliminar al candidato ${candidato.nombre_completo}?`)) {
+        fetch(`/api/admin/candidatos/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                mostrarNotificacion('Candidato eliminado exitosamente', 'success');
+                cargarDatosIniciales(); // Recargar datos
+            } else {
+                mostrarNotificacion('Error eliminando candidato: ' + result.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error eliminando candidato', 'error');
+        });
+    }
+}
+
+function mostrarModal(titulo, contenido) {
+    const modalHtml = `
+        <div class="modal fade" id="detalleModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${titulo}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${contenido}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal anterior si existe
+    const existingModal = document.getElementById('detalleModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('detalleModal'));
+    modal.show();
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'warning': 'alert-warning',
+        'error': 'alert-danger',
+        'info': 'alert-info'
+    }[tipo];
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

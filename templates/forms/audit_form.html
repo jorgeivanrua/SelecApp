@@ -1,155 +1,343 @@
 {% extends "base.html" %}
-{% block title %}Formulario de Auditoría - Sistema Electoral ERP{% endblock %}
+{% block title %}Iniciar Auditoría - Sistema Electoral ERP{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-shield-alt me-2"></i>
-                    Nueva Auditoría Electoral
-                </h4>
-            </div>
-            <div class="card-body">
-                <form id="auditForm" method="POST" action="/api/audit/create">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="audit_type" class="form-label">Tipo de Auditoría</label>
-                                <select class="form-select" id="audit_type" name="audit_type" required>
-                                    <option value="">Seleccionar tipo</option>
-                                    <option value="proceso_electoral">Proceso Electoral</option>
-                                    <option value="registro_candidatos">Registro de Candidatos</option>
-                                    <option value="configuracion_mesas">Configuración de Mesas</option>
-                                    <option value="sistema_votacion">Sistema de Votación</option>
-                                    <option value="conteo_votos">Conteo de Votos</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="priority" class="form-label">Prioridad</label>
-                                <select class="form-select" id="priority" name="priority" required>
-                                    <option value="">Seleccionar prioridad</option>
-                                    <option value="alta">Alta</option>
-                                    <option value="media">Media</option>
-                                    <option value="baja">Baja</option>
-                                </select>
-                            </div>
-                        </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Iniciar Nueva Auditoría Electoral
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Auditoría Electoral:</strong> Proceso sistemático de verificación y validación de los procedimientos electorales.
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="municipality" class="form-label">Municipio</label>
-                                <select class="form-select" id="municipality" name="municipality" required>
-                                    <option value="">Seleccionar municipio</option>
-                                    <option value="florencia">Florencia</option>
-                                    <option value="san_vicente">San Vicente del Caguán</option>
-                                    <option value="puerto_rico">Puerto Rico</option>
-                                    <option value="el_paujil">El Paujil</option>
-                                    <option value="la_montanita">La Montañita</option>
-                                </select>
+                    <form id="auditForm" method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="tipo_auditoria" class="form-label">Tipo de Auditoría *</label>
+                                    <select class="form-select" id="tipo_auditoria" name="tipo_auditoria" required>
+                                        <option value="">Seleccionar tipo...</option>
+                                        <option value="integral">Auditoría Integral</option>
+                                        <option value="procedimental">Auditoría Procedimental</option>
+                                        <option value="tecnologica">Auditoría Tecnológica</option>
+                                        <option value="seguridad">Auditoría de Seguridad</option>
+                                        <option value="cumplimiento">Auditoría de Cumplimiento</option>
+                                        <option value="post_electoral">Auditoría Post-Electoral</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="alcance" class="form-label">Alcance de la Auditoría *</label>
+                                    <select class="form-select" id="alcance" name="alcance" required>
+                                        <option value="">Seleccionar alcance...</option>
+                                        <option value="departamental">Departamental (Todo Caquetá)</option>
+                                        <option value="municipal">Municipal Específico</option>
+                                        <option value="puesto">Puesto de Votación</option>
+                                        <option value="mesa">Mesa Específica</option>
+                                        <option value="proceso">Proceso Electoral</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="scheduled_date" class="form-label">Fecha Programada</label>
-                                <input type="date" class="form-control" id="scheduled_date" name="scheduled_date" required>
+                        
+                        <div class="row" id="ubicacionEspecifica" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="municipio_auditoria" class="form-label">Municipio</label>
+                                    <select class="form-select" id="municipio_auditoria" name="municipio_auditoria">
+                                        <option value="">Seleccionar municipio...</option>
+                                        <option value="1">Florencia</option>
+                                        <option value="2">San Vicente del Caguán</option>
+                                        <option value="3">Puerto Rico</option>
+                                        <option value="4">El Paujil</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ubicacion_especifica" class="form-label">Ubicación Específica</label>
+                                    <input type="text" class="form-control" id="ubicacion_especifica" name="ubicacion_especifica" 
+                                           placeholder="Ej: Puesto Central, Mesa 001-A">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Descripción de la Auditoría</label>
-                        <textarea class="form-control" id="description" name="description" rows="4" 
-                                  placeholder="Describe el alcance y objetivos de la auditoría..." required></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="criteria" class="form-label">Criterios de Evaluación</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="transparency" name="criteria[]" value="transparency">
-                            <label class="form-check-label" for="transparency">
-                                Transparencia del Proceso
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="security" name="criteria[]" value="security">
-                            <label class="form-check-label" for="security">
-                                Seguridad del Sistema
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="compliance" name="criteria[]" value="compliance">
-                            <label class="form-check-label" for="compliance">
-                                Cumplimiento Normativo
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="integrity" name="criteria[]" value="integrity">
-                            <label class="form-check-label" for="integrity">
-                                Integridad de Datos
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="auditor_assigned" class="form-label">Auditor Asignado</label>
-                                <select class="form-select" id="auditor_assigned" name="auditor_assigned">
-                                    <option value="">Auto-asignar</option>
-                                    <option value="auditor1">Carlos Mendoza</option>
-                                    <option value="auditor2">Ana Patricia Ruiz</option>
-                                    <option value="auditor3">Miguel Ángel Torres</option>
-                                </select>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fecha_inicio" class="form-label">Fecha de Inicio *</label>
+                                    <input type="datetime-local" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fecha_estimada_fin" class="form-label">Fecha Estimada de Finalización</label>
+                                    <input type="datetime-local" class="form-control" id="fecha_estimada_fin" name="fecha_estimada_fin">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="estimated_duration" class="form-label">Duración Estimada (días)</label>
-                                <input type="number" class="form-control" id="estimated_duration" 
-                                       name="estimated_duration" min="1" max="30" value="3">
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="objetivos" class="form-label">Objetivos de la Auditoría *</label>
+                                    <textarea class="form-control" id="objetivos" name="objetivos" rows="3" required
+                                              placeholder="Describa los objetivos específicos que se buscan alcanzar con esta auditoría..."></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary" onclick="history.back()">
-                            <i class="fas fa-arrow-left me-2"></i>Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-dark">
-                            <i class="fas fa-save me-2"></i>Crear Auditoría
-                        </button>
-                    </div>
-                </form>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Áreas a Auditar *</label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_registro" name="areas[]" value="registro_votantes">
+                                                <label class="form-check-label" for="area_registro">
+                                                    Registro de Votantes
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_candidatos" name="areas[]" value="candidatos">
+                                                <label class="form-check-label" for="area_candidatos">
+                                                    Registro de Candidatos
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_mesas" name="areas[]" value="mesas_votacion">
+                                                <label class="form-check-label" for="area_mesas">
+                                                    Mesas de Votación
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_materiales" name="areas[]" value="materiales">
+                                                <label class="form-check-label" for="area_materiales">
+                                                    Materiales Electorales
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_seguridad" name="areas[]" value="seguridad">
+                                                <label class="form-check-label" for="area_seguridad">
+                                                    Seguridad del Proceso
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_tecnologia" name="areas[]" value="tecnologia">
+                                                <label class="form-check-label" for="area_tecnologia">
+                                                    Sistemas Tecnológicos
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_conteo" name="areas[]" value="conteo">
+                                                <label class="form-check-label" for="area_conteo">
+                                                    Conteo de Votos
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_transmision" name="areas[]" value="transmision">
+                                                <label class="form-check-label" for="area_transmision">
+                                                    Transmisión de Resultados
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="area_documentacion" name="areas[]" value="documentacion">
+                                                <label class="form-check-label" for="area_documentacion">
+                                                    Documentación y Actas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="equipo_auditor" class="form-label">Equipo Auditor</label>
+                                    <textarea class="form-control" id="equipo_auditor" name="equipo_auditor" rows="2"
+                                              placeholder="Nombres y roles de los miembros del equipo auditor..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="metodologia" class="form-label">Metodología</label>
+                                    <select class="form-select" id="metodologia" name="metodologia">
+                                        <option value="">Seleccionar metodología...</option>
+                                        <option value="muestreo_aleatorio">Muestreo Aleatorio</option>
+                                        <option value="revision_completa">Revisión Completa</option>
+                                        <option value="revision_dirigida">Revisión Dirigida</option>
+                                        <option value="mixta">Metodología Mixta</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="criterios_evaluacion" class="form-label">Criterios de Evaluación</label>
+                                    <textarea class="form-control" id="criterios_evaluacion" name="criterios_evaluacion" rows="3"
+                                              placeholder="Especifique los criterios y estándares que se utilizarán para evaluar el cumplimiento..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notificar_inicio" name="notificar_inicio" checked>
+                                        <label class="form-check-label" for="notificar_inicio">
+                                            Notificar inicio de auditoría a las partes interesadas
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="generar_cronograma" name="generar_cronograma" checked>
+                                        <label class="form-check-label" for="generar_cronograma">
+                                            Generar cronograma detallado de actividades
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Importante:</strong> Una vez iniciada la auditoría, se generará un código único de seguimiento y se notificará a todas las partes involucradas.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-info me-2">
+                                    <i class="fas fa-play me-1"></i>Iniciar Auditoría
+                                </button>
+                                <button type="button" class="btn btn-secondary me-2" onclick="guardarBorrador()">
+                                    <i class="fas fa-save me-1"></i>Guardar Borrador
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                    <i class="fas fa-arrow-left me-1"></i>Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-{% block scripts %}
+
+{% block role_scripts %}
 <script>
+// Establecer fecha actual por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('fecha_inicio').value = localDateTime;
+    
+    // Fecha estimada de fin (7 días después)
+    const fechaFin = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000) - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('fecha_estimada_fin').value = fechaFin;
+});
+
+// Mostrar campos específicos según el alcance
+document.getElementById('alcance').addEventListener('change', function() {
+    const ubicacionDiv = document.getElementById('ubicacionEspecifica');
+    const alcance = this.value;
+    
+    if (alcance === 'municipal' || alcance === 'puesto' || alcance === 'mesa') {
+        ubicacionDiv.style.display = 'block';
+        document.getElementById('municipio_auditoria').required = true;
+    } else {
+        ubicacionDiv.style.display = 'none';
+        document.getElementById('municipio_auditoria').required = false;
+    }
+});
+
 document.getElementById('auditForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Validar que al menos un criterio esté seleccionado
-    const criteria = document.querySelectorAll('input[name="criteria[]"]:checked');
-    if (criteria.length === 0) {
-        alert('Debe seleccionar al menos un criterio de evaluación');
+    // Validar que al menos un área esté seleccionada
+    const areasSeleccionadas = document.querySelectorAll('input[name="areas[]"]:checked');
+    if (areasSeleccionadas.length === 0) {
+        alert('Debe seleccionar al menos un área para auditar.');
         return;
     }
     
-    // Simular envío del formulario
-    alert('Auditoría creada exitosamente');
-    window.location.href = '/dashboard/auditor_electoral';
+    // Simular inicio de auditoría
+    const formData = new FormData(this);
+    const auditData = Object.fromEntries(formData);
+    
+    // Agregar áreas seleccionadas
+    auditData.areas = Array.from(areasSeleccionadas).map(cb => cb.value);
+    
+    console.log('Iniciando auditoría:', auditData);
+    
+    // Mostrar confirmación
+    const confirmacion = confirm('¿Está seguro de que desea iniciar esta auditoría? Se generará un código de seguimiento y se notificará a las partes involucradas.');
+    
+    if (confirmacion) {
+        // Simular inicio exitoso
+        const codigoAuditoria = 'AUD-' + Date.now();
+        alert(`Auditoría iniciada exitosamente.\n\nCódigo de seguimiento: ${codigoAuditoria}\n\nSe han enviado las notificaciones correspondientes.`);
+        
+        // Redirigir al dashboard de auditoría
+        window.location.href = '/dashboard/auditor_electoral';
+    }
 });
 
-// Establecer fecha mínima como hoy
-document.getElementById('scheduled_date').min = new Date().toISOString().split('T')[0];
+function guardarBorrador() {
+    const formData = new FormData(document.getElementById('auditForm'));
+    const auditData = Object.fromEntries(formData);
+    
+    console.log('Guardando borrador de auditoría:', auditData);
+    
+    // Simular guardado
+    alert('Borrador guardado exitosamente. Puede continuar editando más tarde.');
+}
+
+// Validación en tiempo real del tipo de auditoría
+document.getElementById('tipo_auditoria').addEventListener('change', function() {
+    const tipoAuditoria = this.value;
+    const objetivosField = document.getElementById('objetivos');
+    
+    // Sugerir objetivos según el tipo
+    const objetivosSugeridos = {
+        'integral': 'Evaluar de manera completa todos los aspectos del proceso electoral, desde el registro hasta la proclamación de resultados.',
+        'procedimental': 'Verificar el cumplimiento de los procedimientos establecidos en la normativa electoral vigente.',
+        'tecnologica': 'Auditar los sistemas tecnológicos utilizados en el proceso electoral, incluyendo seguridad y funcionamiento.',
+        'seguridad': 'Evaluar las medidas de seguridad implementadas para proteger la integridad del proceso electoral.',
+        'cumplimiento': 'Verificar el cumplimiento de las normas y regulaciones electorales aplicables.',
+        'post_electoral': 'Analizar los resultados y procedimientos posteriores a la jornada electoral para identificar mejoras.'
+    };
+    
+    if (objetivosSugeridos[tipoAuditoria] && !objetivosField.value.trim()) {
+        objetivosField.value = objetivosSugeridos[tipoAuditoria];
+    }
+});
 </script>
 {% endblock %}
-</parameter>
-</invoke>

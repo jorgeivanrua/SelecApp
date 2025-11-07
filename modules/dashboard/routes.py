@@ -1,265 +1,415 @@
 """
-Módulo Dashboard - Rutas y Endpoints
-Dashboard principal y widgets del sistema
+Rutas del módulo de dashboard
+Sistema de Recolección Inicial de Votaciones - Caquetá
 """
 
-from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from .services import DashboardService
-from core.permissions import Permission
+from flask import Blueprint, request, jsonify, send_file
+import logging
+from datetime import datetime
 
-dashboard_bp = Blueprint('dashboard', __name__)
+from .services import DashboardService, WidgetService
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Crear blueprint
+dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
+
+# Instancias de servicios
+dashboard_service = DashboardService()
+widget_service = WidgetService()
+
+# ==================== ENDPOINTS PRINCIPALES ====================
 
 @dashboard_bp.route('/overview', methods=['GET'])
-@jwt_required()
 def get_dashboard_overview():
     """Obtener vista general del dashboard"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
+        user_id = request.args.get('user_id', 1, type=int)  # TODO: Obtener del token
         
-        service = DashboardService(current_app.db_manager)
-        overview = service.get_dashboard_overview(user_id)
+        overview = dashboard_service.get_dashboard_overview(user_id)
         
-        return jsonify({'success': True, 'data': overview})
+        return jsonify({
+            'success': True,
+            'data': overview
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo vista general del dashboard: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINTS DE WIDGETS ====================
 
 @dashboard_bp.route('/widgets/electoral-progress', methods=['GET'])
-@jwt_required()
 def get_electoral_progress_widget():
     """Widget de progreso electoral"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = DashboardService(current_app.db_manager)
-        
         process_id = request.args.get('process_id', type=int)
-        widget_data = service.get_electoral_progress_widget(process_id)
         
-        return jsonify({'success': True, 'data': widget_data})
+        widget_data = dashboard_service.get_electoral_progress_widget(process_id)
+        
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de progreso electoral: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/candidate-ranking', methods=['GET'])
-@jwt_required()
 def get_candidate_ranking_widget():
     """Widget de ranking de candidatos"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = DashboardService(current_app.db_manager)
-        
         election_type_id = request.args.get('election_type_id', type=int)
         limit = request.args.get('limit', 5, type=int)
         
-        widget_data = service.get_candidate_ranking_widget(election_type_id, limit)
+        widget_data = dashboard_service.get_candidate_ranking_widget(election_type_id, limit)
         
-        return jsonify({'success': True, 'data': widget_data})
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de ranking de candidatos: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/party-distribution', methods=['GET'])
-@jwt_required()
 def get_party_distribution_widget():
     """Widget de distribución por partido"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = DashboardService(current_app.db_manager)
-        
         election_type_id = request.args.get('election_type_id', type=int)
-        widget_data = service.get_party_distribution_widget(election_type_id)
         
-        return jsonify({'success': True, 'data': widget_data})
+        widget_data = dashboard_service.get_party_distribution_widget(election_type_id)
+        
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de distribución por partido: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/geographic-map', methods=['GET'])
-@jwt_required()
 def get_geographic_map_widget():
     """Widget de mapa geográfico"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = DashboardService(current_app.db_manager)
-        
         election_type_id = request.args.get('election_type_id', type=int)
-        metric = request.args.get('metric', 'participation')  # participation, votes, etc.
+        metric = request.args.get('metric', 'participation')
         
-        widget_data = service.get_geographic_map_widget(election_type_id, metric)
+        widget_data = dashboard_service.get_geographic_map_widget(election_type_id, metric)
         
-        return jsonify({'success': True, 'data': widget_data})
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de mapa geográfico: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/real-time-stats', methods=['GET'])
-@jwt_required()
 def get_real_time_stats_widget():
     """Widget de estadísticas en tiempo real"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
+        widget_data = dashboard_service.get_real_time_stats_widget()
         
-        service = DashboardService(current_app.db_manager)
-        widget_data = service.get_real_time_stats_widget()
-        
-        return jsonify({'success': True, 'data': widget_data})
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de estadísticas en tiempo real: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/user-activity', methods=['GET'])
-@jwt_required()
 def get_user_activity_widget():
     """Widget de actividad de usuarios"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
+        time_range = request.args.get('time_range', '24h')
         
-        service = DashboardService(current_app.db_manager)
+        widget_data = dashboard_service.get_user_activity_widget(time_range)
         
-        time_range = request.args.get('time_range', '24h')  # 24h, 7d, 30d
-        widget_data = service.get_user_activity_widget(time_range)
-        
-        return jsonify({'success': True, 'data': widget_data})
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de actividad de usuarios: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/alerts', methods=['GET'])
-@jwt_required()
 def get_alerts_widget():
     """Widget de alertas del sistema"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
-        service = DashboardService(current_app.db_manager)
-        
-        severity = request.args.get('severity', 'all')  # all, high, medium, low
+        severity = request.args.get('severity', 'all')
         limit = request.args.get('limit', 10, type=int)
         
-        widget_data = service.get_alerts_widget(severity, limit)
+        widget_data = dashboard_service.get_alerts_widget(severity, limit)
         
-        return jsonify({'success': True, 'data': widget_data})
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de alertas: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/widgets/performance-metrics', methods=['GET'])
-@jwt_required()
 def get_performance_metrics_widget():
     """Widget de métricas de rendimiento"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
+        widget_data = dashboard_service.get_performance_metrics_widget()
         
-        service = DashboardService(current_app.db_manager)
-        widget_data = service.get_performance_metrics_widget()
-        
-        return jsonify({'success': True, 'data': widget_data})
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo widget de métricas de rendimiento: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINT GENÉRICO DE WIDGETS ====================
+
+@dashboard_bp.route('/widgets/<widget_type>', methods=['GET'])
+def get_widget_data(widget_type):
+    """Endpoint genérico para obtener datos de cualquier widget"""
+    try:
+        user_id = request.args.get('user_id', 1, type=int)
+        
+        # Obtener parámetros de la query string
+        params = {}
+        for key, value in request.args.items():
+            if key != 'user_id':
+                # Intentar convertir a int si es posible
+                try:
+                    params[key] = int(value)
+                except ValueError:
+                    params[key] = value
+        
+        widget_data = widget_service.get_widget_data(widget_type, user_id, params)
+        
+        return jsonify({
+            'success': True,
+            'data': widget_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo datos del widget {widget_type}: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINTS DE CONFIGURACIÓN ====================
 
 @dashboard_bp.route('/config', methods=['GET'])
-@jwt_required()
 def get_dashboard_config():
     """Obtener configuración del dashboard del usuario"""
     try:
-        user_id = get_jwt_identity()
-        service = DashboardService(current_app.db_manager)
+        user_id = request.args.get('user_id', 1, type=int)  # TODO: Obtener del token
         
-        config = service.get_user_dashboard_config(user_id)
-        return jsonify({'success': True, 'data': config})
+        config = dashboard_service.get_user_dashboard_config(user_id)
+        
+        return jsonify({
+            'success': True,
+            'data': config
+        })
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error obteniendo configuración del dashboard: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
 
 @dashboard_bp.route('/config', methods=['POST'])
-@jwt_required()
 def save_dashboard_config():
     """Guardar configuración del dashboard del usuario"""
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
         
         if not data:
-            return jsonify({'error': 'No configuration data provided'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'Datos JSON requeridos'
+            }), 400
         
-        service = DashboardService(current_app.db_manager)
-        success = service.save_user_dashboard_config(user_id, data)
+        user_id = data.get('user_id', 1)  # TODO: Obtener del token
+        config = data.get('config', {})
+        
+        success = dashboard_service.save_user_dashboard_config(user_id, config)
         
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Dashboard configuration saved successfully'
+                'message': 'Configuración del dashboard guardada exitosamente'
             })
         else:
-            return jsonify({'error': 'Failed to save configuration'}), 500
+            return jsonify({
+                'success': False,
+                'error': 'Error guardando configuración'
+            }), 500
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error guardando configuración del dashboard: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINTS DE INFORMACIÓN ====================
+
+@dashboard_bp.route('/widgets/available', methods=['GET'])
+def get_available_widgets():
+    """Obtener lista de widgets disponibles"""
+    try:
+        widgets = widget_service.get_available_widgets()
+        
+        return jsonify({
+            'success': True,
+            'data': widgets,
+            'total': len(widgets)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo widgets disponibles: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+@dashboard_bp.route('/widgets/categories', methods=['GET'])
+def get_widget_categories():
+    """Obtener categorías de widgets"""
+    try:
+        categories = widget_service.get_widget_categories()
+        
+        return jsonify({
+            'success': True,
+            'data': categories,
+            'total': len(categories)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo categorías de widgets: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+@dashboard_bp.route('/widgets/refresh-intervals', methods=['GET'])
+def get_widget_refresh_intervals():
+    """Obtener intervalos de actualización recomendados"""
+    try:
+        intervals = widget_service.get_widget_refresh_intervals()
+        
+        return jsonify({
+            'success': True,
+            'data': intervals
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo intervalos de actualización: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== ENDPOINTS DE EXPORTACIÓN ====================
 
 @dashboard_bp.route('/export', methods=['POST'])
-@jwt_required()
 def export_dashboard():
     """Exportar dashboard como imagen o PDF"""
     try:
-        # Verificar permisos
-        user_id = get_jwt_identity()
-        if not current_app.permission_manager.has_permission(user_id, Permission.DASHBOARD_VIEW.value):
-            return jsonify({'error': 'Insufficient permissions'}), 403
-        
         data = request.get_json()
-        if not data or 'format' not in data:
-            return jsonify({'error': 'Export format required'}), 400
         
-        service = DashboardService(current_app.db_manager)
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Datos JSON requeridos'
+            }), 400
         
-        export_file = service.export_dashboard(
-            user_id,
-            data['format'],  # 'png', 'pdf'
-            data.get('widgets', []),
-            data.get('options', {})
-        )
+        user_id = data.get('user_id', 1)  # TODO: Obtener del token
+        format_type = data.get('format', 'png')
+        widgets = data.get('widgets', [])
+        options = data.get('options', {})
         
-        if export_file:
+        export_filename = dashboard_service.export_dashboard(user_id, format_type, widgets, options)
+        
+        if export_filename:
             return jsonify({
                 'success': True,
-                'message': 'Dashboard exported successfully',
-                'download_url': f'/api/dashboard/download/{export_file}'
+                'message': 'Dashboard exportado exitosamente',
+                'filename': export_filename,
+                'download_url': f'/api/dashboard/download/{export_filename}'
             })
         else:
-            return jsonify({'error': 'Failed to export dashboard'}), 500
+            return jsonify({
+                'success': False,
+                'error': 'Error exportando dashboard'
+            }), 500
         
     except Exception as e:
-        return current_app.api_manager.handle_api_error(e)
+        logger.error(f"Error exportando dashboard: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Error interno del servidor'
+        }), 500
+
+# ==================== MANEJO DE ERRORES ====================
+
+@dashboard_bp.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'success': False,
+        'error': 'Endpoint no encontrado'
+    }), 404
+
+@dashboard_bp.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({
+        'success': False,
+        'error': 'Método no permitido'
+    }), 405
+
+@dashboard_bp.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        'success': False,
+        'error': 'Error interno del servidor'
+    }), 500

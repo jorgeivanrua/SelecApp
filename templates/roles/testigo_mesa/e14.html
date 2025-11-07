@@ -1,0 +1,240 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Captura E14 - Testigo Electoral{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">
+                <i class="fas fa-camera text-success"></i>
+                Captura de Formulario E14
+            </h2>
+            <p class="text-muted">Tome una foto del formulario E14 físico y digite los datos</p>
+        </div>
+    </div>
+
+    <!-- Paso 1: Captura de Foto -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-camera"></i> Paso 1: Fotografía del E14
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div id="preview-container" class="border rounded p-3 mb-3" style="min-height: 300px; background-color: #f8f9fa;">
+                            <i class="fas fa-image fa-5x text-muted"></i>
+                            <p class="text-muted mt-3">Vista previa de la foto</p>
+                        </div>
+                        
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-primary" onclick="tomarFoto()">
+                                <i class="fas fa-camera"></i> Tomar Foto
+                            </button>
+                            <button class="btn btn-secondary" onclick="subirArchivo()">
+                                <i class="fas fa-upload"></i> Subir Archivo
+                            </button>
+                        </div>
+                        
+                        <input type="file" id="file-input" accept="image/*,application/pdf" style="display: none;" onchange="previewFile(this)">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Recomendaciones:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Buena iluminación</li>
+                            <li>Foto nítida y enfocada</li>
+                            <li>Formulario completo visible</li>
+                            <li>Sin sombras ni reflejos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 2: Digitación de Datos -->
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-keyboard"></i> Paso 2: Digitación de Datos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form id="form-e14-datos">
+                        <div class="form-group">
+                            <label>Mesa de Votación</label>
+                            <input type="text" class="form-control" value="Mesa 001-A" readonly>
+                        </div>
+
+                        <h6 class="mt-3 mb-2">Votos por Candidato</h6>
+                        <div id="votos-candidatos">
+                            <div class="form-group">
+                                <label>Candidato 1</label>
+                                <input type="number" class="form-control" min="0" placeholder="Número de votos">
+                            </div>
+                            <div class="form-group">
+                                <label>Candidato 2</label>
+                                <input type="number" class="form-control" min="0" placeholder="Número de votos">
+                            </div>
+                            <div class="form-group">
+                                <label>Candidato 3</label>
+                                <input type="number" class="form-control" min="0" placeholder="Número de votos">
+                            </div>
+                        </div>
+
+                        <h6 class="mt-3 mb-2">Votos Especiales</h6>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>Votos en Blanco</label>
+                                <input type="number" class="form-control" min="0" value="0">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Votos Nulos</label>
+                                <input type="number" class="form-control" min="0" value="0">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>No Marcadas</label>
+                                <input type="number" class="form-control" min="0" value="0">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <strong>Total Votos:</strong> <span id="total-votos">0</span><br>
+                            <strong>Votantes Habilitados:</strong> 350
+                        </div>
+
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <textarea class="form-control" rows="2" placeholder="Observaciones adicionales (opcional)"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón de Envío -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="text-center">
+                        <button class="btn btn-success btn-lg" onclick="enviarE14()" id="btn-enviar" disabled>
+                            <i class="fas fa-paper-plane"></i> Enviar Captura E14
+                        </button>
+                        <p class="text-muted mt-2">
+                            <small>Asegúrese de haber tomado la foto y digitado todos los datos correctamente</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let fotoCapturada = false;
+
+function tomarFoto() {
+    // Aquí se implementaría la captura con la cámara del dispositivo
+    alert('Abriendo cámara...');
+    // Por ahora simulamos
+    document.getElementById('file-input').click();
+}
+
+function subirArchivo() {
+    document.getElementById('file-input').click();
+}
+
+function previewFile(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const previewContainer = document.getElementById('preview-container');
+            previewContainer.innerHTML = `
+                <img src="${e.target.result}" class="img-fluid" style="max-height: 300px;">
+                <p class="text-success mt-2">
+                    <i class="fas fa-check-circle"></i> Foto cargada correctamente
+                </p>
+            `;
+            fotoCapturada = true;
+            validarFormulario();
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function validarFormulario() {
+    const btnEnviar = document.getElementById('btn-enviar');
+    
+    // Habilitar botón solo si hay foto capturada
+    if (fotoCapturada) {
+        btnEnviar.disabled = false;
+        btnEnviar.classList.remove('btn-secondary');
+        btnEnviar.classList.add('btn-success');
+    } else {
+        btnEnviar.disabled = true;
+        btnEnviar.classList.remove('btn-success');
+        btnEnviar.classList.add('btn-secondary');
+    }
+}
+
+function enviarE14() {
+    if (!fotoCapturada) {
+        alert('Debe capturar la foto del formulario E14 primero');
+        return;
+    }
+
+    if (confirm('¿Está seguro de enviar la captura del E14? Verifique que la foto sea clara y los datos estén correctos.')) {
+        // Aquí se enviaría a la API
+        console.log('Enviando E14...');
+        
+        const formData = {
+            foto: document.getElementById('file-input').files[0],
+            datos: {
+                // Recopilar todos los datos del formulario
+            }
+        };
+        
+        alert('Captura E14 enviada exitosamente');
+        // Redirigir al dashboard
+        window.location.href = '/dashboard/testigo_mesa';
+    }
+}
+
+// Calcular total de votos automáticamente
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let total = 0;
+            inputs.forEach(i => {
+                total += parseInt(i.value) || 0;
+            });
+            document.getElementById('total-votos').textContent = total;
+        });
+    });
+});
+</script>
+
+<style>
+#preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#btn-enviar:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+</style>
+{% endblock %}
