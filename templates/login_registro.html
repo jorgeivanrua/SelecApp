@@ -352,16 +352,28 @@
                         <label><i class="fas fa-phone me-2"></i>Teléfono (10 dígitos)</label>
                     </div>
 
-                    <!-- Ubicación -->
-                    <div class="form-floating">
-                        <select class="form-select" id="registerMunicipio" required onchange="loadPuestos()">
+                    <!-- Ubicación Condicional -->
+                    <div id="ubicacionInfo" class="alert alert-info mb-3" style="display: none;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span id="ubicacionInfoText">Seleccione un rol para ver los campos requeridos</span>
+                    </div>
+
+                    <div class="form-floating" id="departamentoContainer" style="display: none;">
+                        <select class="form-select" id="registerDepartamento">
+                            <option value="Caquetá">Caquetá</option>
+                        </select>
+                        <label><i class="fas fa-map me-2"></i>Departamento</label>
+                    </div>
+
+                    <div class="form-floating" id="municipioContainer" style="display: none;">
+                        <select class="form-select" id="registerMunicipio" onchange="loadPuestos()">
                             <option value="">Seleccione...</option>
                         </select>
                         <label><i class="fas fa-map-marker-alt me-2"></i>Municipio</label>
                     </div>
 
-                    <div class="form-floating">
-                        <select class="form-select" id="registerPuesto" required onchange="loadMesas()">
+                    <div class="form-floating" id="puestoContainer" style="display: none;">
+                        <select class="form-select" id="registerPuesto" onchange="loadMesas()">
                             <option value="">Primero seleccione municipio...</option>
                         </select>
                         <label><i class="fas fa-building me-2"></i>Puesto de Votación</label>
@@ -371,7 +383,7 @@
                         <select class="form-select" id="registerMesa">
                             <option value="">Primero seleccione puesto...</option>
                         </select>
-                        <label><i class="fas fa-table me-2"></i>Mesa (Opcional para coordinadores)</label>
+                        <label><i class="fas fa-table me-2"></i>Mesa</label>
                     </div>
 
                     <!-- Contraseña -->
@@ -427,13 +439,50 @@
             document.querySelector(`[data-role="${role}"]`).classList.add('active');
             document.getElementById('registerRole').value = role;
             
-            // Mostrar/ocultar campo de mesa según el rol
+            // Ocultar todos los campos primero
+            document.getElementById('departamentoContainer').style.display = 'none';
+            document.getElementById('municipioContainer').style.display = 'none';
+            document.getElementById('puestoContainer').style.display = 'none';
+            document.getElementById('mesaContainer').style.display = 'none';
+            
+            // Remover required de todos
+            document.getElementById('registerDepartamento').required = false;
+            document.getElementById('registerMunicipio').required = false;
+            document.getElementById('registerPuesto').required = false;
+            document.getElementById('registerMesa').required = false;
+            
+            // Mostrar info
+            const ubicacionInfo = document.getElementById('ubicacionInfo');
+            const ubicacionInfoText = document.getElementById('ubicacionInfoText');
+            ubicacionInfo.style.display = 'block';
+            
+            // Configurar según el rol
             if (role === 'testigo_mesa') {
+                // Testigo necesita todo
+                document.getElementById('departamentoContainer').style.display = 'block';
+                document.getElementById('municipioContainer').style.display = 'block';
+                document.getElementById('puestoContainer').style.display = 'block';
                 document.getElementById('mesaContainer').style.display = 'block';
+                
+                document.getElementById('registerDepartamento').required = true;
+                document.getElementById('registerMunicipio').required = true;
+                document.getElementById('registerPuesto').required = true;
                 document.getElementById('registerMesa').required = true;
-            } else {
-                document.getElementById('mesaContainer').style.display = 'none';
-                document.getElementById('registerMesa').required = false;
+                
+                ubicacionInfoText.textContent = 'Testigo de Mesa: Requiere departamento, municipio, puesto y mesa específica';
+                ubicacionInfo.className = 'alert alert-success mb-3';
+            } else if (role === 'coordinador_puesto') {
+                // Coordinador de puesto necesita hasta puesto
+                document.getElementById('departamentoContainer').style.display = 'block';
+                document.getElementById('municipioContainer').style.display = 'block';
+                document.getElementById('puestoContainer').style.display = 'block';
+                
+                document.getElementById('registerDepartamento').required = true;
+                document.getElementById('registerMunicipio').required = true;
+                document.getElementById('registerPuesto').required = true;
+                
+                ubicacionInfoText.textContent = 'Coordinador de Puesto: Requiere departamento, municipio y puesto de votación';
+                ubicacionInfo.className = 'alert alert-warning mb-3';
             }
         }
 
@@ -594,8 +643,9 @@
                 nombre_completo: document.getElementById('registerNombre').value,
                 email: document.getElementById('registerEmail').value,
                 telefono: document.getElementById('registerTelefono').value,
-                municipio_id: document.getElementById('registerMunicipio').value,
-                puesto_id: document.getElementById('registerPuesto').value,
+                departamento: document.getElementById('registerDepartamento').value || 'Caquetá',
+                municipio_id: document.getElementById('registerMunicipio').value || null,
+                puesto_id: document.getElementById('registerPuesto').value || null,
                 mesa_id: document.getElementById('registerMesa').value || null,
                 rol: selectedRole,
                 password: password

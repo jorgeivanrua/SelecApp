@@ -14,13 +14,14 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .login-container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
+            max-width: 450px;
             width: 100%;
             padding: 40px;
         }
@@ -30,37 +31,48 @@
             margin-bottom: 30px;
         }
 
+        .login-header .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
         .login-header h2 {
             color: #1e293b;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
         }
 
         .login-header p {
             color: #64748b;
+            margin-bottom: 0;
         }
 
         .tab-buttons {
             display: flex;
             gap: 10px;
             margin-bottom: 30px;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 12px;
         }
 
         .tab-btn {
             flex: 1;
             padding: 12px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            border-radius: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
+            color: #64748b;
         }
 
         .tab-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #667eea;
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .form-group {
@@ -71,18 +83,31 @@
             font-weight: 600;
             color: #1e293b;
             margin-bottom: 8px;
+            display: block;
         }
 
         .form-control, .form-select {
             border-radius: 10px;
             border: 2px solid #e2e8f0;
             padding: 12px 15px;
+            width: 100%;
             transition: all 0.3s;
+            font-size: 1rem;
         }
 
         .form-control:focus, .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            outline: none;
+        }
+
+        .form-select {
+            background-color: #f8f9fa;
+        }
+
+        .form-select:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
         }
 
         .btn-login {
@@ -96,549 +121,374 @@
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s;
+            margin-top: 10px;
         }
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .tab-content {
+        .alert-custom {
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
             display: none;
         }
 
-        .tab-content.active {
+        .alert-custom.show {
             display: block;
         }
 
-        .alert {
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .loading-spinner {
+        .loading {
             display: none;
             text-align: center;
-            margin: 10px 0;
+            padding: 20px;
         }
 
-        .ubicacion-info {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .ubicacion-info.show {
+        .loading.show {
             display: block;
-        }
-
-        .ubicacion-info h6 {
-            color: #667eea;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .ubicacion-info p {
-            margin: 5px 0;
-            color: #64748b;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h2><i class="fas fa-vote-yea me-2"></i>Sistema Electoral</h2>
+            <div class="logo">
+                <i class="fas fa-vote-yea"></i> Sistema Electoral
+            </div>
             <p>Departamento del Caquetá</p>
         </div>
 
         <!-- Tabs -->
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('registrado')">
+            <button class="tab-btn active" onclick="switchTab('registered')">
                 <i class="fas fa-user me-2"></i>Ya Registrado
             </button>
-            <button class="tab-btn" onclick="switchTab('nuevo')">
+            <button class="tab-btn" onclick="switchTab('new')">
                 <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
             </button>
         </div>
 
         <!-- Alertas -->
-        <div id="alert-container"></div>
-
-        <!-- Tab: Usuario Ya Registrado -->
-        <div id="tab-registrado" class="tab-content active">
-            <form id="form-registrado" onsubmit="loginRegistrado(event)">
-                <div class="form-group">
-                    <label class="form-label">Municipio</label>
-                    <select class="form-select" id="municipio-reg" required onchange="cargarZonasReg()">
-                        <option value="">Seleccione municipio...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Zona</label>
-                    <select class="form-select" id="zona-reg" required onchange="cargarPuestosReg()" disabled>
-                        <option value="">Primero seleccione municipio...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Puesto de Votación</label>
-                    <select class="form-select" id="puesto-reg" required onchange="cargarMesasReg()" disabled>
-                        <option value="">Primero seleccione zona...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Mesa</label>
-                    <select class="form-select" id="mesa-reg" required onchange="buscarUsuario()" disabled>
-                        <option value="">Primero seleccione puesto...</option>
-                    </select>
-                </div>
-
-                <div class="loading-spinner" id="loading-usuario">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Buscando...</span>
-                    </div>
-                    <p class="mt-2">Buscando usuario...</p>
-                </div>
-
-                <div class="ubicacion-info" id="usuario-info">
-                    <h6><i class="fas fa-user-check me-2"></i>Usuario Encontrado</h6>
-                    <p><strong>Nombre:</strong> <span id="usuario-nombre"></span></p>
-                    <p><strong>Cédula:</strong> <span id="usuario-cedula"></span></p>
-                    <p><strong>Rol:</strong> <span id="usuario-rol"></span></p>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password-reg" required placeholder="Ingrese su contraseña">
-                </div>
-
-                <button type="submit" class="btn-login" id="btn-login-reg" disabled>
-                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                </button>
-            </form>
+        <div id="alertSuccess" class="alert alert-success alert-custom">
+            <i class="fas fa-check-circle me-2"></i> <span id="successMessage"></span>
+        </div>
+        <div id="alertError" class="alert alert-danger alert-custom">
+            <i class="fas fa-exclamation-circle me-2"></i> <span id="errorMessage"></span>
         </div>
 
-        <!-- Tab: Nuevo Usuario -->
-        <div id="tab-nuevo" class="tab-content">
-            <form id="form-nuevo" onsubmit="registrarNuevo(event)">
-                <div class="form-group">
-                    <label class="form-label">Nombre Completo</label>
-                    <input type="text" class="form-control" id="nombre-nuevo" required placeholder="Ej: Juan Pérez García">
-                </div>
+        <!-- Formulario Ya Registrado -->
+        <form id="registeredForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label class="form-label">Nombre Completo</label>
+                <input type="text" class="form-control" id="nombreCompleto" placeholder="Ej: Juan Pérez García" required>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Cédula</label>
-                    <input type="text" class="form-control" id="cedula-nuevo" required placeholder="Ej: 1234567890">
-                </div>
+            <div class="form-group">
+                <label class="form-label">Cédula</label>
+                <input type="text" class="form-control" id="cedula" placeholder="Ej: 1234567890" required pattern="[0-9]{6,10}">
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Rol</label>
-                    <select class="form-select" id="rol-nuevo" required>
-                        <option value="">Seleccione rol...</option>
-                        <option value="testigo_mesa">Testigo de Mesa</option>
-                        <option value="coordinador_puesto">Coordinador de Puesto</option>
-                        <option value="coordinador_municipal">Coordinador Municipal</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Rol</label>
+                <select class="form-select" id="rol" required onchange="loadUbicacionData()">
+                    <option value="">Seleccione rol...</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="admin_departamental">Admin Departamental</option>
+                    <option value="admin_municipal">Admin Municipal</option>
+                    <option value="coordinador_departamental">Coordinador Departamental</option>
+                    <option value="coordinador_municipal">Coordinador Municipal</option>
+                    <option value="coordinador_puesto">Coordinador Puesto</option>
+                    <option value="testigo_mesa">Testigo Mesa</option>
+                    <option value="auditor_electoral">Auditor Electoral</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Municipio</label>
-                    <select class="form-select" id="municipio-nuevo" required onchange="cargarZonasNuevo()">
-                        <option value="">Seleccione municipio...</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Municipio</label>
+                <select class="form-select" id="municipio" onchange="loadZonas()">
+                    <option value="">Seleccione municipio...</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Zona</label>
-                    <select class="form-select" id="zona-nuevo" required onchange="cargarPuestosNuevo()" disabled>
-                        <option value="">Primero seleccione municipio...</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Zona</label>
+                <select class="form-select" id="zona" disabled onchange="loadPuestos()">
+                    <option value="">Primero seleccione municipio...</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Puesto de Votación</label>
-                    <select class="form-select" id="puesto-nuevo" required onchange="cargarMesasNuevo()" disabled>
-                        <option value="">Primero seleccione zona...</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Puesto de Votación</label>
+                <select class="form-select" id="puesto" disabled onchange="loadMesas()">
+                    <option value="">Primero seleccione zona...</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Mesa</label>
-                    <select class="form-select" id="mesa-nuevo" required disabled>
-                        <option value="">Primero seleccione puesto...</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Mesa</label>
+                <select class="form-select" id="mesa" disabled>
+                    <option value="">Primero seleccione puesto...</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password-nuevo" required placeholder="Mínimo 6 caracteres">
-                </div>
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" placeholder="Ingrese su contraseña" required>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Confirmar Contraseña</label>
-                    <input type="password" class="form-control" id="password-confirm" required placeholder="Repita la contraseña">
-                </div>
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+            </button>
+        </form>
 
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-user-plus me-2"></i>Registrarse
-                </button>
-            </form>
+        <!-- Formulario Nuevo Usuario (oculto por defecto) -->
+        <div id="newUserForm" style="display: none;">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Nota:</strong> Los usuarios son creados automáticamente por el administrador del sistema. 
+                Si no tienes credenciales, contacta al administrador.
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3 text-muted">Procesando...</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let usuarioEncontrado = null;
-
-        // Cargar municipios al iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarMunicipios();
-        });
-
         // Cambiar entre tabs
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            if (tab === 'registrado') {
+            if (tab === 'registered') {
                 document.querySelector('.tab-btn:first-child').classList.add('active');
-                document.getElementById('tab-registrado').classList.add('active');
+                document.getElementById('registeredForm').style.display = 'block';
+                document.getElementById('newUserForm').style.display = 'none';
             } else {
                 document.querySelector('.tab-btn:last-child').classList.add('active');
-                document.getElementById('tab-nuevo').classList.add('active');
+                document.getElementById('registeredForm').style.display = 'none';
+                document.getElementById('newUserForm').style.display = 'block';
             }
         }
 
+        // Cargar municipios al inicio
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMunicipios();
+        });
+
         // Cargar municipios
-        async function cargarMunicipios() {
+        async function loadMunicipios() {
             try {
                 const response = await fetch('/api/ubicacion/municipios');
                 const data = await response.json();
                 
-                if (data.success) {
-                    const selectReg = document.getElementById('municipio-reg');
-                    const selectNuevo = document.getElementById('municipio-nuevo');
-                    
+                const select = document.getElementById('municipio');
+                select.innerHTML = '<option value="">Seleccione municipio...</option>';
+                
+                if (data.success && data.municipios) {
                     data.municipios.forEach(mun => {
-                        const option1 = new Option(mun.nombre, mun.id);
-                        const option2 = new Option(mun.nombre, mun.id);
-                        selectReg.add(option1);
-                        selectNuevo.add(option2);
+                        const option = document.createElement('option');
+                        option.value = mun.id;
+                        option.textContent = mun.nombre;
+                        select.appendChild(option);
                     });
                 }
             } catch (error) {
-                showAlert('Error al cargar municipios', 'danger');
+                console.error('Error cargando municipios:', error);
             }
         }
 
-        // Cargar zonas (Registrado)
-        async function cargarZonasReg() {
-            const municipioId = document.getElementById('municipio-reg').value;
-            const selectZona = document.getElementById('zona-reg');
+        // Cargar zonas
+        async function loadZonas() {
+            const municipioId = document.getElementById('municipio').value;
+            const selectZona = document.getElementById('zona');
+            const selectPuesto = document.getElementById('puesto');
+            const selectMesa = document.getElementById('mesa');
+            
+            // Resetear selects dependientes
+            selectPuesto.innerHTML = '<option value="">Primero seleccione zona...</option>';
+            selectPuesto.disabled = true;
+            selectMesa.innerHTML = '<option value="">Primero seleccione puesto...</option>';
+            selectMesa.disabled = true;
+            
+            if (!municipioId) {
+                selectZona.innerHTML = '<option value="">Primero seleccione municipio...</option>';
+                selectZona.disabled = true;
+                return;
+            }
             
             selectZona.innerHTML = '<option value="">Cargando...</option>';
-            selectZona.disabled = true;
-            
-            document.getElementById('puesto-reg').disabled = true;
-            document.getElementById('mesa-reg').disabled = true;
-            
-            if (!municipioId) return;
+            selectZona.disabled = false;
             
             try {
                 const response = await fetch(`/api/ubicacion/zonas/${municipioId}`);
                 const data = await response.json();
                 
-                if (data.success) {
-                    selectZona.innerHTML = '<option value="">Seleccione zona...</option>';
-                    data.zonas.forEach(zona => {
-                        const descripcion = zona.descripcion || '';
-                        const texto = descripcion ? `${zona.nombre} - ${descripcion}` : zona.nombre;
-                        const option = new Option(texto, zona.id);
-                        selectZona.add(option);
-                    });
-                    selectZona.disabled = false;
-                }
-            } catch (error) {
-                showAlert('Error al cargar zonas', 'danger');
-            }
-        }
-
-        // Cargar puestos (Registrado)
-        async function cargarPuestosReg() {
-            const zonaId = document.getElementById('zona-reg').value;
-            const selectPuesto = document.getElementById('puesto-reg');
-            
-            selectPuesto.innerHTML = '<option value="">Cargando...</option>';
-            selectPuesto.disabled = true;
-            document.getElementById('mesa-reg').disabled = true;
-            
-            if (!zonaId) return;
-            
-            try {
-                const response = await fetch(`/api/ubicacion/puestos/${zonaId}`);
-                const data = await response.json();
+                selectZona.innerHTML = '<option value="">Seleccione zona...</option>';
                 
-                if (data.success) {
-                    selectPuesto.innerHTML = '<option value="">Seleccione puesto...</option>';
-                    data.puestos.forEach(puesto => {
-                        const option = new Option(puesto.nombre, puesto.id);
-                        selectPuesto.add(option);
+                if (data.success && data.zonas) {
+                    data.zonas.forEach(zona => {
+                        const option = document.createElement('option');
+                        option.value = zona.id;
+                        option.textContent = `${zona.codigo_zz} - ${zona.nombre}`;
+                        selectZona.appendChild(option);
                     });
-                    selectPuesto.disabled = false;
                 }
             } catch (error) {
-                showAlert('Error al cargar puestos', 'danger');
+                console.error('Error cargando zonas:', error);
+                selectZona.innerHTML = '<option value="">Error cargando zonas</option>';
             }
         }
 
-        // Cargar mesas (Registrado)
-        async function cargarMesasReg() {
-            const puestoId = document.getElementById('puesto-reg').value;
-            const selectMesa = document.getElementById('mesa-reg');
+        // Cargar puestos
+        async function loadPuestos() {
+            const zonaId = document.getElementById('zona').value;
+            const municipioId = document.getElementById('municipio').value;
+            const selectPuesto = document.getElementById('puesto');
+            const selectMesa = document.getElementById('mesa');
             
-            selectMesa.innerHTML = '<option value="">Cargando...</option>';
+            selectMesa.innerHTML = '<option value="">Primero seleccione puesto...</option>';
             selectMesa.disabled = true;
             
-            if (!puestoId) return;
+            if (!zonaId) {
+                selectPuesto.innerHTML = '<option value="">Primero seleccione zona...</option>';
+                selectPuesto.disabled = true;
+                return;
+            }
+            
+            selectPuesto.innerHTML = '<option value="">Cargando...</option>';
+            selectPuesto.disabled = false;
+            
+            try {
+                const response = await fetch(`/api/ubicacion/puestos-municipio/${municipioId}`);
+                const data = await response.json();
+                
+                selectPuesto.innerHTML = '<option value="">Seleccione puesto...</option>';
+                
+                if (data.success && data.puestos) {
+                    // Filtrar puestos por zona
+                    const puestosFiltrados = data.puestos.filter(p => p.zona_id == zonaId);
+                    
+                    puestosFiltrados.forEach(puesto => {
+                        const option = document.createElement('option');
+                        option.value = puesto.id;
+                        option.textContent = puesto.nombre;
+                        selectPuesto.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando puestos:', error);
+                selectPuesto.innerHTML = '<option value="">Error cargando puestos</option>';
+            }
+        }
+
+        // Cargar mesas
+        async function loadMesas() {
+            const puestoId = document.getElementById('puesto').value;
+            const selectMesa = document.getElementById('mesa');
+            
+            if (!puestoId) {
+                selectMesa.innerHTML = '<option value="">Primero seleccione puesto...</option>';
+                selectMesa.disabled = true;
+                return;
+            }
+            
+            selectMesa.innerHTML = '<option value="">Cargando...</option>';
+            selectMesa.disabled = false;
             
             try {
                 const response = await fetch(`/api/ubicacion/mesas/${puestoId}`);
                 const data = await response.json();
                 
-                if (data.success) {
-                    selectMesa.innerHTML = '<option value="">Seleccione mesa...</option>';
+                selectMesa.innerHTML = '<option value="">Seleccione mesa...</option>';
+                
+                if (data.success && data.mesas) {
                     data.mesas.forEach(mesa => {
-                        const option = new Option(`Mesa ${mesa.numero} (${mesa.votantes_habilitados} votantes)`, mesa.id);
-                        selectMesa.add(option);
+                        const option = document.createElement('option');
+                        option.value = mesa.id;
+                        option.textContent = `Mesa ${mesa.numero}`;
+                        selectMesa.appendChild(option);
                     });
-                    selectMesa.disabled = false;
                 }
             } catch (error) {
-                showAlert('Error al cargar mesas', 'danger');
+                console.error('Error cargando mesas:', error);
+                selectMesa.innerHTML = '<option value="">Error cargando mesas</option>';
             }
         }
 
-        // Buscar usuario por ubicación
-        async function buscarUsuario() {
-            const municipioId = document.getElementById('municipio-reg').value;
-            const puestoId = document.getElementById('puesto-reg').value;
-            const mesaId = document.getElementById('mesa-reg').value;
-            
-            if (!municipioId || !puestoId || !mesaId) return;
-            
-            document.getElementById('loading-usuario').style.display = 'block';
-            document.getElementById('usuario-info').classList.remove('show');
-            document.getElementById('btn-login-reg').disabled = true;
-            
-            try {
-                const response = await fetch(`/api/ubicacion/usuario-por-ubicacion?municipio_id=${municipioId}&puesto_id=${puestoId}&mesa_id=${mesaId}`);
-                const data = await response.json();
-                
-                document.getElementById('loading-usuario').style.display = 'none';
-                
-                if (data.success) {
-                    usuarioEncontrado = data.usuario;
-                    document.getElementById('usuario-nombre').textContent = data.usuario.nombre_completo;
-                    document.getElementById('usuario-cedula').textContent = data.usuario.cedula;
-                    document.getElementById('usuario-rol').textContent = data.usuario.rol;
-                    document.getElementById('usuario-info').classList.add('show');
-                    document.getElementById('btn-login-reg').disabled = false;
-                } else {
-                    showAlert('No se encontró usuario para esta ubicación. Por favor regístrese.', 'warning');
-                }
-            } catch (error) {
-                document.getElementById('loading-usuario').style.display = 'none';
-                showAlert('Error al buscar usuario', 'danger');
-            }
+        // Cargar datos de ubicación según rol
+        function loadUbicacionData() {
+            const rol = document.getElementById('rol').value;
+            // Por ahora solo cargamos municipios, la lógica condicional se puede agregar después
+            loadMunicipios();
         }
 
-        // Login usuario registrado
-        async function loginRegistrado(e) {
-            e.preventDefault();
+        // Mostrar alerta
+        function showAlert(type, message) {
+            const alertId = type === 'success' ? 'alertSuccess' : 'alertError';
+            const messageId = type === 'success' ? 'successMessage' : 'errorMessage';
             
-            if (!usuarioEncontrado) {
-                showAlert('Primero debe seleccionar una ubicación válida', 'warning');
-                return;
-            }
+            document.getElementById(messageId).textContent = message;
+            document.getElementById(alertId).classList.add('show');
             
-            const password = document.getElementById('password-reg').value;
+            setTimeout(() => {
+                document.getElementById(alertId).classList.remove('show');
+            }, 5000);
+        }
+
+        // Manejar login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const formData = {
+                nombre_completo: document.getElementById('nombreCompleto').value,
+                cedula: document.getElementById('cedula').value,
+                rol: document.getElementById('rol').value,
+                municipio_id: document.getElementById('municipio').value,
+                zona_id: document.getElementById('zona').value,
+                puesto_id: document.getElementById('puesto').value,
+                mesa_id: document.getElementById('mesa').value,
+                password: document.getElementById('password').value
+            };
+            
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('registeredForm').style.display = 'none';
             
             try {
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        username: usuarioEncontrado.username,
-                        password: password
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
                 });
                 
                 const data = await response.json();
                 
-                if (response.ok) {
+                if (response.ok && data.access_token) {
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('user_id', data.user.id);
-                    localStorage.setItem('user_role', data.user.rol);
-                    showAlert('¡Bienvenido! Redirigiendo...', 'success');
+                    
+                    showAlert('success', '¡Inicio de sesión exitoso! Redirigiendo...');
+                    
                     setTimeout(() => {
                         window.location.href = `/dashboard/${data.user.rol}`;
-                    }, 1000);
-                } else {
-                    showAlert(data.error || 'Contraseña incorrecta', 'danger');
-                }
-            } catch (error) {
-                showAlert('Error al iniciar sesión', 'danger');
-            }
-        }
-
-        // Funciones para tab Nuevo (similar a las de Registrado)
-        async function cargarZonasNuevo() {
-            const municipioId = document.getElementById('municipio-nuevo').value;
-            const selectZona = document.getElementById('zona-nuevo');
-            
-            selectZona.innerHTML = '<option value="">Cargando...</option>';
-            selectZona.disabled = true;
-            
-            if (!municipioId) return;
-            
-            try {
-                const response = await fetch(`/api/ubicacion/zonas/${municipioId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    selectZona.innerHTML = '<option value="">Seleccione zona...</option>';
-                    data.zonas.forEach(zona => {
-                        const descripcion = zona.descripcion || '';
-                        const texto = descripcion ? `${zona.nombre} - ${descripcion}` : zona.nombre;
-                        const option = new Option(texto, zona.id);
-                        selectZona.add(option);
-                    });
-                    selectZona.disabled = false;
-                }
-            } catch (error) {
-                showAlert('Error al cargar zonas', 'danger');
-            }
-        }
-
-        async function cargarPuestosNuevo() {
-            const zonaId = document.getElementById('zona-nuevo').value;
-            const selectPuesto = document.getElementById('puesto-nuevo');
-            
-            selectPuesto.innerHTML = '<option value="">Cargando...</option>';
-            selectPuesto.disabled = true;
-            
-            if (!zonaId) return;
-            
-            try {
-                const response = await fetch(`/api/ubicacion/puestos/${zonaId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    selectPuesto.innerHTML = '<option value="">Seleccione puesto...</option>';
-                    data.puestos.forEach(puesto => {
-                        const option = new Option(puesto.nombre, puesto.id);
-                        selectPuesto.add(option);
-                    });
-                    selectPuesto.disabled = false;
-                }
-            } catch (error) {
-                showAlert('Error al cargar puestos', 'danger');
-            }
-        }
-
-        async function cargarMesasNuevo() {
-            const puestoId = document.getElementById('puesto-nuevo').value;
-            const selectMesa = document.getElementById('mesa-nuevo');
-            
-            selectMesa.innerHTML = '<option value="">Cargando...</option>';
-            selectMesa.disabled = true;
-            
-            if (!puestoId) return;
-            
-            try {
-                const response = await fetch(`/api/ubicacion/mesas/${puestoId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    selectMesa.innerHTML = '<option value="">Seleccione mesa...</option>';
-                    data.mesas.forEach(mesa => {
-                        const option = new Option(`Mesa ${mesa.numero}`, mesa.id);
-                        selectMesa.add(option);
-                    });
-                    selectMesa.disabled = false;
-                }
-            } catch (error) {
-                showAlert('Error al cargar mesas', 'danger');
-            }
-        }
-
-        // Registrar nuevo usuario
-        async function registrarNuevo(e) {
-            e.preventDefault();
-            
-            const password = document.getElementById('password-nuevo').value;
-            const passwordConfirm = document.getElementById('password-confirm').value;
-            
-            if (password !== passwordConfirm) {
-                showAlert('Las contraseñas no coinciden', 'danger');
-                return;
-            }
-            
-            const datos = {
-                nombre_completo: document.getElementById('nombre-nuevo').value,
-                cedula: document.getElementById('cedula-nuevo').value,
-                rol: document.getElementById('rol-nuevo').value,
-                municipio_id: document.getElementById('municipio-nuevo').value,
-                puesto_id: document.getElementById('puesto-nuevo').value,
-                mesa_id: document.getElementById('mesa-nuevo').value,
-                password: password
-            };
-            
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(datos)
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showAlert('¡Registro exitoso! Iniciando sesión...', 'success');
-                    setTimeout(() => {
-                        window.location.href = `/dashboard/${datos.rol}`;
                     }, 1500);
                 } else {
-                    showAlert(data.error || 'Error al registrar', 'danger');
+                    showAlert('error', data.error || 'Credenciales incorrectas');
+                    document.getElementById('loading').classList.remove('show');
+                    document.getElementById('registeredForm').style.display = 'block';
                 }
             } catch (error) {
-                showAlert('Error al registrar usuario', 'danger');
+                showAlert('error', 'Error de conexión. Intenta nuevamente.');
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('registeredForm').style.display = 'block';
             }
-        }
-
-        // Mostrar alertas
-        function showAlert(message, type) {
-            const container = document.getElementById('alert-container');
-            container.innerHTML = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                container.innerHTML = '';
-            }, 5000);
         }
     </script>
 </body>
