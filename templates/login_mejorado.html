@@ -181,16 +181,6 @@
         <!-- Formulario Ya Registrado -->
         <form id="registeredForm" onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label class="form-label">Nombre Completo</label>
-                <input type="text" class="form-control" id="nombreCompleto" placeholder="Ej: Juan Pérez García" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Cédula</label>
-                <input type="text" class="form-control" id="cedula" placeholder="Ej: 1234567890" required pattern="[0-9]{6,10}">
-            </div>
-
-            <div class="form-group">
                 <label class="form-label">Rol</label>
                 <select class="form-select" id="rol" required onchange="loadUbicacionData()">
                     <option value="">Seleccione rol...</option>
@@ -206,9 +196,17 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Departamento</label>
+                <select class="form-select" id="departamento" required onchange="loadMunicipios()">
+                    <option value="">Seleccione departamento...</option>
+                    <option value="Caquetá">Caquetá</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Municipio</label>
-                <select class="form-select" id="municipio" onchange="loadZonas()">
-                    <option value="">Seleccione municipio...</option>
+                <select class="form-select" id="municipio" disabled onchange="loadZonas()">
+                    <option value="">Primero seleccione departamento...</option>
                 </select>
             </div>
 
@@ -278,30 +276,48 @@
             }
         }
 
-        // Cargar municipios al inicio
-        document.addEventListener('DOMContentLoaded', function() {
-            loadMunicipios();
-        });
-
         // Cargar municipios
         async function loadMunicipios() {
+            const departamento = document.getElementById('departamento').value;
+            const selectMunicipio = document.getElementById('municipio');
+            const selectZona = document.getElementById('zona');
+            const selectPuesto = document.getElementById('puesto');
+            const selectMesa = document.getElementById('mesa');
+            
+            // Resetear selects dependientes
+            selectZona.innerHTML = '<option value="">Primero seleccione municipio...</option>';
+            selectZona.disabled = true;
+            selectPuesto.innerHTML = '<option value="">Primero seleccione zona...</option>';
+            selectPuesto.disabled = true;
+            selectMesa.innerHTML = '<option value="">Primero seleccione puesto...</option>';
+            selectMesa.disabled = true;
+            
+            if (!departamento) {
+                selectMunicipio.innerHTML = '<option value="">Primero seleccione departamento...</option>';
+                selectMunicipio.disabled = true;
+                return;
+            }
+            
+            selectMunicipio.innerHTML = '<option value="">Cargando...</option>';
+            selectMunicipio.disabled = false;
+            
             try {
                 const response = await fetch('/api/ubicacion/municipios');
                 const data = await response.json();
                 
-                const select = document.getElementById('municipio');
-                select.innerHTML = '<option value="">Seleccione municipio...</option>';
+                selectMunicipio.innerHTML = '<option value="">Seleccione municipio...</option>';
                 
                 if (data.success && data.municipios) {
                     data.municipios.forEach(mun => {
                         const option = document.createElement('option');
                         option.value = mun.id;
                         option.textContent = mun.nombre;
-                        select.appendChild(option);
+                        selectMunicipio.appendChild(option);
                     });
                 }
             } catch (error) {
                 console.error('Error cargando municipios:', error);
+                selectMunicipio.innerHTML = '<option value="">Error cargando municipios</option>';
             }
         }
 
@@ -448,9 +464,8 @@
             event.preventDefault();
             
             const formData = {
-                nombre_completo: document.getElementById('nombreCompleto').value,
-                cedula: document.getElementById('cedula').value,
                 rol: document.getElementById('rol').value,
+                departamento: document.getElementById('departamento').value,
                 municipio_id: document.getElementById('municipio').value,
                 zona_id: document.getElementById('zona').value,
                 puesto_id: document.getElementById('puesto').value,
