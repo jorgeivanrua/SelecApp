@@ -1,0 +1,191 @@
+======================================================================
+USUARIOS DEMO - SISTEMA ELECTORAL CAQUETÁ
+======================================================================
+
+Contraseña para todos: Demo2024!
+
+
+TESTIGO_MESA
+----------------------------------------------------------------------
+Cédula: 1000000001
+Nombre: Testigo Curillo 1
+Email: demo_testigo_mesa_1000000001@electoral.gov.co
+Municipio: Curillo
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 758
+
+Cédula: 1000000002
+Nombre: Testigo Curillo 2
+Email: demo_testigo_mesa_1000000002@electoral.gov.co
+Municipio: Curillo
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 758
+
+Cédula: 1000000003
+Nombre: Testigo Cartagena Del Chaira 3
+Email: demo_testigo_mesa_1000000003@electoral.gov.co
+Municipio: Cartagena Del Chaira
+Puesto: IE. EL CHAIRA JOSE MARIA CORDOBA
+Mesa: 747
+
+Cédula: 1000000004
+Nombre: Testigo Belen De Los Andaquies 4
+Email: demo_testigo_mesa_1000000004@electoral.gov.co
+Municipio: Belen De Los Andaquies
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 742
+
+Cédula: 1000000005
+Nombre: Testigo Albania 5
+Email: demo_testigo_mesa_1000000005@electoral.gov.co
+Municipio: Albania
+Puesto: IE ALBANIA - SD PEREGRINO LOZANO
+Mesa: 739
+
+Cédula: 1000000006
+Nombre: Testigo Cartagena Del Chaira 7
+Email: demo_testigo_mesa_1000000006@electoral.gov.co
+Municipio: Cartagena Del Chaira
+Puesto: IE. EL CHAIRA JOSE MARIA CORDOBA
+Mesa: 747
+
+Cédula: 1000000007
+Nombre: Testigo El Paujil 8
+Email: demo_testigo_mesa_1000000007@electoral.gov.co
+Municipio: El Paujil
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 772
+
+Cédula: 1000000008
+Nombre: Testigo Albania 9
+Email: demo_testigo_mesa_1000000008@electoral.gov.co
+Municipio: Albania
+Puesto: IE ALBANIA - SD PEREGRINO LOZANO
+Mesa: 739
+
+Cédula: 1000000009
+Nombre: Testigo Morelia 10
+Email: demo_testigo_mesa_1000000009@electoral.gov.co
+Municipio: Morelia
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 856
+
+Cédula: 1000000010
+Nombre: Testigo Albania 11
+Email: demo_testigo_mesa_1000000010@electoral.gov.co
+Municipio: Albania
+Puesto: IE ALBANIA - SD PEREGRINO LOZANO
+Mesa: 739
+
+Cédula: 1000000011
+Nombre: Testigo Milan 12
+Email: demo_testigo_mesa_1000000011@electoral.gov.co
+Municipio: Milan
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 849
+
+Cédula: 1000000012
+Nombre: Testigo Albania 13
+Email: demo_testigo_mesa_1000000012@electoral.gov.co
+Municipio: Albania
+Puesto: IE ALBANIA - SD PEREGRINO LOZANO
+Mesa: 739
+
+Cédula: 1000000013
+Nombre: Testigo Morelia 14
+Email: demo_testigo_mesa_1000000013@electoral.gov.co
+Municipio: Morelia
+Puesto: PUESTO CABECERA MUNICIPAL
+Mesa: 856
+
+Cédula: 1000000014
+Nombre: Testigo Florencia 15
+Email: demo_testigo_mesa_1000000014@electoral.gov.co
+Municipio: Florencia
+Puesto: I.E. JUAN BAUTISTA LA SALLE
+Mesa: 777
+
+
+COORDINADOR_PUESTO
+----------------------------------------------------------------------
+Cédula: 1000000015
+Nombre: Coordinador Puesto Cartagena Del Chaira 1
+Email: demo_coordinador_puesto_1000000015@electoral.gov.co
+Municipio: Cartagena Del Chaira
+Puesto: IE. EL CHAIRA JOSE MARIA CORDOBA
+
+Cédula: 1000000016
+Nombre: Coordinador Puesto Cartagena Del Chaira 2
+Email: demo_coordinador_puesto_1000000016@electoral.gov.co
+Municipio: Cartagena Del Chaira
+Puesto: IE. EL CHAIRA JOSE MARIA CORDOBA
+
+Cédula: 1000000017
+Nombre: Coordinador Puesto Milan 3
+Email: demo_coordinador_puesto_1000000017@electoral.gov.co
+Municipio: Milan
+Puesto: PUESTO CABECERA MUNICIPAL
+
+Cédula: 1000000018
+Nombre: Coordinador Puesto Belen De Los Andaquies 4
+Email: demo_coordinador_puesto_1000000018@electoral.gov.co
+Municipio: Belen De Los Andaquies
+Puesto: PUESTO CABECERA MUNICIPAL
+
+Cédula: 1000000019
+Nombre: Coordinador Puesto Florencia 5
+Email: demo_coordinador_puesto_1000000019@electoral.gov.co
+Municipio: Florencia
+Puesto: I.E. JUAN BAUTISTA LA SALLE
+
+Cédula: 1000000020
+Nombre: Coordinador Puesto Cartagena Del Chaira 6
+Email: demo_coordinador_puesto_1000000020@electoral.gov.co
+Municipio: Cartagena Del Chaira
+Puesto: IE. EL CHAIRA JOSE MARIA CORDOBA
+
+Cédula: 1000000021
+Nombre: Coordinador Puesto Belen De Los Andaquies 7
+Email: demo_coordinador_puesto_1000000021@electoral.gov.co
+Municipio: Belen De Los Andaquies
+Puesto: PUESTO CABECERA MUNICIPAL
+
+Cédula: 1000000022
+Nombre: Coordinador Puesto Cartagena Del Chaira 8
+Email: demo_coordinador_puesto_1000000022@electoral.gov.co
+Municipio: Cartagena Del Chaira
+Puesto: IE. EL CHAIRA JOSE MARIA CORDOBA
+
+
+COORDINADOR_MUNICIPAL
+----------------------------------------------------------------------
+Cédula: 1000000023
+Nombre: Coordinador Municipal El Doncello 1
+Email: demo_coordinador_municipal_1000000023@electoral.gov.co
+Municipio: El Doncello
+Puesto: PUESTO CABECERA MUNICIPAL
+
+Cédula: 1000000024
+Nombre: Coordinador Municipal Albania 2
+Email: demo_coordinador_municipal_1000000024@electoral.gov.co
+Municipio: Albania
+Puesto: IE ALBANIA - SD PEREGRINO LOZANO
+
+Cédula: 1000000025
+Nombre: Coordinador Municipal Milan 3
+Email: demo_coordinador_municipal_1000000025@electoral.gov.co
+Municipio: Milan
+Puesto: PUESTO CABECERA MUNICIPAL
+
+Cédula: 1000000026
+Nombre: Coordinador Municipal El Doncello 4
+Email: demo_coordinador_municipal_1000000026@electoral.gov.co
+Municipio: El Doncello
+Puesto: PUESTO CABECERA MUNICIPAL
+
+Cédula: 1000000027
+Nombre: Coordinador Municipal Belen De Los Andaquies 5
+Email: demo_coordinador_municipal_1000000027@electoral.gov.co
+Municipio: Belen De Los Andaquies
+Puesto: PUESTO CABECERA MUNICIPAL
+

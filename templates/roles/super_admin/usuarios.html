@@ -1,0 +1,560 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Usuarios - Super Admin{% endblock %}
+{% block role_styles %}
+<link href="{{ url_for('static', filename='css/roles/super_admin.css') }}" rel="stylesheet">
+<style>
+    .user-card {
+        transition: all 0.3s;
+        border-left: 4px solid #667eea;
+    }
+    .user-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .role-badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .btn-create {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+    }
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .search-box {
+        border-radius: 25px;
+        border: 2px solid #e2e8f0;
+        padding: 12px 20px;
+    }
+    .search-box:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+</style>
+{% endblock %}
+{% block body_class %}role-super-admin{% endblock %}
+{% block navbar_class %}navbar-dark bg-dark{% endblock %}
+{% block brand_text %}Sistema Electoral - Gestión de Usuarios{% endblock %}
+
+{% block navigation %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard_role', role='super_admin') }}">
+        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="/super_admin/usuarios">
+        <i class="fas fa-users me-1"></i>Usuarios
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/electoral">
+        <i class="fas fa-vote-yea me-1"></i>Procesos Electorales
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/reports">
+        <i class="fas fa-chart-bar me-1"></i>Reportes
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-users me-2"></i>Gestión de Usuarios</h2>
+                    <p class="text-muted mb-0">Administra todos los usuarios del sistema electoral</p>
+                </div>
+                <button class="btn btn-create btn-lg" onclick="showCreateUserModal()">
+                    <i class="fas fa-user-plus me-2"></i>Crear Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <input type="text" class="form-control search-box" id="searchInput" placeholder="🔍 Buscar por nombre, cédula o email..." onkeyup="filterUsers()">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="filterRol" onchange="filterUsers()">
+                <option value="">Todos los roles</option>
+                <option value="super_admin">Super Admin</option>
+                <option value="admin_departamental">Admin Departamental</option>
+                <option value="admin_municipal">Admin Municipal</option>
+                <option value="coordinador_departamental">Coordinador Departamental</option>
+                <option value="coordinador_municipal">Coordinador Municipal</option>
+                <option value="coordinador_puesto">Coordinador Puesto</option>
+                <option value="testigo_mesa">Testigo Mesa</option>
+                <option value="auditor_electoral">Auditor Electoral</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="filterEstado" onchange="filterUsers()">
+                <option value="">Todos los estados</option>
+                <option value="1">Activos</option>
+                <option value="0">Inactivos</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h3 class="text-primary mb-0" id="totalUsers">0</h3>
+                    <small class="text-muted">Total Usuarios</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h3 class="text-success mb-0" id="activeUsers">0</h3>
+                    <small class="text-muted">Activos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning mb-0" id="testigosCount">0</h3>
+                    <small class="text-muted">Testigos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h3 class="text-info mb-0" id="coordinadoresCount">0</h3>
+                    <small class="text-muted">Coordinadores</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de usuarios -->
+    <div class="row" id="usersContainer">
+        <!-- Los usuarios se cargarán aquí dinámicamente -->
+    </div>
+</div>
+
+<!-- Modal Crear/Editar Usuario -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="fas fa-user-plus me-2"></i>Crear Nuevo Usuario
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cédula *</label>
+                            <input type="text" class="form-control" id="userCedula" required pattern="[0-9]{6,10}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" id="userNombre" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email (Opcional)</label>
+                            <input type="email" class="form-control" id="userEmail">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" id="userTelefono" required pattern="[0-9]{10}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Rol *</label>
+                            <select class="form-select" id="userRol" required>
+                                <option value="">Seleccione...</option>
+                                <option value="super_admin">Super Admin</option>
+                                <option value="admin_departamental">Admin Departamental</option>
+                                <option value="admin_municipal">Admin Municipal</option>
+                                <option value="coordinador_departamental">Coordinador Departamental</option>
+                                <option value="coordinador_municipal">Coordinador Municipal</option>
+                                <option value="coordinador_puesto">Coordinador Puesto</option>
+                                <option value="testigo_mesa">Testigo Mesa</option>
+                                <option value="auditor_electoral">Auditor Electoral</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contraseña *</label>
+                            <input type="password" class="form-control" id="userPassword" minlength="6">
+                            <small class="text-muted">Mínimo 6 caracteres</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Municipio</label>
+                            <select class="form-select" id="userMunicipio" onchange="loadPuestosModal()">
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Puesto</label>
+                            <select class="form-select" id="userPuesto" onchange="loadMesasModal()">
+                                <option value="">Seleccione municipio...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Mesa</label>
+                            <select class="form-select" id="userMesa">
+                                <option value="">Seleccione puesto...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Nota:</strong> Los campos de ubicación (municipio, puesto, mesa) son opcionales para roles administrativos.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-create" onclick="saveUser()">
+                    <i class="fas fa-save me-2"></i>Guardar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allUsers = [];
+let userModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    userModal = new bootstrap.Modal(document.getElementById('userModal'));
+    loadUsers();
+    loadMunicipiosModal();
+});
+
+// Cargar usuarios
+async function loadUsers() {
+    try {
+        const response = await fetch('/api/admin/users');
+        const data = await response.json();
+        
+        if (data.success) {
+            allUsers = data.users;
+            displayUsers(allUsers);
+            updateStats(allUsers);
+        }
+    } catch (error) {
+        console.error('Error cargando usuarios:', error);
+        alert('Error al cargar usuarios');
+    }
+}
+
+// Mostrar usuarios
+function displayUsers(users) {
+    const container = document.getElementById('usersContainer');
+    
+    if (users.length === 0) {
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No se encontraron usuarios
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = users.map(user => `
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card user-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">${user.nombre_completo}</h5>
+                        <span class="badge ${user.activo ? 'bg-success' : 'bg-secondary'}">
+                            ${user.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </div>
+                    
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-id-card me-2"></i>${user.cedula}
+                    </p>
+                    
+                    <span class="badge role-badge bg-primary mb-2">${getRoleName(user.rol)}</span>
+                    
+                    ${user.email ? `<p class="text-muted mb-1"><i class="fas fa-envelope me-2"></i>${user.email}</p>` : ''}
+                    <p class="text-muted mb-1"><i class="fas fa-phone me-2"></i>${user.telefono}</p>
+                    
+                    ${user.municipio_nombre ? `<p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-2"></i>${user.municipio_nombre}</p>` : ''}
+                    ${user.puesto_nombre ? `<p class="text-muted mb-1"><i class="fas fa-building me-2"></i>${user.puesto_nombre}</p>` : ''}
+                    ${user.mesa_numero ? `<p class="text-muted mb-1"><i class="fas fa-table me-2"></i>Mesa ${user.mesa_numero}</p>` : ''}
+                    
+                    <div class="mt-3 d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editUser(${user.id})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Actualizar estadísticas
+function updateStats(users) {
+    document.getElementById('totalUsers').textContent = users.length;
+    document.getElementById('activeUsers').textContent = users.filter(u => u.activo).length;
+    document.getElementById('testigosCount').textContent = users.filter(u => u.rol === 'testigo_mesa').length;
+    document.getElementById('coordinadoresCount').textContent = users.filter(u => u.rol.includes('coordinador')).length;
+}
+
+// Filtrar usuarios
+function filterUsers() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rolFilter = document.getElementById('filterRol').value;
+    const estadoFilter = document.getElementById('filterEstado').value;
+    
+    let filtered = allUsers;
+    
+    if (searchTerm) {
+        filtered = filtered.filter(u => 
+            u.nombre_completo.toLowerCase().includes(searchTerm) ||
+            u.cedula.includes(searchTerm) ||
+            (u.email && u.email.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    if (rolFilter) {
+        filtered = filtered.filter(u => u.rol === rolFilter);
+    }
+    
+    if (estadoFilter !== '') {
+        filtered = filtered.filter(u => u.activo == estadoFilter);
+    }
+    
+    displayUsers(filtered);
+}
+
+// Mostrar modal crear usuario
+function showCreateUserModal() {
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus me-2"></i>Crear Nuevo Usuario';
+    document.getElementById('userForm').reset();
+    document.getElementById('userId').value = '';
+    document.getElementById('userPassword').required = true;
+    userModal.show();
+}
+
+// Editar usuario
+async function editUser(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>Editar Usuario';
+    document.getElementById('userId').value = user.id;
+    document.getElementById('userCedula').value = user.cedula;
+    document.getElementById('userNombre').value = user.nombre_completo;
+    document.getElementById('userEmail').value = user.email || '';
+    document.getElementById('userTelefono').value = user.telefono;
+    document.getElementById('userRol').value = user.rol;
+    document.getElementById('userPassword').required = false;
+    document.getElementById('userPassword').value = '';
+    
+    userModal.show();
+}
+
+// Guardar usuario
+async function saveUser() {
+    const userId = document.getElementById('userId').value;
+    const isEdit = userId !== '';
+    
+    const userData = {
+        cedula: document.getElementById('userCedula').value,
+        nombre_completo: document.getElementById('userNombre').value,
+        email: document.getElementById('userEmail').value,
+        telefono: document.getElementById('userTelefono').value,
+        rol: document.getElementById('userRol').value,
+        municipio_id: document.getElementById('userMunicipio').value || null,
+        puesto_id: document.getElementById('userPuesto').value || null,
+        mesa_id: document.getElementById('userMesa').value || null
+    };
+    
+    const password = document.getElementById('userPassword').value;
+    if (password) {
+        userData.password = password;
+    } else if (!isEdit) {
+        alert('La contraseña es requerida para nuevos usuarios');
+        return;
+    }
+    
+    try {
+        const url = isEdit ? `/api/admin/users/${userId}` : '/api/admin/users';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(isEdit ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente');
+            userModal.hide();
+            loadUsers();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error guardando usuario:', error);
+        alert('Error al guardar usuario');
+    }
+}
+
+// Eliminar usuario
+async function deleteUser(userId) {
+    if (!confirm('¿Está seguro de desactivar este usuario?')) return;
+    
+    try {
+        const response = await fetch(`/api/admin/users/${userId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Usuario desactivado exitosamente');
+            loadUsers();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error eliminando usuario:', error);
+        alert('Error al eliminar usuario');
+    }
+}
+
+// Cargar municipios para el modal
+async function loadMunicipiosModal() {
+    try {
+        const response = await fetch('/api/ubicacion/municipios');
+        const data = await response.json();
+        
+        const select = document.getElementById('userMunicipio');
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        
+        data.municipios.forEach(mun => {
+            const option = document.createElement('option');
+            option.value = mun.id;
+            option.textContent = mun.nombre;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando municipios:', error);
+    }
+}
+
+// Cargar puestos para el modal
+async function loadPuestosModal() {
+    const municipioId = document.getElementById('userMunicipio').value;
+    const selectPuesto = document.getElementById('userPuesto');
+    const selectMesa = document.getElementById('userMesa');
+    
+    selectPuesto.innerHTML = '<option value="">Cargando...</option>';
+    selectMesa.innerHTML = '<option value="">Seleccione puesto...</option>';
+    
+    if (!municipioId) {
+        selectPuesto.innerHTML = '<option value="">Seleccione municipio...</option>';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/ubicacion/puestos-municipio/${municipioId}`);
+        const data = await response.json();
+        
+        selectPuesto.innerHTML = '<option value="">Seleccione...</option>';
+        
+        data.puestos.forEach(puesto => {
+            const option = document.createElement('option');
+            option.value = puesto.id;
+            option.textContent = puesto.nombre;
+            selectPuesto.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando puestos:', error);
+    }
+}
+
+// Cargar mesas para el modal
+async function loadMesasModal() {
+    const puestoId = document.getElementById('userPuesto').value;
+    const selectMesa = document.getElementById('userMesa');
+    
+    selectMesa.innerHTML = '<option value="">Cargando...</option>';
+    
+    if (!puestoId) {
+        selectMesa.innerHTML = '<option value="">Seleccione puesto...</option>';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/ubicacion/mesas/${puestoId}`);
+        const data = await response.json();
+        
+        selectMesa.innerHTML = '<option value="">Seleccione...</option>';
+        
+        data.mesas.forEach(mesa => {
+            const option = document.createElement('option');
+            option.value = mesa.id;
+            option.textContent = `Mesa ${mesa.numero}`;
+            selectMesa.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando mesas:', error);
+    }
+}
+
+// Obtener nombre del rol
+function getRoleName(rol) {
+    const roles = {
+        'super_admin': 'Super Admin',
+        'admin_departamental': 'Admin Departamental',
+        'admin_municipal': 'Admin Municipal',
+        'coordinador_departamental': 'Coordinador Departamental',
+        'coordinador_municipal': 'Coordinador Municipal',
+        'coordinador_puesto': 'Coordinador Puesto',
+        'testigo_mesa': 'Testigo Mesa',
+        'auditor_electoral': 'Auditor Electoral'
+    };
+    return roles[rol] || rol;
+}
+</script>
+{% endblock %}

@@ -224,11 +224,21 @@ def create_app():
     @app.route('/')
     def index():
         """Página principal del sistema"""
-        return render_template('index.html')
+        return render_template('index_home.html')
     
     @app.route('/login')
     def login_page():
-        """Página de login"""
+        """Página de login mejorado con carga dinámica"""
+        return render_template('login_mejorado.html')
+    
+    @app.route('/login-original')
+    def login_original():
+        """Página de login original (legacy)"""
+        return render_template('login_registro.html')
+    
+    @app.route('/login-simple')
+    def login_simple_page():
+        """Página de login simple (legacy)"""
         return render_template('login.html')
     
     @app.route('/dashboard')
@@ -316,17 +326,12 @@ def create_app():
     # ==================== RUTAS PARA SUPER ADMIN ====================
     
     @app.route('/users')
+    @app.route('/super_admin/usuarios')
     def users_management():
-        """Gestión de usuarios (placeholder)"""
-        return render_template('dashboard_generic.html',
+        """Gestión de usuarios - Interfaz completa"""
+        return render_template('roles/super_admin/usuarios.html',
                              user_role='super_admin',
-                             role_name='Gestión de Usuarios',
-                             stats={'total_users': 156, 'active_users': 142, 'pending_approvals': 8},
-                             quick_actions=[
-                                 {'name': 'Nuevo Usuario', 'url': '/users/new', 'icon': 'fas fa-user-plus'},
-                                 {'name': 'Roles y Permisos', 'url': '/users/roles', 'icon': 'fas fa-user-shield'},
-                                 {'name': 'Usuarios Inactivos', 'url': '/users/inactive', 'icon': 'fas fa-user-slash'}
-                             ])
+                             role_name='Gestión de Usuarios')
     
     @app.route('/users/new')
     def create_user():
@@ -804,25 +809,52 @@ def create_app():
             cursor = conn.cursor()
             
             cursor.execute("""
-                SELECT id, username, nombre_completo, password_hash, rol, activo
-                FROM users 
-                WHERE (cedula = ? OR username = ?) AND activo = 1
+                SELECT 
+                    u.id, u.username, u.nombre_completo, u.password_hash, u.rol, u.activo,
+                    u.cedula, u.email, u.telefono,
+                    u.municipio_id, u.puesto_id, u.mesa_id,
+                    mu.nombre as municipio_nombre, mu.codigo as municipio_codigo,
+                    p.nombre as puesto_nombre, p.direccion as puesto_direccion,
+                    m.numero as mesa_numero, m.votantes_habilitados,
+                    z.codigo_zz as zona_codigo, z.nombre as zona_nombre
+                FROM users u
+                LEFT JOIN municipios mu ON u.municipio_id = mu.id
+                LEFT JOIN puestos_votacion p ON u.puesto_id = p.id
+                LEFT JOIN mesas_votacion m ON u.mesa_id = m.id
+                LEFT JOIN zonas z ON p.zona_id = z.id
+                WHERE (u.cedula = ? OR u.username = ?) AND u.activo = 1
             """, (cedula, cedula))
             
             user_data = cursor.fetchone()
-            conn.close()
             
             if not user_data:
+                conn.close()
                 return jsonify({'error': 'Invalid credentials'}), 401
             
             # Verificar password (simplificado para demo)
             if WERKZEUG_AVAILABLE:
                 if not check_password_hash(user_data[3], password):
+                    conn.close()
                     return jsonify({'error': 'Invalid credentials'}), 401
             else:
                 # Verificación simple para demo
-                if password != 'demo123':
+                if password != 'demo123' and password != 'Demo2024!':
+                    conn.close()
                     return jsonify({'error': 'Invalid credentials'}), 401
+            
+            # Contar capturas E14 si es testigo
+            total_capturas = 0
+            if user_data[4] == 'testigo_mesa':
+                cursor.execute("""
+                    SELECT COUNT(*) as total_capturas
+                    FROM capturas_e14
+                    WHERE testigo_id = ?
+                """, (user_data[0],))
+                stats = cursor.fetchone()
+                if stats:
+                    total_capturas = stats[0]
+            
+            conn.close()
             
             # Crear token JWT si está disponible
             if JWT_AVAILABLE:
@@ -842,7 +874,22 @@ def create_app():
                     'id': user_data[0],
                     'username': user_data[1],
                     'nombre_completo': user_data[2],
-                    'rol': user_data[4]
+                    'rol': user_data[4],
+                    'cedula': user_data[6],
+                    'email': user_data[7],
+                    'telefono': user_data[8],
+                    'municipio_id': user_data[9],
+                    'puesto_id': user_data[10],
+                    'mesa_id': user_data[11],
+                    'municipio_nombre': user_data[12],
+                    'municipio_codigo': user_data[13],
+                    'puesto_nombre': user_data[14],
+                    'puesto_direccion': user_data[15],
+                    'mesa_numero': user_data[16],
+                    'votantes_habilitados': user_data[17],
+                    'zona_codigo': user_data[18],
+                    'zona_nombre': user_data[19],
+                    'total_capturas': total_capturas
                 }
             })
             
@@ -1187,6 +1234,30 @@ def create_app():
         print("✅ APIs de gestión de candidatos registradas exitosamente")
     except ImportError as e:
         print(f"⚠️  No se pudieron cargar las APIs de gestión de candidatos: {e}")
+    
+    # Registrar API de autenticación y registro
+    try:
+        from api.auth_api import auth_api
+        app.register_blueprint(auth_api)
+        print("✅ API de autenticación y registro registrada exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudo cargar la API de autenticación: {e}")
+    
+    # Registrar API de testigo electoral
+    try:
+        from api.testigo_api import testigo_api
+        app.register_blueprint(testigo_api)
+        print("✅ API de testigo electoral registrada exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudo cargar la API de testigo: {e}")
+    
+    # Registrar API de ubicación dinámica
+    try:
+        from api.ubicacion_api import ubicacion_api
+        app.register_blueprint(ubicacion_api)
+        print("✅ API de ubicación dinámica registrada exitosamente")
+    except ImportError as e:
+        print(f"⚠️  No se pudo cargar la API de ubicación: {e}")
     
     return app
 

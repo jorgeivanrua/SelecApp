@@ -43,43 +43,62 @@ Este documento define los requisitos para implementar el dashboard del testigo e
 5. WHEN completa todas las zonas, THE Sistema SHALL retornar los datos extraídos con confianza promedio y total de votos
 6. IF el OCR falla en una zona, THEN THE Sistema SHALL asignar valor 0 y confianza 0% a esa posición
 
-### Requirement 3: Visualización de Resultados OCR
+### Requirement 3: Visualización de Resultados OCR en Formulario Completo
 
-**User Story:** Como testigo electoral, quiero ver los datos extraídos por el OCR en una tabla editable con indicadores de confianza, para que pueda revisar y corregir cualquier error antes de confirmar.
-
-#### Acceptance Criteria
-
-1. WHEN el OCR completa el procesamiento, THE Sistema SHALL mostrar una tabla con columnas: Posición, Candidato, Votos, Confianza y Acción
-2. WHEN muestra la tabla, THE Sistema SHALL resaltar en amarillo las filas con confianza menor a 90%
-3. WHEN muestra la tabla, THE Sistema SHALL mostrar la confianza promedio general en la parte superior
-4. WHEN muestra la tabla, THE Sistema SHALL calcular y mostrar el total de votos detectados
-5. WHEN el testigo hace clic en el ícono de editar, THE Sistema SHALL convertir el campo de votos en un input editable
-
-### Requirement 4: Corrección Manual de Datos
-
-**User Story:** Como testigo electoral, quiero poder editar manualmente cualquier número extraído por el OCR, para que pueda corregir errores de lectura antes de guardar los datos finales.
+**User Story:** Como testigo electoral, quiero ver los datos extraídos por el OCR en un formulario completo del E14 con todos los campos editables, para que pueda revisar y corregir cualquier error antes de confirmar.
 
 #### Acceptance Criteria
 
-1. WHEN el testigo hace clic en editar un campo de votos, THE Sistema SHALL mostrar un input numérico con el valor actual
-2. WHEN el testigo modifica un valor, THE Sistema SHALL marcar ese campo como "editado" visualmente
-3. WHEN el testigo modifica un valor, THE Sistema SHALL recalcular el total de votos automáticamente
-4. WHEN el testigo guarda un valor editado, THE Sistema SHALL validar que sea un número entero no negativo
-5. IF el valor editado no es válido, THEN THE Sistema SHALL mostrar un mensaje de error y no permitir guardar
+1. WHEN el OCR completa el procesamiento, THE Sistema SHALL llenar automáticamente el formulario E14 con los datos extraídos
+2. WHEN llena el formulario, THE Sistema SHALL incluir: departamento, municipio, zona, puesto, mesa, tipo de elección, horarios, candidatos con partidos y votos, votos especiales, información de votantes, datos del acta y observaciones
+3. WHEN muestra el formulario, THE Sistema SHALL mostrar un indicador de estado del OCR (procesando/completado/error)
+4. WHEN muestra el formulario, THE Sistema SHALL calcular y mostrar el total de votos automáticamente
+5. WHEN muestra el formulario, THE Sistema SHALL validar el total contra votantes habilitados con indicador visual (verde/amarillo/rojo)
 
-### Requirement 5: Confirmación y Guardado de Datos
+### Requirement 4: Edición Completa de Datos del E14
 
-**User Story:** Como testigo electoral, quiero confirmar los datos revisados y guardarlos en el sistema, para que queden registrados oficialmente los resultados de mi mesa.
+**User Story:** Como testigo electoral, quiero poder editar manualmente todos los campos del formulario E14 extraídos por el OCR, para que pueda corregir errores de lectura y completar información faltante antes de guardar los datos finales.
 
 #### Acceptance Criteria
 
-1. WHEN el testigo hace clic en "Aceptar y Guardar", THE Sistema SHALL enviar los datos confirmados mediante POST a `/api/testigo/confirmar-datos-e14`
-2. WHEN envía los datos, THE Sistema SHALL incluir mesa_id, imagen_e14_id, datos_confirmados, total_votos, observaciones y timestamp
-3. WHEN el servidor recibe los datos, THE Sistema SHALL guardar los registros en la tabla `datos_ocr_e14` con estado "confirmado"
-4. WHEN guarda exitosamente, THE Sistema SHALL mostrar un mensaje de confirmación al testigo
-5. WHEN guarda exitosamente, THE Sistema SHALL actualizar el estado de la mesa a "datos_reportados"
+1. WHEN el testigo modifica cualquier campo del formulario, THE Sistema SHALL permitir la edición sin restricciones
+2. WHEN el testigo modifica un campo de votos, THE Sistema SHALL recalcular el total de votos automáticamente
+3. WHEN el testigo modifica un campo de votos, THE Sistema SHALL actualizar el indicador de validación (verde/amarillo/rojo)
+4. WHEN el testigo modifica un campo numérico, THE Sistema SHALL validar que sea un número entero no negativo
+5. WHEN el testigo agrega o elimina candidatos, THE Sistema SHALL actualizar dinámicamente la lista y recalcular totales
+6. WHEN el testigo completa los campos del acta, THE Sistema SHALL validar que los campos obligatorios estén llenos antes de permitir envío
 
-### Requirement 6: Configuración de Estructura E14 por Admin
+### Requirement 5: Captura de Campos Completos del E14
+
+**User Story:** Como testigo electoral, quiero capturar todos los campos del formulario E14 oficial incluyendo información del acta, horarios y datos de votantes, para que el registro sea completo y cumpla con los requisitos legales.
+
+#### Acceptance Criteria
+
+1. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: departamento, municipio, zona, puesto, mesa, tipo de elección
+2. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: hora de apertura y hora de cierre de la votación
+3. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: candidatos con nombre, partido y votos
+4. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: votos en blanco, votos nulos, tarjetas no marcadas y total de tarjetas
+5. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: votantes habilitados, votantes que sufragaron y certificados electorales
+6. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: número de acta E14, jurado presidente y testigos del acta
+7. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: checkboxes de acta firmada y proceso normal
+8. WHEN el testigo completa el formulario, THE Sistema SHALL capturar: observaciones detalladas del proceso
+
+### Requirement 6: Confirmación y Guardado de Datos Completos
+
+**User Story:** Como testigo electoral, quiero confirmar los datos revisados y guardarlos en el sistema con toda la información del E14, para que queden registrados oficialmente los resultados completos de mi mesa.
+
+#### Acceptance Criteria
+
+1. WHEN el testigo hace clic en "Enviar Formulario E14", THE Sistema SHALL validar que la foto esté capturada
+2. WHEN el testigo hace clic en "Enviar Formulario E14", THE Sistema SHALL validar que haya al menos un voto registrado
+3. WHEN envía los datos, THE Sistema SHALL incluir todos los 25+ campos del formulario E14 completo
+4. WHEN envía los datos, THE Sistema SHALL enviar mediante POST a `/api/testigo/enviar-e14`
+5. WHEN el servidor recibe los datos, THE Sistema SHALL guardar los registros en las tablas correspondientes
+6. WHEN guarda exitosamente, THE Sistema SHALL mostrar un mensaje de confirmación al testigo
+7. WHEN guarda exitosamente, THE Sistema SHALL actualizar el contador de capturas E14 en el dashboard
+8. WHEN guarda exitosamente, THE Sistema SHALL recargar la página para permitir nueva captura
+
+### Requirement 7: Configuración de Estructura E14 por Admin
 
 **User Story:** Como administrador, quiero configurar las zonas OCR del formulario E14 para cada tipo de elección, de manera que el sistema sepa dónde extraer los números de votos en las fotos.
 
@@ -91,7 +110,7 @@ Este documento define los requisitos para implementar el dashboard del testigo e
 4. WHEN el servidor recibe la configuración, THE Sistema SHALL guardar los registros en la tabla `estructura_e14`
 5. WHEN guarda exitosamente, THE Sistema SHALL validar que todas las posiciones tengan zonas OCR definidas
 
-### Requirement 7: Validación de Totales
+### Requirement 8: Validación de Totales
 
 **User Story:** Como testigo electoral, quiero que el sistema valide que el total de votos coincida con los votantes que sufragaron, para detectar inconsistencias antes de reportar.
 
@@ -103,7 +122,7 @@ Este documento define los requisitos para implementar el dashboard del testigo e
 4. WHEN muestra advertencia, THE Sistema SHALL permitir al testigo agregar observaciones explicando la diferencia
 5. WHEN el testigo agrega observaciones, THE Sistema SHALL permitir confirmar los datos a pesar de la advertencia
 
-### Requirement 8: Manejo de Errores OCR
+### Requirement 9: Manejo de Errores OCR
 
 **User Story:** Como testigo electoral, quiero que el sistema me notifique si el OCR no puede procesar la imagen, para que pueda tomar una nueva foto o ingresar los datos manualmente.
 
@@ -115,7 +134,7 @@ Este documento define los requisitos para implementar el dashboard del testigo e
 4. IF el testigo selecciona "Ingresar manualmente", THEN THE Sistema SHALL mostrar un formulario vacío para entrada manual
 5. WHEN hay error OCR, THE Sistema SHALL registrar el error en logs con detalles de la imagen y mesa
 
-### Requirement 9: Historial de Imágenes E14
+### Requirement 10: Historial de Imágenes E14
 
 **User Story:** Como testigo electoral, quiero ver todas las fotos E14 que he subido para mi mesa, para poder revisar o reprocesar imágenes anteriores si es necesario.
 
@@ -127,7 +146,7 @@ Este documento define los requisitos para implementar el dashboard del testigo e
 4. WHEN muestra imagen completa, THE Sistema SHALL mostrar los datos extraídos asociados a esa imagen
 5. WHEN el testigo selecciona una imagen, THE Sistema SHALL permitir reprocesar o eliminar la imagen
 
-### Requirement 10: Indicadores de Calidad de Imagen
+### Requirement 11: Indicadores de Calidad de Imagen
 
 **User Story:** Como testigo electoral, quiero recibir retroalimentación sobre la calidad de la foto antes de procesarla, para asegurarme de que el OCR funcionará correctamente.
 
@@ -138,3 +157,15 @@ Este documento define los requisitos para implementar el dashboard del testigo e
 3. WHEN analiza la imagen, THE Sistema SHALL detectar si está borrosa usando análisis de varianza de Laplacian
 4. IF la imagen está borrosa, THEN THE Sistema SHALL mostrar una advertencia y sugerir tomar nueva foto
 5. WHEN muestra advertencias de calidad, THE Sistema SHALL permitir al testigo continuar o tomar nueva foto
+
+### Requirement 12: Dashboard Enfocado sin Distracciones
+
+**User Story:** Como testigo electoral, quiero un dashboard limpio y enfocado solo en la captura del E14, para que pueda completar mi tarea sin distracciones o elementos innecesarios.
+
+#### Acceptance Criteria
+
+1. WHEN el testigo accede al dashboard, THE Sistema SHALL mostrar solo: estadísticas de la mesa, área de captura de foto y formulario E14
+2. WHEN el testigo accede al dashboard, THE Sistema SHALL NOT mostrar acciones rápidas o botones de navegación secundaria
+3. WHEN el testigo accede al dashboard, THE Sistema SHALL mantener el menú de navegación principal para acceso a otras funciones
+4. WHEN el testigo completa el formulario, THE Sistema SHALL mantener el foco en el botón de envío como única acción principal
+5. WHEN el testigo envía el formulario, THE Sistema SHALL recargar el dashboard para permitir nueva captura sin navegación adicional

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Registro - Sistema Electoral Caquetá</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 1100px;
+            width: 100%;
+            display: flex;
+        }
+
+        .auth-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-left h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .auth-left p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.7;
+        }
+
+        .icon-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .icon-box i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .auth-right {
+            padding: 50px 40px;
+            flex: 1.2;
+            background: white;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h2 {
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .auth-header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-floating {
+            margin-bottom: 20px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            height: 58px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-floating label {
+            padding: 1rem 0.75rem;
+            color: #64748b;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-custom.show {
+            display: block;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .role-card {
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .role-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .role-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .role-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .role-card h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+            
+            .auth-left {
+                padding: 40px 30px;
+            }
+            
+            .auth-right {
+                padding: 40px 30px;
+                max-height: none;
+            }
+
+            .role-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Lado izquierdo -->
+        <div class="auth-left">
+            <div>
+                <h1><i class="fas fa-vote-yea"></i> Sistema Electoral</h1>
+                <p><strong>Departamento del Caquetá</strong></p>
+                <p>Plataforma de gestión electoral para la recolección inicial de votaciones.</p>
+                
+                <div class="icon-box">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Acceso Seguro</h4>
+                    <p>Sistema protegido con autenticación JWT y encriptación de datos.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lado derecho -->
+        <div class="auth-right">
+            <div class="auth-header">
+                <h2>Bienvenido</h2>
+                <p>Inicia sesión o regístrate para acceder</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('login')">
+                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                </button>
+                <button class="tab-btn" onclick="switchTab('register')">
+                    <i class="fas fa-user-plus me-2"></i>Registrarse
+                </button>
+            </div>
+
+            <!-- Alertas -->
+            <div id="alertSuccess" class="alert alert-success alert-custom">
+                <i class="fas fa-check-circle me-2"></i> <span id="successMessage"></span>
+            </div>
+            <div id="alertError" class="alert alert-danger alert-custom">
+                <i class="fas fa-exclamation-circle me-2"></i> <span id="errorMessage"></span>
+            </div>
+
+            <!-- Formulario de Login -->
+            <div id="loginSection" class="form-section active">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="loginUsername" placeholder="Usuario" required>
+                        <label><i class="fas fa-user me-2"></i>Usuario o Cédula</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Contraseña" required>
+                        <label><i class="fas fa-lock me-2"></i>Contraseña</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </button>
+                </form>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <div id="registerSection" class="form-section">
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <!-- Selección de Rol -->
+                    <div class="role-selector mb-4">
+                        <div class="role-card" onclick="selectRole('testigo_mesa')" data-role="testigo_mesa">
+                            <i class="fas fa-user-check"></i>
+                            <h5>Testigo Electoral</h5>
+                            <small>Testigo de mesa</small>
+                        </div>
+                        <div class="role-card" onclick="selectRole('coordinador_puesto')" data-role="coordinador_puesto">
+                            <i class="fas fa-users-cog"></i>
+                            <h5>Coordinador</h5>
+                            <small>Coordinador de puesto</small>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="registerRole" required>
+
+                    <!-- Datos Personales -->
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="registerCedula" placeholder="Cédula" required pattern="[0-9]{6,10}">
+                        <label><i class="fas fa-id-card me-2"></i>Cédula</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="registerNombre" placeholder="Nombre completo" required>
+                        <label><i class="fas fa-user me-2"></i>Nombre Completo</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="email" class="form-control" id="registerEmail" placeholder="Email">
+                        <label><i class="fas fa-envelope me-2"></i>Email (Opcional)</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="tel" class="form-control" id="registerTelefono" placeholder="Teléfono" required pattern="[0-9]{10}">
+                        <label><i class="fas fa-phone me-2"></i>Teléfono (10 dígitos)</label>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="form-floating">
+                        <select class="form-select" id="registerMunicipio" required onchange="loadPuestos()">
+                            <option value="">Seleccione...</option>
+                        </select>
+                        <label><i class="fas fa-map-marker-alt me-2"></i>Municipio</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <select class="form-select" id="registerPuesto" required onchange="loadMesas()">
+                            <option value="">Primero seleccione municipio...</option>
+                        </select>
+                        <label><i class="fas fa-building me-2"></i>Puesto de Votación</label>
+                    </div>
+
+                    <div class="form-floating" id="mesaContainer" style="display: none;">
+                        <select class="form-select" id="registerMesa">
+                            <option value="">Primero seleccione puesto...</option>
+                        </select>
+                        <label><i class="fas fa-table me-2"></i>Mesa (Opcional para coordinadores)</label>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="registerPassword" placeholder="Contraseña" required minlength="6">
+                        <label><i class="fas fa-lock me-2"></i>Contraseña (mínimo 6 caracteres)</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="registerPasswordConfirm" placeholder="Confirmar contraseña" required>
+                        <label><i class="fas fa-lock me-2"></i>Confirmar Contraseña</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Registrarse
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-3 text-muted">Procesando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedRole = '';
+
+        // Cambiar entre tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('loginSection').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('registerSection').classList.add('active');
+                loadMunicipios();
+            }
+        }
+
+        // Seleccionar rol
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('active'));
+            document.querySelector(`[data-role="${role}"]`).classList.add('active');
+            document.getElementById('registerRole').value = role;
+            
+            // Mostrar/ocultar campo de mesa según el rol
+            if (role === 'testigo_mesa') {
+                document.getElementById('mesaContainer').style.display = 'block';
+                document.getElementById('registerMesa').required = true;
+            } else {
+                document.getElementById('mesaContainer').style.display = 'none';
+                document.getElementById('registerMesa').required = false;
+            }
+        }
+
+        // Cargar municipios
+        async function loadMunicipios() {
+            try {
+                const response = await fetch('/api/ubicacion/municipios');
+                const data = await response.json();
+                
+                const select = document.getElementById('registerMunicipio');
+                select.innerHTML = '<option value="">Seleccione...</option>';
+                
+                data.municipios.forEach(mun => {
+                    const option = document.createElement('option');
+                    option.value = mun.id;
+                    option.textContent = mun.nombre;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando municipios:', error);
+            }
+        }
+
+        // Cargar puestos
+        async function loadPuestos() {
+            const municipioId = document.getElementById('registerMunicipio').value;
+            const selectPuesto = document.getElementById('registerPuesto');
+            const selectMesa = document.getElementById('registerMesa');
+            
+            selectPuesto.innerHTML = '<option value="">Cargando...</option>';
+            selectMesa.innerHTML = '<option value="">Primero seleccione puesto...</option>';
+            
+            if (!municipioId) {
+                selectPuesto.innerHTML = '<option value="">Primero seleccione municipio...</option>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/ubicacion/puestos/${municipioId}`);
+                const data = await response.json();
+                
+                selectPuesto.innerHTML = '<option value="">Seleccione...</option>';
+                
+                data.puestos.forEach(puesto => {
+                    const option = document.createElement('option');
+                    option.value = puesto.id;
+                    option.textContent = puesto.nombre;
+                    selectPuesto.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando puestos:', error);
+                selectPuesto.innerHTML = '<option value="">Error cargando puestos</option>';
+            }
+        }
+
+        // Cargar mesas
+        async function loadMesas() {
+            const puestoId = document.getElementById('registerPuesto').value;
+            const selectMesa = document.getElementById('registerMesa');
+            
+            selectMesa.innerHTML = '<option value="">Cargando...</option>';
+            
+            if (!puestoId) {
+                selectMesa.innerHTML = '<option value="">Primero seleccione puesto...</option>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/ubicacion/mesas/${puestoId}`);
+                const data = await response.json();
+                
+                selectMesa.innerHTML = '<option value="">Seleccione...</option>';
+                
+                data.mesas.forEach(mesa => {
+                    const option = document.createElement('option');
+                    option.value = mesa.id;
+                    option.textContent = `Mesa ${mesa.numero}`;
+                    selectMesa.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando mesas:', error);
+                selectMesa.innerHTML = '<option value="">Error cargando mesas</option>';
+            }
+        }
+
+        // Mostrar alerta
+        function showAlert(type, message) {
+            const alertId = type === 'success' ? 'alertSuccess' : 'alertError';
+            const messageId = type === 'success' ? 'successMessage' : 'errorMessage';
+            
+            document.getElementById(messageId).textContent = message;
+            document.getElementById(alertId).classList.add('show');
+            
+            setTimeout(() => {
+                document.getElementById(alertId).classList.remove('show');
+            }, 5000);
+        }
+
+        // Manejar login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            document.querySelector('.loading-spinner').classList.add('show');
+            document.getElementById('loginForm').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cedula: username, password: password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.access_token) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showAlert('success', '¡Inicio de sesión exitoso! Redirigiendo...');
+                    
+                    setTimeout(() => {
+                        window.location.href = `/dashboard/${data.user.rol}`;
+                    }, 1500);
+                } else {
+                    showAlert('error', data.error || 'Credenciales incorrectas');
+                    document.querySelector('.loading-spinner').classList.remove('show');
+                    document.getElementById('loginForm').style.display = 'block';
+                }
+            } catch (error) {
+                showAlert('error', 'Error de conexión. Intenta nuevamente.');
+                document.querySelector('.loading-spinner').classList.remove('show');
+                document.getElementById('loginForm').style.display = 'block';
+            }
+        }
+
+        // Manejar registro
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            if (password !== passwordConfirm) {
+                showAlert('error', 'Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (!selectedRole) {
+                showAlert('error', 'Por favor selecciona un rol');
+                return;
+            }
+            
+            const formData = {
+                cedula: document.getElementById('registerCedula').value,
+                nombre_completo: document.getElementById('registerNombre').value,
+                email: document.getElementById('registerEmail').value,
+                telefono: document.getElementById('registerTelefono').value,
+                municipio_id: document.getElementById('registerMunicipio').value,
+                puesto_id: document.getElementById('registerPuesto').value,
+                mesa_id: document.getElementById('registerMesa').value || null,
+                rol: selectedRole,
+                password: password
+            };
+            
+            document.querySelector('.loading-spinner').classList.add('show');
+            document.getElementById('registerForm').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showAlert('success', '¡Registro exitoso! Redirigiendo al login...');
+                    
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.getElementById('loginUsername').value = formData.cedula;
+                        document.querySelector('.loading-spinner').classList.remove('show');
+                        document.getElementById('registerForm').style.display = 'block';
+                    }, 2000);
+                } else {
+                    showAlert('error', data.error || 'Error en el registro');
+                    document.querySelector('.loading-spinner').classList.remove('show');
+                    document.getElementById('registerForm').style.display = 'block';
+                }
+            } catch (error) {
+                showAlert('error', 'Error de conexión. Intenta nuevamente.');
+                document.querySelector('.loading-spinner').classList.remove('show');
+                document.getElementById('registerForm').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
