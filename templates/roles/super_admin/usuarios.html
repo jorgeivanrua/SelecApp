@@ -76,9 +76,14 @@
                     <h2><i class="fas fa-users me-2"></i>Gestión de Usuarios</h2>
                     <p class="text-muted mb-0">Administra todos los usuarios del sistema electoral</p>
                 </div>
-                <button class="btn btn-create btn-lg" onclick="showCreateUserModal()">
-                    <i class="fas fa-user-plus me-2"></i>Crear Usuario
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-warning btn-lg" onclick="showAutoGenerateModal()">
+                        <i class="fas fa-magic me-2"></i>Generar Automático
+                    </button>
+                    <button class="btn btn-create btn-lg" onclick="showCreateUserModal()">
+                        <i class="fas fa-user-plus me-2"></i>Crear Usuario
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -152,6 +157,142 @@
     </div>
 </div>
 
+<!-- Modal Generación Automática -->
+<div class="modal fade" id="autoGenerateModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-magic me-2"></i>Generación Automática de Usuarios desde DIVIPOLA
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Generación Inteligente:</strong> Este sistema creará usuarios automáticamente basándose en la estructura DIVIPOLA cargada en la base de datos.
+                </div>
+
+                <!-- Opciones de generación -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-city text-primary me-2"></i>Coordinadores Municipales
+                                </h5>
+                                <p class="card-text">Genera un coordinador por cada municipio del departamento</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="genCoordinadoresMunicipales" checked>
+                                    <label class="form-check-label" for="genCoordinadoresMunicipales">
+                                        Generar coordinadores municipales
+                                    </label>
+                                </div>
+                                <small class="text-muted">Se crearán <span id="countMunicipios">0</span> usuarios</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-building text-warning me-2"></i>Coordinadores de Puesto
+                                </h5>
+                                <p class="card-text">Genera un coordinador por cada puesto de votación</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="genCoordinadoresPuesto" checked>
+                                    <label class="form-check-label" for="genCoordinadoresPuesto">
+                                        Generar coordinadores de puesto
+                                    </label>
+                                </div>
+                                <small class="text-muted">Se crearán <span id="countPuestos">0</span> usuarios</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-user-check text-success me-2"></i>Testigos de Mesa
+                                </h5>
+                                <p class="card-text">Genera un testigo por cada mesa de votación</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="genTestigos" checked>
+                                    <label class="form-check-label" for="genTestigos">
+                                        Generar testigos de mesa
+                                    </label>
+                                </div>
+                                <small class="text-muted">Se crearán <span id="countMesas">0</span> usuarios</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-cog text-info me-2"></i>Configuración
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Contraseña por defecto</label>
+                                    <input type="text" class="form-control" id="defaultPassword" value="Electoral2024!" placeholder="Contraseña para todos los usuarios">
+                                    <small class="text-muted">Los usuarios podrán cambiarla después</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="skipExisting" checked>
+                                    <label class="form-check-label" for="skipExisting">
+                                        Omitir usuarios existentes
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen -->
+                <div class="alert alert-dark">
+                    <h6><i class="fas fa-calculator me-2"></i>Resumen de Generación</h6>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h3 class="text-primary mb-0" id="totalUsuarios">0</h3>
+                            <small>Total de usuarios a crear</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="text-success mb-0" id="estimatedTime">~0s</h3>
+                            <small>Tiempo estimado</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="text-info mb-0">Caquetá</h3>
+                            <small>Departamento</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progreso -->
+                <div id="generationProgress" style="display: none;">
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progressBar" style="width: 0%">
+                            <span id="progressText">0%</span>
+                        </div>
+                    </div>
+                    <div id="generationLog" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85rem;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" onclick="startAutoGeneration()" id="btnStartGeneration">
+                    <i class="fas fa-magic me-2"></i>Iniciar Generación
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Crear/Editar Usuario -->
 <div class="modal fade" id="userModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -191,7 +332,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Rol *</label>
-                            <select class="form-select" id="userRol" required>
+                            <select class="form-select" id="userRol" required onchange="updateUbicacionFields()">
                                 <option value="">Seleccione...</option>
                                 <option value="super_admin">Super Admin</option>
                                 <option value="admin_departamental">Admin Departamental</option>
@@ -210,30 +351,49 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Municipio</label>
-                            <select class="form-select" id="userMunicipio" onchange="loadPuestosModal()">
-                                <option value="">Seleccione...</option>
-                            </select>
+                    <!-- Campos de ubicación condicionales según rol -->
+                    <div id="ubicacionFields">
+                        <div class="row" id="departamentoRow" style="display: none;">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Departamento *</label>
+                                <select class="form-select" id="userDepartamento">
+                                    <option value="Caquetá">Caquetá</option>
+                                </select>
+                                <small class="text-muted">Departamento asignado</small>
+                            </div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Puesto</label>
-                            <select class="form-select" id="userPuesto" onchange="loadMesasModal()">
-                                <option value="">Seleccione municipio...</option>
-                            </select>
+
+                        <div class="row" id="municipioRow" style="display: none;">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Municipio *</label>
+                                <select class="form-select" id="userMunicipio" onchange="loadPuestosModal()">
+                                    <option value="">Seleccione...</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Mesa</label>
-                            <select class="form-select" id="userMesa">
-                                <option value="">Seleccione puesto...</option>
-                            </select>
+
+                        <div class="row" id="puestoRow" style="display: none;">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Puesto de Votación *</label>
+                                <select class="form-select" id="userPuesto" onchange="loadMesasModal()">
+                                    <option value="">Seleccione municipio...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row" id="mesaRow" style="display: none;">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Mesa *</label>
+                                <select class="form-select" id="userMesa">
+                                    <option value="">Seleccione puesto...</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="alert alert-info">
+                    <div class="alert alert-info" id="ubicacionInfo">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Nota:</strong> Los campos de ubicación (municipio, puesto, mesa) son opcionales para roles administrativos.
+                        <strong>Nota:</strong> Seleccione un rol para ver los campos de ubicación requeridos.
                     </div>
                 </form>
             </div>
@@ -250,11 +410,14 @@
 <script>
 let allUsers = [];
 let userModal;
+let autoGenerateModal;
 
 document.addEventListener('DOMContentLoaded', function() {
     userModal = new bootstrap.Modal(document.getElementById('userModal'));
+    autoGenerateModal = new bootstrap.Modal(document.getElementById('autoGenerateModal'));
     loadUsers();
     loadMunicipiosModal();
+    loadGenerationStats();
 });
 
 // Cargar usuarios
@@ -310,6 +473,7 @@ function displayUsers(users) {
                     ${user.email ? `<p class="text-muted mb-1"><i class="fas fa-envelope me-2"></i>${user.email}</p>` : ''}
                     <p class="text-muted mb-1"><i class="fas fa-phone me-2"></i>${user.telefono}</p>
                     
+                    ${user.departamento ? `<p class="text-muted mb-1"><i class="fas fa-map me-2"></i>${user.departamento}</p>` : ''}
                     ${user.municipio_nombre ? `<p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-2"></i>${user.municipio_nombre}</p>` : ''}
                     ${user.puesto_nombre ? `<p class="text-muted mb-1"><i class="fas fa-building me-2"></i>${user.puesto_nombre}</p>` : ''}
                     ${user.mesa_numero ? `<p class="text-muted mb-1"><i class="fas fa-table me-2"></i>Mesa ${user.mesa_numero}</p>` : ''}
@@ -369,6 +533,20 @@ function showCreateUserModal() {
     document.getElementById('userForm').reset();
     document.getElementById('userId').value = '';
     document.getElementById('userPassword').required = true;
+    
+    // Ocultar todos los campos de ubicación
+    document.getElementById('departamentoRow').style.display = 'none';
+    document.getElementById('municipioRow').style.display = 'none';
+    document.getElementById('puestoRow').style.display = 'none';
+    document.getElementById('mesaRow').style.display = 'none';
+    
+    // Resetear info
+    document.getElementById('ubicacionInfo').innerHTML = `
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Nota:</strong> Seleccione un rol para ver los campos de ubicación requeridos.
+    `;
+    document.getElementById('ubicacionInfo').className = 'alert alert-info';
+    
     userModal.show();
 }
 
@@ -401,6 +579,7 @@ async function saveUser() {
         email: document.getElementById('userEmail').value,
         telefono: document.getElementById('userTelefono').value,
         rol: document.getElementById('userRol').value,
+        departamento: document.getElementById('userDepartamento').value || null,
         municipio_id: document.getElementById('userMunicipio').value || null,
         puesto_id: document.getElementById('userPuesto').value || null,
         mesa_id: document.getElementById('userMesa').value || null
@@ -555,6 +734,243 @@ function getRoleName(rol) {
         'auditor_electoral': 'Auditor Electoral'
     };
     return roles[rol] || rol;
+}
+
+// Mostrar modal de generación automática
+function showAutoGenerateModal() {
+    loadGenerationStats();
+    autoGenerateModal.show();
+}
+
+// Cargar estadísticas para generación
+async function loadGenerationStats() {
+    try {
+        const response = await fetch('/api/admin/generation-stats');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('countMunicipios').textContent = data.municipios;
+            document.getElementById('countPuestos').textContent = data.puestos;
+            document.getElementById('countMesas').textContent = data.mesas;
+            updateTotalUsuarios();
+        }
+    } catch (error) {
+        console.error('Error cargando estadísticas:', error);
+    }
+}
+
+// Actualizar total de usuarios a crear
+function updateTotalUsuarios() {
+    let total = 0;
+    
+    if (document.getElementById('genCoordinadoresMunicipales').checked) {
+        total += parseInt(document.getElementById('countMunicipios').textContent);
+    }
+    if (document.getElementById('genCoordinadoresPuesto').checked) {
+        total += parseInt(document.getElementById('countPuestos').textContent);
+    }
+    if (document.getElementById('genTestigos').checked) {
+        total += parseInt(document.getElementById('countMesas').textContent);
+    }
+    
+    document.getElementById('totalUsuarios').textContent = total;
+    document.getElementById('estimatedTime').textContent = `~${Math.ceil(total / 10)}s`;
+}
+
+// Agregar listeners para actualizar totales
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = ['genCoordinadoresMunicipales', 'genCoordinadoresPuesto', 'genTestigos'];
+    checkboxes.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', updateTotalUsuarios);
+        }
+    });
+});
+
+// Iniciar generación automática
+async function startAutoGeneration() {
+    const config = {
+        coordinadores_municipales: document.getElementById('genCoordinadoresMunicipales').checked,
+        coordinadores_puesto: document.getElementById('genCoordinadoresPuesto').checked,
+        testigos: document.getElementById('genTestigos').checked,
+        default_password: document.getElementById('defaultPassword').value,
+        skip_existing: document.getElementById('skipExisting').checked
+    };
+    
+    if (!config.default_password) {
+        alert('Por favor ingrese una contraseña por defecto');
+        return;
+    }
+    
+    if (!config.coordinadores_municipales && !config.coordinadores_puesto && !config.testigos) {
+        alert('Por favor seleccione al menos un tipo de usuario para generar');
+        return;
+    }
+    
+    // Confirmar
+    const total = parseInt(document.getElementById('totalUsuarios').textContent);
+    if (!confirm(`¿Está seguro de generar ${total} usuarios automáticamente?`)) {
+        return;
+    }
+    
+    // Mostrar progreso
+    document.getElementById('generationProgress').style.display = 'block';
+    document.getElementById('btnStartGeneration').disabled = true;
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('progressText').textContent = '0%';
+    document.getElementById('generationLog').innerHTML = '<div class="text-info">Iniciando generación...</div>';
+    
+    try {
+        const response = await fetch('/api/admin/generate-users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Actualizar progreso
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressText').textContent = '100%';
+            document.getElementById('progressBar').classList.remove('progress-bar-animated');
+            document.getElementById('progressBar').classList.add('bg-success');
+            
+            // Mostrar resumen
+            let logHtml = '<div class="text-success mb-2"><strong>✅ Generación completada exitosamente</strong></div>';
+            logHtml += `<div>📊 Total creados: ${data.created}</div>`;
+            logHtml += `<div>⏭️ Omitidos (ya existían): ${data.skipped}</div>`;
+            logHtml += `<div>❌ Errores: ${data.errors}</div>`;
+            
+            if (data.details) {
+                logHtml += '<div class="mt-2"><strong>Detalles:</strong></div>';
+                data.details.forEach(detail => {
+                    const icon = detail.status === 'created' ? '✅' : detail.status === 'skipped' ? '⏭️' : '❌';
+                    logHtml += `<div class="text-muted">${icon} ${detail.message}</div>`;
+                });
+            }
+            
+            document.getElementById('generationLog').innerHTML = logHtml;
+            
+            // Recargar lista de usuarios
+            setTimeout(() => {
+                loadUsers();
+                alert(`Generación completada:\n${data.created} usuarios creados\n${data.skipped} omitidos\n${data.errors} errores`);
+                autoGenerateModal.hide();
+                document.getElementById('btnStartGeneration').disabled = false;
+                document.getElementById('generationProgress').style.display = 'none';
+            }, 2000);
+        } else {
+            throw new Error(data.error || 'Error en la generación');
+        }
+    } catch (error) {
+        console.error('Error en generación automática:', error);
+        document.getElementById('progressBar').classList.add('bg-danger');
+        document.getElementById('generationLog').innerHTML = `<div class="text-danger">❌ Error: ${error.message}</div>`;
+        document.getElementById('btnStartGeneration').disabled = false;
+    }
+}
+
+// Actualizar campos de ubicación según el rol seleccionado
+function updateUbicacionFields() {
+    const rol = document.getElementById('userRol').value;
+    
+    // Ocultar todos los campos primero
+    document.getElementById('departamentoRow').style.display = 'none';
+    document.getElementById('municipioRow').style.display = 'none';
+    document.getElementById('puestoRow').style.display = 'none';
+    document.getElementById('mesaRow').style.display = 'none';
+    
+    // Remover required de todos
+    document.getElementById('userDepartamento').required = false;
+    document.getElementById('userMunicipio').required = false;
+    document.getElementById('userPuesto').required = false;
+    document.getElementById('userMesa').required = false;
+    
+    // Configurar según el rol
+    const ubicacionInfo = document.getElementById('ubicacionInfo');
+    
+    switch(rol) {
+        case 'super_admin':
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-crown me-2"></i>
+                <strong>Super Admin:</strong> No requiere asignación de ubicación específica. Tiene acceso total al sistema.
+            `;
+            ubicacionInfo.className = 'alert alert-dark';
+            break;
+            
+        case 'admin_departamental':
+        case 'coordinador_departamental':
+            document.getElementById('departamentoRow').style.display = 'block';
+            document.getElementById('userDepartamento').required = true;
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-map me-2"></i>
+                <strong>${getRoleName(rol)}:</strong> Requiere asignación de departamento.
+            `;
+            ubicacionInfo.className = 'alert alert-primary';
+            break;
+            
+        case 'admin_municipal':
+        case 'coordinador_municipal':
+            document.getElementById('departamentoRow').style.display = 'block';
+            document.getElementById('municipioRow').style.display = 'block';
+            document.getElementById('userDepartamento').required = true;
+            document.getElementById('userMunicipio').required = true;
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-city me-2"></i>
+                <strong>${getRoleName(rol)}:</strong> Requiere asignación de departamento y municipio.
+            `;
+            ubicacionInfo.className = 'alert alert-info';
+            break;
+            
+        case 'coordinador_puesto':
+            document.getElementById('departamentoRow').style.display = 'block';
+            document.getElementById('municipioRow').style.display = 'block';
+            document.getElementById('puestoRow').style.display = 'block';
+            document.getElementById('userDepartamento').required = true;
+            document.getElementById('userMunicipio').required = true;
+            document.getElementById('userPuesto').required = true;
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-building me-2"></i>
+                <strong>Coordinador de Puesto:</strong> Requiere asignación de departamento, municipio y puesto de votación.
+            `;
+            ubicacionInfo.className = 'alert alert-warning';
+            break;
+            
+        case 'testigo_mesa':
+            document.getElementById('departamentoRow').style.display = 'block';
+            document.getElementById('municipioRow').style.display = 'block';
+            document.getElementById('puestoRow').style.display = 'block';
+            document.getElementById('mesaRow').style.display = 'block';
+            document.getElementById('userDepartamento').required = true;
+            document.getElementById('userMunicipio').required = true;
+            document.getElementById('userPuesto').required = true;
+            document.getElementById('userMesa').required = true;
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-user-check me-2"></i>
+                <strong>Testigo de Mesa:</strong> Requiere asignación completa: departamento, municipio, puesto y mesa específica.
+            `;
+            ubicacionInfo.className = 'alert alert-success';
+            break;
+            
+        case 'auditor_electoral':
+            document.getElementById('departamentoRow').style.display = 'block';
+            document.getElementById('userDepartamento').required = true;
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-search me-2"></i>
+                <strong>Auditor Electoral:</strong> Requiere asignación de departamento.
+            `;
+            ubicacionInfo.className = 'alert alert-danger';
+            break;
+            
+        default:
+            ubicacionInfo.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Nota:</strong> Seleccione un rol para ver los campos de ubicación requeridos.
+            `;
+            ubicacionInfo.className = 'alert alert-info';
+    }
 }
 </script>
 {% endblock %}

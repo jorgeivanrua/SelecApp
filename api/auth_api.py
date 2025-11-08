@@ -248,7 +248,7 @@ def get_all_users():
         cursor.execute("""
             SELECT 
                 u.id, u.username, u.cedula, u.nombre_completo, u.email, u.telefono,
-                u.rol, u.activo, u.created_at,
+                u.rol, u.departamento, u.activo, u.created_at,
                 m.nombre as municipio_nombre,
                 p.nombre as puesto_nombre,
                 mv.numero as mesa_numero
@@ -269,6 +269,7 @@ def get_all_users():
                 'email': row['email'],
                 'telefono': row['telefono'],
                 'rol': row['rol'],
+                'departamento': row['departamento'],
                 'activo': row['activo'],
                 'created_at': row['created_at'],
                 'municipio_nombre': row['municipio_nombre'],
@@ -319,9 +320,9 @@ def create_user_by_admin():
         cursor.execute("""
             INSERT INTO users (
                 username, cedula, nombre_completo, email, telefono,
-                password_hash, rol, municipio_id, puesto_id, mesa_id,
+                password_hash, rol, departamento, municipio_id, puesto_id, mesa_id,
                 activo, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             username,
             data['cedula'],
@@ -330,6 +331,7 @@ def create_user_by_admin():
             data['telefono'],
             password_hash,
             data['rol'],
+            data.get('departamento', 'Caquetá'),
             data.get('municipio_id'),
             data.get('puesto_id'),
             data.get('mesa_id'),
@@ -380,6 +382,10 @@ def update_user(user_id):
         if 'rol' in data:
             updates.append('rol = ?')
             params.append(data['rol'])
+        
+        if 'departamento' in data:
+            updates.append('departamento = ?')
+            params.append(data['departamento'])
         
         if 'activo' in data:
             updates.append('activo = ?')
@@ -437,6 +443,245 @@ def delete_user(user_id):
         return jsonify({
             'success': True,
             'message': 'Usuario desactivado exitosamente'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_api.route('/api/admin/generation-stats', methods=['GET'])
+def get_generation_stats():
+    """Obtener estadísticas para generación automática"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Contar municipios
+        cursor.execute("SELECT COUNT(*) as count FROM municipios WHERE activo = 1")
+        municipios = cursor.fetchone()['count']
+        
+        # Contar puestos
+        cursor.execute("SELECT COUNT(*) as count FROM puestos_votacion WHERE activo = 1")
+        puestos = cursor.fetchone()['count']
+        
+        # Contar mesas
+        cursor.execute("SELECT COUNT(*) as count FROM mesas_votacion WHERE activa = 1")
+        mesas = cursor.fetchone()['count']
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'municipios': municipios,
+            'puestos': puestos,
+            'mesas': mesas
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@auth_api.route('/api/admin/generate-users', methods=['POST'])
+def generate_users_auto():
+    """Generar usuarios automáticamente desde DIVIPOLA"""
+    try:
+        data = request.get_json()
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        created = 0
+        skipped = 0
+        errors = 0
+        details = []
+        
+        default_password = data.get('default_password', 'Electoral2024!')
+        skip_existing = data.get('skip_existing', True)
+        password_hash = generate_password_hash(default_password)
+        
+        # 1. Generar Coordinadores Municipales
+        if data.get('coordinadores_municipales', False):
+            cursor.execute("""
+                SELECT id, codigo, nombre, codigo_dd, codigo_mm
+                FROM municipios
+                WHERE activo = 1
+                ORDER BY nombre
+            """)
+            
+            municipios = cursor.fetchall()
+            
+            for mun in municipios:
+                cedula = f"CM{mun['codigo_dd']}{mun['codigo_mm']}"
+                username = f"coord_mun_{mun['codigo']}"
+                
+                # Verificar si existe
+                if skip_existing:
+                    cursor.execute("SELECT id FROM users WHERE cedula = ?", (cedula,))
+                    if cursor.fetchone():
+                        skipped += 1
+                        details.append({
+                            'status': 'skipped',
+                            'message': f"Coordinador Municipal {mun['nombre']} ya existe"
+                        })
+                        continue
+                
+                try:
+                    cursor.execute("""
+                        INSERT INTO users (
+                            username, cedula, nombre_completo, email, telefono,
+                            password_hash, rol, departamento, municipio_id,
+                            activo, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        username,
+                        cedula,
+                        f"Coordinador Municipal {mun['nombre']}",
+                        f"{username}@electoral.gov.co",
+                        "3000000000",
+                        password_hash,
+                        'coordinador_municipal',
+                        'Caquetá',
+                        mun['id'],
+                        1,
+                        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    ))
+                    created += 1
+                    details.append({
+                        'status': 'created',
+                        'message': f"✅ Coordinador Municipal {mun['nombre']}"
+                    })
+                except Exception as e:
+                    errors += 1
+                    details.append({
+                        'status': 'error',
+                        'message': f"❌ Error en {mun['nombre']}: {str(e)}"
+                    })
+        
+        # 2. Generar Coordinadores de Puesto
+        if data.get('coordinadores_puesto', False):
+            cursor.execute("""
+                SELECT p.id, p.nombre, p.codigo_divipola, p.municipio_id,
+                       m.nombre as municipio_nombre, m.codigo_dd, m.codigo_mm
+                FROM puestos_votacion p
+                LEFT JOIN municipios m ON p.municipio_id = m.id
+                WHERE p.activo = 1
+                ORDER BY m.nombre, p.nombre
+            """)
+            
+            puestos = cursor.fetchall()
+            
+            for puesto in puestos:
+                cedula = f"CP{puesto['codigo_divipola']}"
+                username = f"coord_puesto_{puesto['codigo_divipola']}"
+                
+                if skip_existing:
+                    cursor.execute("SELECT id FROM users WHERE cedula = ?", (cedula,))
+                    if cursor.fetchone():
+                        skipped += 1
+                        details.append({
+                            'status': 'skipped',
+                            'message': f"Coordinador Puesto {puesto['nombre']} ya existe"
+                        })
+                        continue
+                
+                try:
+                    cursor.execute("""
+                        INSERT INTO users (
+                            username, cedula, nombre_completo, email, telefono,
+                            password_hash, rol, departamento, municipio_id, puesto_id,
+                            activo, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        username,
+                        cedula,
+                        f"Coordinador {puesto['nombre']}",
+                        f"{username}@electoral.gov.co",
+                        "3000000000",
+                        password_hash,
+                        'coordinador_puesto',
+                        'Caquetá',
+                        puesto['municipio_id'],
+                        puesto['id'],
+                        1,
+                        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    ))
+                    created += 1
+                    details.append({
+                        'status': 'created',
+                        'message': f"✅ Coordinador {puesto['nombre']} - {puesto['municipio_nombre']}"
+                    })
+                except Exception as e:
+                    errors += 1
+                    details.append({
+                        'status': 'error',
+                        'message': f"❌ Error en {puesto['nombre']}: {str(e)}"
+                    })
+        
+        # 3. Generar Testigos de Mesa
+        if data.get('testigos', False):
+            cursor.execute("""
+                SELECT mv.id, mv.numero, mv.puesto_id, mv.municipio_id,
+                       p.nombre as puesto_nombre, p.codigo_divipola,
+                       m.nombre as municipio_nombre
+                FROM mesas_votacion mv
+                LEFT JOIN puestos_votacion p ON mv.puesto_id = p.id
+                LEFT JOIN municipios m ON mv.municipio_id = m.id
+                WHERE mv.activa = 1
+                ORDER BY m.nombre, p.nombre, mv.numero
+            """)
+            
+            mesas = cursor.fetchall()
+            
+            for mesa in mesas:
+                cedula = f"TM{mesa['codigo_divipola']}{mesa['numero']:03d}"
+                username = f"testigo_{mesa['codigo_divipola']}_{mesa['numero']:03d}"
+                
+                if skip_existing:
+                    cursor.execute("SELECT id FROM users WHERE cedula = ?", (cedula,))
+                    if cursor.fetchone():
+                        skipped += 1
+                        continue
+                
+                try:
+                    cursor.execute("""
+                        INSERT INTO users (
+                            username, cedula, nombre_completo, email, telefono,
+                            password_hash, rol, departamento, municipio_id, puesto_id, mesa_id,
+                            activo, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        username,
+                        cedula,
+                        f"Testigo Mesa {mesa['numero']} - {mesa['puesto_nombre']}",
+                        f"{username}@electoral.gov.co",
+                        "3000000000",
+                        password_hash,
+                        'testigo_mesa',
+                        'Caquetá',
+                        mesa['municipio_id'],
+                        mesa['puesto_id'],
+                        mesa['id'],
+                        1,
+                        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    ))
+                    created += 1
+                    if created % 10 == 0:  # Log cada 10 testigos
+                        details.append({
+                            'status': 'created',
+                            'message': f"✅ {created} testigos creados..."
+                        })
+                except Exception as e:
+                    errors += 1
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'created': created,
+            'skipped': skipped,
+            'errors': errors,
+            'details': details[:50]  # Limitar a 50 detalles
         })
         
     except Exception as e:
